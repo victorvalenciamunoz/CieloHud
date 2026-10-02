@@ -16,6 +16,8 @@
 
   <ItemGroup>
     <Using Include="Xunit" />
+    <Using Include="CieloHud.Core.Sky" />
+    <Using Include="CieloHud.Core.SolarSystem" />
   </ItemGroup>
 
   <ItemGroup>

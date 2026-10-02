@@ -31,6 +31,12 @@ Fase actual: 1 (ver PLAN.md).
 - Test de que un `DateTimeOffset` con desfase local da el mismo resultado que su equivalente UTC.
 - Validado con `dotnet build` (0 avisos) y `dotnet test` (50 tests).
 
+### Organización de Core (2026-10-02)
+
+- Carpeta por feature, con namespace igual a la carpeta: `Sky/` (Observer, HorizontalPosition, Azimuth, CardinalPoint),
+  `SolarSystem/` (CelestialBody, ISolarSystemService, AstronomyEngineSolarSystemService). `Satellites/` llegará en el paso 4.
+  Los tests siguen la misma estructura y tienen `using` globales de esos namespaces en el csproj.
+
 ## Pendiente (Fase 1)
 
 4. Satélites con `SGP.NET`; test de la ISS con TLE fijo.

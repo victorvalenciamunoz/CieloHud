@@ -1,4 +1,4 @@
-namespace CieloHud.Core.Tests;
+namespace CieloHud.Core.Tests.SolarSystem;
 
 /// <summary>
 /// Reference values come from JPL Horizons (https://ssd.jpl.nasa.gov/api/horizons.api), observer table,

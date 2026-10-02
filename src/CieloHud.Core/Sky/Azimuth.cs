@@ -1,4 +1,4 @@
-namespace CieloHud.Core;
+namespace CieloHud.Core.Sky;
 
 /// <summary>
 /// Helpers for azimuth angles. Convention: 0° = north, 90° = east, clockwise.

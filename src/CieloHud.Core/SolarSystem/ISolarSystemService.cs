@@ -1,4 +1,6 @@
-namespace CieloHud.Core;
+using CieloHud.Core.Sky;
+
+namespace CieloHud.Core.SolarSystem;
 
 /// <summary>
 /// Locates solar-system bodies in the observer's sky.

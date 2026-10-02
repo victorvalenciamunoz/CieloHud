@@ -1,4 +1,4 @@
-namespace CieloHud.Core;
+namespace CieloHud.Core.SolarSystem;
 
 /// <summary>
 /// Solar-system objects the app guides to. Satellites are handled separately because they need orbital elements.

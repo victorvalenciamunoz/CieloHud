@@ -1,4 +1,4 @@
-namespace CieloHud.Core;
+namespace CieloHud.Core.Sky;
 
 /// <summary>
 /// Geographic position of the person looking at the sky.

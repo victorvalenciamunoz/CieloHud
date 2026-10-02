@@ -1,4 +1,4 @@
-namespace CieloHud.Core;
+namespace CieloHud.Core.Sky;
 
 /// <summary>
 /// Eight-point compass direction. Display names (e.g. Spanish "O" for west) belong to the UI layer.

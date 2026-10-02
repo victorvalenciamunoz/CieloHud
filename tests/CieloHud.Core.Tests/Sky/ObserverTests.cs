@@ -1,4 +1,4 @@
-namespace CieloHud.Core.Tests;
+namespace CieloHud.Core.Tests.Sky;
 
 public class ObserverTests
 {

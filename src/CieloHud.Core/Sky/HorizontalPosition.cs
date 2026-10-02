@@ -1,4 +1,4 @@
-namespace CieloHud.Core;
+namespace CieloHud.Core.Sky;
 
 /// <summary>
 /// Where an object appears in the observer's sky.

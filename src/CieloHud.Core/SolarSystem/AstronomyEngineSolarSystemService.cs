@@ -1,7 +1,9 @@
+using CieloHud.Core.Sky;
 using CosineKitty;
 using AeObserver = CosineKitty.Observer;
+using Observer = CieloHud.Core.Sky.Observer;
 
-namespace CieloHud.Core;
+namespace CieloHud.Core.SolarSystem;
 
 /// <summary>
 /// <see cref="ISolarSystemService"/> backed by Astronomy Engine (CosineKitty.AstronomyEngine).
