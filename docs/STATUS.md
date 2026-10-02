@@ -143,29 +143,37 @@ Stellarium Web, ubicación Humanes de Madrid (en CieloHud: 40.2525, -3.8278, 620
 - Verificado a mano: `--passes 14` desde el 2 oct da los tres pasos del sondeo del paso 4 (14, 15 y 16 oct de madrugada); `--passes 2` da "(ninguno)";
   `--passes 0` → mensaje + ayuda + código 1; la tabla de posiciones sigue igual.
 
-### Paso 6 — Validación contra Heavens-Above (2026-10-02, en curso)
+### Paso 6 — Validación contra Heavens-Above (2026-10-02)
 
-Heavens-Above con ubicación Humanes de Madrid (en CieloHud: 40.2525, -3.8278, 620 m), hora local UTC+2, TLE de CieloHud del 1 oct 19:41 UTC.
-Heavens-Above corta sus tablas a 10° de altura; CieloHud al horizonte. Se compara el máximo y, cuando la ISS aparece saliendo de la sombra, el punto de aparición.
+Heavens-Above con ubicación Humanes de Madrid (40.2509, -3.8271, 0 m; mismos valores en CieloHud), hora local UTC+2, periodo 12-22 oct, "sólo los visibles".
+TLE de CieloHud del 1 oct 19:41 UTC; Heavens-Above usa uno del 2 oct. Heavens-Above corta sus tablas a 10° de altura; CieloHud al horizonte,
+así que se compara el máximo y, cuando la ISS aparece saliendo de la sombra, el punto de aparición.
 
 | Fecha | Heavens-Above (máximo) | CieloHud (máximo) | Dif. | Aparición HA / CieloHud |
 |---|---|---|---|---|
+| 13 oct | 8:00:09 37° SE | 8:00:09 37° SE | 0 s | 10° SSO (corte) / 0° SO |
 | 14 oct | 7:13:02 22° SE | 7:13:01 22° SE | 1 s | 10° S (corte) / 2° S |
 | 15 oct | 6:25:56 13° SE | 6:25:55 13° SE | 1 s | 6:24:24 10° SSE / 6:24:21 10° SE |
 | 16 oct | 7:15:05 68° SE | 7:15:04 67° SE | 1 s, 1° | 7:12:53 20° SO / 7:12:47 19° SO |
-| 17 oct | 6:28:07 37° SE | 6:28:02 37° SE | 5 s | 37° SE / 37° SE |
+| 17 oct | 6:28:07 37° SE | 6:28:01 37° SE | 6 s | 37° SE / 37° SE |
 | 18 oct | 5:43:12 11° E | 5:43:08 11° E | 4 s | 11° E / 11° E |
 | 18 oct | 7:17:20 42° NNO | 7:17:19 42° NO | 1 s | 7:16:12 30° O / 7:16:15 31° O |
 | 19 oct | 6:31:10 37° NE | 6:31:11 36° NE | 1 s, 1° | 37° NE / 36° NE |
 | 20 oct | 7:19:48 21° NNO | 7:19:46 21° N | 2 s | 7:19:01 20° NO / 7:18:59 20° NO |
 | 21 oct | 6:33:47 21° NNE | 6:33:41 21° N | 6 s | 21° NNE / 21° N |
 
-- Todos los pasos que CieloHud declara visibles están en Heavens-Above con el máximo a ≤ 6 s y ≤ 1°. Geometría, sombra y Sol validados.
-- Heavens-Above lista además el 13 oct 8:00 (37°) y el 17 oct 8:04 (29°), con el Sol a -5,3° en el máximo (-5,9° al cruzar 10°): fuera de nuestro umbral de -6°.
-  Sin embargo no lista el 15 oct 8:02 (71°), 19 oct 8:07 (17°) ni 21 oct 8:09 (13°), con el Sol en las mismas condiciones. Pendiente de confirmar con el usuario si faltan en la copia.
-- Heavens-Above lista el 20 oct 5:46:01 (máximo 10°, 5 s de duración); CieloHud lo excluye porque su máximo queda justo por debajo de 10°. Caso límite.
-- Pendiente: decidir el umbral del Sol (-6° del PLAN frente a ~-5° que parece usar Heavens-Above) y cerrar la fase.
+- 10 pasos coincidentes con el máximo a ≤ 6 s y ≤ 1°, y el punto de aparición desde la sombra a ≤ 6 s y 1°. Geometría, sombra y Sol validados.
+- Casos en el filo del corte de -6° (pasos de madrugada que empiezan con el Sol entre -6,0° y -6,3° y acaban a -4,7°):
+  CieloHud lista 11 oct 7:58 (12°), 13 oct 8:00 (37°) y 15 oct 8:02 (71°); Heavens-Above lista 13 oct 8:00 y 17 oct 8:04 (29°).
+  El 13 y el 15 son numéricamente idénticos (Sol -6,32° al salir, -5,90° al cruzar 10°) y Heavens-Above lista uno y no el otro:
+  son decisiones de ruido numérico en el filo, no reproducibles con ningún umbral. Heavens-Above documenta en su FAQ el corte de -6°.
+- Hallazgo que cambió el algoritmo (decisión 011): exigir Sol ≤ -6° en cada instante truncaba estos pasos al cruzar -6° y los descartaba;
+  ahora se exige al aparecer y el tramo sigue mientras la ISS esté iluminada.
+- Heavens-Above lista el 20 oct 5:46:01 (máximo 10°, 5 s); CieloHud lo excluye porque culmina justo por debajo de 10°. Caso límite.
+- Validado con `dotnet build` (0 avisos) y `dotnet test` (118 tests).
 
-### Pendiente (Fase 2)
+## Fase 2 — Hecho
 
-6. Validación contra Heavens-Above; resultados aquí.
+- `dotnet test`: 118 tests en verde. `dotnet build`: 0 avisos.
+- Pasos visibles de la ISS contrastados con Heavens-Above: 10 de 10 coincidentes a segundos; las únicas diferencias son casos en el filo del corte de -6° que Heavens-Above tampoco resuelve de forma consistente.
+- Geometría de pasos contrastada con JPL Horizons (7 de 7 pasos, ±60 s); iluminación con un test físico (un eclipse por órbita, 34 % del periodo).

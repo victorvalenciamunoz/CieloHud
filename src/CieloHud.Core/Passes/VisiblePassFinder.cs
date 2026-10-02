@@ -6,8 +6,11 @@ namespace CieloHud.Core.Passes;
 
 /// <summary>
 /// Combines pass geometry, satellite illumination and Sun altitude. Each geometric pass is sampled every
-/// <see cref="VisibilityCriteria.Step"/>; the longest run of samples that are lit and in a dark sky is the visible part,
-/// kept only if it peaks above <see cref="VisibilityCriteria.MinPeakAltitudeDegrees"/>.
+/// <see cref="VisibilityCriteria.Step"/>. The visible part starts at the first sample where the satellite is lit and the
+/// sky is dark, and lasts while the satellite stays lit: once you are watching it, a slowly brightening dawn sky does not
+/// make it vanish (a pass lasts minutes; the Sun climbs under 2° in that time). This matches how Heavens-Above lists
+/// dawn passes that start in darkness and end in civil twilight. Kept only if it peaks above
+/// <see cref="VisibilityCriteria.MinPeakAltitudeDegrees"/>.
 /// </summary>
 public sealed class VisiblePassFinder : IVisiblePassFinder
 {
@@ -50,17 +53,22 @@ public sealed class VisiblePassFinder : IVisiblePassFinder
             samples.Add(t == pass.Start.Instant ? pass.Start : new PassPoint(t, _satellite.Locate(tle, observer, t)));
         samples.Add(pass.End);
 
-        var visible = samples.Select(s => IsVisibleAt(tle, observer, s)).ToArray();
+        var lit = samples.Select(s => _illumination.IsSunlit(tle, s.Instant)).ToArray();
+        var dark = samples.Select(s => _sun.Locate(observer, s.Instant).AltitudeDegrees <= _criteria.MaxSunAltitudeDegrees).ToArray();
 
-        // Longest run of visible samples.
+        // For each run of lit samples, the visible part goes from its first dark sample to the end of the run. Keep the longest.
         int bestStart = -1, bestLength = 0;
         for (var i = 0; i < samples.Count;)
         {
-            if (!visible[i]) { i++; continue; }
-            var j = i;
-            while (j < samples.Count && visible[j]) j++;
-            if (j - i > bestLength) { bestStart = i; bestLength = j - i; }
-            i = j;
+            if (!lit[i]) { i++; continue; }
+            var runEnd = i;
+            while (runEnd < samples.Count && lit[runEnd]) runEnd++;
+
+            var firstDark = i;
+            while (firstDark < runEnd && !dark[firstDark]) firstDark++;
+
+            if (runEnd - firstDark > bestLength) { bestStart = firstDark; bestLength = runEnd - firstDark; }
+            i = runEnd;
         }
         if (bestLength == 0)
             return null;
@@ -79,9 +87,4 @@ public sealed class VisiblePassFinder : IVisiblePassFinder
 
         return new VisiblePass(pass, start, max, end);
     }
-
-    // Every sample lies within the geometric pass, so being above the horizon is given (the end points sit at ±0.1° of it).
-    private bool IsVisibleAt(Tle tle, Observer observer, PassPoint point) =>
-        _sun.Locate(observer, point.Instant).AltitudeDegrees <= _criteria.MaxSunAltitudeDegrees
-        && _illumination.IsSunlit(tle, point.Instant);
 }

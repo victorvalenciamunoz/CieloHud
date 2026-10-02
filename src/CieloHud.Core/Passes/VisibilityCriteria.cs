@@ -6,7 +6,10 @@ namespace CieloHud.Core.Passes;
 /// </summary>
 public sealed record VisibilityCriteria
 {
-    /// <summary>The Sun must be below this geometric altitude for the sky to be dark enough. Civil twilight: -6°.</summary>
+    /// <summary>
+    /// The Sun must be below this geometric altitude when the satellite becomes visible. Civil twilight: -6°.
+    /// The sky may brighten past it during the pass without ending the visible part.
+    /// </summary>
     public double MaxSunAltitudeDegrees { get; init; } = -6;
 
     /// <summary>The visible part of the pass must reach at least this altitude.</summary>

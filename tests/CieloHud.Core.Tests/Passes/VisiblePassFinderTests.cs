@@ -82,6 +82,49 @@ public class VisiblePassFinderTests
     }
 
     [Fact]
+    public void DawnSkyBrightensDuringPass_StaysVisibleToTheEnd()
+    {
+        // Sun at -6.5° when the pass starts, climbing 0.2°/min: crosses -6° after 2.5 minutes, ends at -4.5°.
+        _sun.AltitudeAt = t => -6.5 + 0.2 * (t - T0).TotalMinutes;
+
+        var pass = Assert.Single(CreateFinder().Find(TleTests.Iss, Madrid, T0, T0.AddHours(1)));
+
+        Assert.Equal(pass.Pass.Start, pass.VisibleStart);
+        Assert.Equal(pass.Pass.Max, pass.VisibleMax);
+        Assert.Equal(pass.Pass.End, pass.VisibleEnd);
+    }
+
+    [Fact]
+    public void DawnSkyAlreadyTooBrightWhenPassStarts_NothingVisible()
+    {
+        _sun.AltitudeAt = t => -5.9 + 0.2 * (t - T0).TotalMinutes;
+
+        Assert.Empty(CreateFinder().Find(TleTests.Iss, Madrid, T0, T0.AddHours(1)));
+    }
+
+    [Fact]
+    public void DawnSkyBrightensBeforeShadowExit_NothingVisible()
+    {
+        // Dark enough at the start, but the satellite is in shadow then; when it emerges the sky is too bright.
+        _sun.AltitudeAt = t => -6.5 + 0.2 * (t - T0).TotalMinutes;
+        _illumination.DarkUntil = T0.AddMinutes(4);
+
+        Assert.Empty(CreateFinder().Find(TleTests.Iss, Madrid, T0, T0.AddHours(1)));
+    }
+
+    [Fact]
+    public void DuskSkyDarkensDuringPass_VisibleFromTheMomentItIsDarkEnough()
+    {
+        // Sun at -5° when the pass starts, sinking 0.2°/min: dark enough after 5 minutes, at the geometric maximum.
+        _sun.AltitudeAt = t => -5 - 0.2 * (t - T0).TotalMinutes;
+
+        var pass = Assert.Single(CreateFinder().Find(TleTests.Iss, Madrid, T0, T0.AddHours(1)));
+
+        Assert.InRange(pass.VisibleStart.Instant, T0.AddMinutes(5), T0.AddMinutes(5).AddSeconds(10));
+        Assert.Equal(pass.Pass.End, pass.VisibleEnd);
+    }
+
+    [Fact]
     public void AlwaysInShadow_NothingVisible()
     {
         _illumination.DarkUntil = T0.AddDays(1);
@@ -136,7 +179,8 @@ public class VisiblePassFinderTests
     private sealed class FakeSun(double altitude) : ISunService
     {
         public double Altitude { get; set; } = altitude;
-        public HorizontalPosition Locate(Observer observer, DateTimeOffset instant) => new(180, Altitude);
+        public Func<DateTimeOffset, double>? AltitudeAt { get; set; }
+        public HorizontalPosition Locate(Observer observer, DateTimeOffset instant) => new(180, AltitudeAt?.Invoke(instant) ?? Altitude);
     }
 
     private sealed class FakeIllumination : ISatelliteIlluminationService

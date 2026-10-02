@@ -54,11 +54,11 @@ public class VisiblePassFinderIntegrationTests
             Assert.True(pass.VisibleMax.Position.AltitudeDegrees >= 10);
             Assert.True(pass.VisibleStart.Instant >= pass.Pass.Start.Instant && pass.VisibleEnd.Instant <= pass.Pass.End.Instant);
             Assert.True(pass.VisibleStart.Instant <= pass.VisibleMax.Instant && pass.VisibleMax.Instant <= pass.VisibleEnd.Instant);
+            // Dark when it appears; it may brighten a little afterwards (dawn passes), never past -4° within a pass.
+            Assert.True(_sun.Locate(Madrid, pass.VisibleStart.Instant).AltitudeDegrees <= -6, $"sky not dark at {pass.VisibleStart.Instant:u}");
+            Assert.True(_sun.Locate(Madrid, pass.VisibleEnd.Instant).AltitudeDegrees <= -4, $"sky far too bright at {pass.VisibleEnd.Instant:u}");
             foreach (var point in new[] { pass.VisibleStart, pass.VisibleMax, pass.VisibleEnd })
-            {
-                Assert.True(_sun.Locate(Madrid, point.Instant).AltitudeDegrees <= -6, $"sky not dark at {point.Instant:u}");
                 Assert.True(_illumination.IsSunlit(TleTests.Iss, point.Instant), $"ISS in shadow at {point.Instant:u}");
-            }
             // The flags must agree with the geometry.
             Assert.Equal(pass.VisibleEnd.Instant < pass.Pass.End.Instant, pass.EndsInShadow);
             Assert.Equal(pass.VisibleStart.Instant > pass.Pass.Start.Instant, pass.StartsFromShadow);
