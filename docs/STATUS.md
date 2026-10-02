@@ -213,9 +213,18 @@ Solo orientación vertical.
   instalada con `-t:Install` y arrancada en el OPPO CPH2699 (Android 16): sin crash, captura de pantalla con el diseño esperado.
 - Comandos útiles: `adb` está en `%LocalAppData%\Android\Sdk\platform-tools`; captura: `adb exec-out screencap -p > captura.png`.
 
+### Paso 4 — Página de diagnóstico (2026-10-02)
+
+- `Services/`: `IPointingSource` + `OrientationSensorPointingSource` (sensor de orientación de MAUI → `OrientationMath` → declinación → `PointingSmoother`),
+  `ILocationSource` + `GeolocationSource` (permiso + última posición + fix fresco), `MagneticDeclination` (`GeomagneticField` de Android).
+- `DiagnosticsPage`: GPS y precisión, declinación, hacia dónde apunta el móvil (acimut, altura, roll, sin suavizar), posición del Sol y de la Luna
+  y las indicaciones de `GuidanceCalculator` para cada uno ("izquierda 106°, sube 75°" / "¡AQUÍ!"). Sol y Luna se recalculan cada segundo; la UI de orientación a 10 Hz.
+- Servicios de Core y de dispositivo registrados en `MauiProgram`; la página se resuelve por inyección.
+- Verificado en el OPPO: GPS con precisión de ±13 m, declinación +0,7°, Sol a 230,2° SO / 32,5° a las 16:46 local, Luna a -13,8° (puesta a las 14:55, coincide con Stellarium).
+  Pendiente: prueba real apuntando al Sol (el usuario), que valida la cadena sensor → cielo.
+
 ### Pendiente (Fase 3)
 
-4. Página de diagnóstico con GPS, orientación y posición de la Luna; primera prueba con el móvil.
 5. HUD: retícula, marcador, flecha y texto, estado "en objetivo"; selector de objetivo.
 6. Ruido del magnetómetro: suavizado, zona, aviso de calibración.
 7. Validación en el cielo (Luna, luego planetas); resultados aquí.

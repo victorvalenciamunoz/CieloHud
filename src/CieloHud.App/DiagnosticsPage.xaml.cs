@@ -1,0 +1,154 @@
+using System.Globalization;
+using CieloHud.App.Services;
+using CieloHud.Core.Guidance;
+using CieloHud.Core.Sky;
+using CieloHud.Core.SolarSystem;
+
+namespace CieloHud.App;
+
+/// <summary>
+/// Numbers only: where we are, where the phone points, where the Sun and Moon are. First real-sky check of the pipeline.
+/// </summary>
+public partial class DiagnosticsPage : ContentPage
+{
+    private static readonly CultureInfo Culture = CultureInfo.InvariantCulture;
+    private static readonly TimeSpan UiInterval = TimeSpan.FromMilliseconds(100);
+
+    private readonly IPointingSource _pointing;
+    private readonly ILocationSource _location;
+    private readonly ISolarSystemService _solarSystem;
+    private readonly ISunService _sun;
+    private readonly GuidanceCalculator _guidance = new();
+
+    private Observer? _observer;
+    private HorizontalPosition _sunPosition;
+    private HorizontalPosition _moonPosition;
+    private bool _onSun, _onMoon;
+    private DateTimeOffset _lastUiUpdate;
+    private IDispatcherTimer? _skyTimer;
+
+    public DiagnosticsPage(IPointingSource pointing, ILocationSource location, ISolarSystemService solarSystem, ISunService sun)
+    {
+        InitializeComponent();
+        _pointing = pointing;
+        _location = location;
+        _solarSystem = solarSystem;
+        _sun = sun;
+    }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+
+        if (!_pointing.IsSupported)
+            StatusLabel.Text = "Este móvil no tiene sensor de orientación.";
+        _pointing.ReadingChanged += OnPointingChanged;
+        _pointing.Start();
+
+        _skyTimer = Dispatcher.CreateTimer();
+        _skyTimer.Interval = TimeSpan.FromSeconds(1);
+        _skyTimer.Tick += (_, _) => UpdateSky();
+        _skyTimer.Start();
+
+        await RefreshLocationAsync();
+    }
+
+    protected override void OnDisappearing()
+    {
+        _pointing.ReadingChanged -= OnPointingChanged;
+        _pointing.Stop();
+        _skyTimer?.Stop();
+        base.OnDisappearing();
+    }
+
+    private async Task RefreshLocationAsync()
+    {
+        var fix = await _location.GetAsync();
+        if (fix is null)
+        {
+            LocationLabel.Text = "sin ubicación";
+            StatusLabel.Text = "Sin permiso de ubicación o sin GPS.";
+            return;
+        }
+
+        _observer = fix.Observer;
+        var o = fix.Observer;
+        LocationLabel.Text = $"{o.LatitudeDegrees.ToString("F4", Culture)}, {o.LongitudeDegrees.ToString("F4", Culture)}  {o.AltitudeMeters.ToString("F0", Culture)} m";
+        AccuracyLabel.Text = fix.AccuracyMeters is { } acc ? $"±{acc.ToString("F0", Culture)} m" : "–";
+
+        var declination = MagneticDeclination.Degrees(o, DateTimeOffset.UtcNow);
+        _pointing.DeclinationDegrees = declination;
+        DeclinationLabel.Text = $"{declination.ToString("+0.0;-0.0", Culture)}°";
+
+        UpdateSky();
+    }
+
+    private void UpdateSky()
+    {
+        if (_observer is not { } observer)
+            return;
+
+        var now = DateTimeOffset.UtcNow;
+        _sunPosition = _sun.Locate(observer, now);
+        _moonPosition = _solarSystem.Locate(CelestialBody.Moon, observer, now);
+
+        SunLabel.Text = Position(_sunPosition);
+        MoonLabel.Text = Position(_moonPosition);
+        UpdateGuidance();
+    }
+
+    private void OnPointingChanged(object? sender, PointingReading reading)
+    {
+        if (reading.Timestamp - _lastUiUpdate < UiInterval)
+            return;
+        _lastUiUpdate = reading.Timestamp;
+
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            AzimuthLabel.Text = $"{reading.Pointing.AzimuthDegrees.ToString("F1", Culture)}°  {Cardinal(reading.Pointing.CardinalPoint())}";
+            AltitudeLabel.Text = $"{reading.Pointing.AltitudeDegrees.ToString("F1", Culture)}°";
+            RollLabel.Text = $"{reading.RollDegrees.ToString("F0", Culture)}°";
+            RawLabel.Text = $"{reading.RawPointing.AzimuthDegrees.ToString("F1", Culture)}° / {reading.RawPointing.AltitudeDegrees.ToString("F1", Culture)}°";
+            UpdateGuidance();
+        });
+    }
+
+    private void UpdateGuidance()
+    {
+        if (_observer is null || _pointing.Last is not { } reading)
+            return;
+
+        var sun = _guidance.Compute(reading.Pointing, _sunPosition, _onSun);
+        _onSun = sun.IsOnTarget;
+        SunGuidanceLabel.Text = Hint(sun);
+
+        var moon = _guidance.Compute(reading.Pointing, _moonPosition, _onMoon);
+        _onMoon = moon.IsOnTarget;
+        MoonGuidanceLabel.Text = Hint(moon);
+    }
+
+    private static string Position(HorizontalPosition p) =>
+        $"{p.AzimuthDegrees.ToString("F1", Culture)}° {Cardinal(p.CardinalPoint)}  alt {p.AltitudeDegrees.ToString("F1", Culture)}°";
+
+    private static string Hint(Guidance g)
+    {
+        if (g.IsOnTarget)
+            return $"¡AQUÍ!  ({g.AngularDistanceDegrees.ToString("F1", Culture)}°)";
+        var turn = g.AzimuthDeltaDegrees >= 0 ? "derecha" : "izquierda";
+        var tilt = g.AltitudeDeltaDegrees >= 0 ? "sube" : "baja";
+        return $"{turn} {Math.Abs(g.AzimuthDeltaDegrees).ToString("F0", Culture)}°, {tilt} {Math.Abs(g.AltitudeDeltaDegrees).ToString("F0", Culture)}°";
+    }
+
+    private static string Cardinal(CardinalPoint point) => point switch
+    {
+        CardinalPoint.SW => "SO",
+        CardinalPoint.W => "O",
+        CardinalPoint.NW => "NO",
+        _ => point.ToString(),
+    };
+}
+
+internal static class PointingExtensions
+{
+    public static CardinalPoint CardinalPoint(this PointingDirection p) => Azimuth.ToCardinalPoint(p.AzimuthDegrees);
+}

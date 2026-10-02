@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="CieloHud.App.DiagnosticsPage"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{StaticResource HudBackground}">
+
+    <ContentPage.Resources>
+        <Style TargetType="Label" x:Key="Key">
+            <Setter Property="FontFamily" Value="ChakraPetch" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="TextColor" Value="{StaticResource HudTextDim}" />
+            <Setter Property="VerticalOptions" Value="Center" />
+        </Style>
+        <Style TargetType="Label" x:Key="Value">
+            <Setter Property="FontFamily" Value="ChakraPetchBold" />
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="TextColor" Value="{StaticResource HudText}" />
+            <Setter Property="VerticalOptions" Value="Center" />
+        </Style>
+        <Style TargetType="Label" x:Key="Section">
+            <Setter Property="FontFamily" Value="ChakraPetchBold" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="CharacterSpacing" Value="1.5" />
+            <Setter Property="TextColor" Value="{StaticResource HudMint}" />
+            <Setter Property="Margin" Value="0,14,0,2" />
+        </Style>
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20,48,20,24" Spacing="6">
+            <Label Text="DIAGNÓSTICO" Style="{StaticResource Section}" Margin="0" />
+
+            <Label Text="UBICACIÓN" Style="{StaticResource Section}" />
+            <Grid ColumnDefinitions="110,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="4">
+                <Label Grid.Row="0" Text="GPS" Style="{StaticResource Key}" />
+                <Label Grid.Row="0" Grid.Column="1" x:Name="LocationLabel" Text="buscando…" Style="{StaticResource Value}" />
+                <Label Grid.Row="1" Text="Precisión" Style="{StaticResource Key}" />
+                <Label Grid.Row="1" Grid.Column="1" x:Name="AccuracyLabel" Text="–" Style="{StaticResource Value}" />
+                <Label Grid.Row="2" Text="Declinación" Style="{StaticResource Key}" />
+                <Label Grid.Row="2" Grid.Column="1" x:Name="DeclinationLabel" Text="–" Style="{StaticResource Value}" />
+            </Grid>
+
+            <Label Text="MÓVIL APUNTA A" Style="{StaticResource Section}" />
+            <Grid ColumnDefinitions="110,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="4">
+                <Label Grid.Row="0" Text="Acimut" Style="{StaticResource Key}" />
+                <Label Grid.Row="0" Grid.Column="1" x:Name="AzimuthLabel" Text="–" Style="{StaticResource Value}" />
+                <Label Grid.Row="1" Text="Altura" Style="{StaticResource Key}" />
+                <Label Grid.Row="1" Grid.Column="1" x:Name="AltitudeLabel" Text="–" Style="{StaticResource Value}" />
+                <Label Grid.Row="2" Text="Roll" Style="{StaticResource Key}" />
+                <Label Grid.Row="2" Grid.Column="1" x:Name="RollLabel" Text="–" Style="{StaticResource Value}" />
+                <Label Grid.Row="3" Text="Sin suavizar" Style="{StaticResource Key}" />
+                <Label Grid.Row="3" Grid.Column="1" x:Name="RawLabel" Text="–" Style="{StaticResource Value}" TextColor="{StaticResource HudTextMuted}" />
+            </Grid>
+
+            <Label Text="SOL" Style="{StaticResource Section}" />
+            <Grid ColumnDefinitions="110,*" RowDefinitions="Auto,Auto" RowSpacing="4">
+                <Label Grid.Row="0" Text="Posición" Style="{StaticResource Key}" />
+                <Label Grid.Row="0" Grid.Column="1" x:Name="SunLabel" Text="–" Style="{StaticResource Value}" />
+                <Label Grid.Row="1" Text="Para llegar" Style="{StaticResource Key}" />
+                <Label Grid.Row="1" Grid.Column="1" x:Name="SunGuidanceLabel" Text="–" Style="{StaticResource Value}" TextColor="{StaticResource HudAmber}" />
+            </Grid>
+
+            <Label Text="LUNA" Style="{StaticResource Section}" />
+            <Grid ColumnDefinitions="110,*" RowDefinitions="Auto,Auto" RowSpacing="4">
+                <Label Grid.Row="0" Text="Posición" Style="{StaticResource Key}" />
+                <Label Grid.Row="0" Grid.Column="1" x:Name="MoonLabel" Text="–" Style="{StaticResource Value}" />
+                <Label Grid.Row="1" Text="Para llegar" Style="{StaticResource Key}" />
+                <Label Grid.Row="1" Grid.Column="1" x:Name="MoonGuidanceLabel" Text="–" Style="{StaticResource Value}" TextColor="{StaticResource HudAmber}" />
+            </Grid>
+
+            <Label x:Name="StatusLabel" Text="" Style="{StaticResource Key}" Margin="0,16,0,0" TextColor="{StaticResource HudAlert}" />
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+using CieloHud.App.Services;
+using CieloHud.Core.SolarSystem;
+using Microsoft.Extensions.Logging;
 
 namespace CieloHud.App;
 
@@ -16,6 +18,17 @@ public static class MauiProgram
 				fonts.AddFont("ChakraPetch-Regular.ttf", "ChakraPetch");
 				fonts.AddFont("ChakraPetch-Bold.ttf", "ChakraPetchBold");
 			});
+
+		// Core (no UI, no state)
+		builder.Services.AddSingleton<ISolarSystemService, AstronomyEngineSolarSystemService>();
+		builder.Services.AddSingleton<ISunService, AstronomyEngineSunService>();
+
+		// Device
+		builder.Services.AddSingleton<IPointingSource, OrientationSensorPointingSource>();
+		builder.Services.AddSingleton<ILocationSource, GeolocationSource>();
+
+		// Pages
+		builder.Services.AddTransient<DiagnosticsPage>();
 
 #if DEBUG
 		builder.Logging.AddDebug();
