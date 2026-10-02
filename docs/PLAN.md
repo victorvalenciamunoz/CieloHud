@@ -79,6 +79,9 @@ dotnet run --project src/CieloHud.Console -- [--lat 40.4168] [--lon -3.7038] [--
   los demás cuerpos de `CelestialBody` y marcas de horizonte con puntos cardinales. Pocas cosas, todas visibles desde ciudad.
   Nada de líneas de constelaciones ni catálogos grandes. Las estrellas se calculan con la misma conversión ecuatorial → horizontal
   que los planetas (AstronomyEngine `Horizon`).
+- Modo "¿qué es eso?": apuntas y la app dice qué objeto del catálogo (Luna, planetas, ISS, estrellas brillantes) está más cerca
+  de donde apuntas, si está a menos de ~5°. Es la misma geometría de guiado al revés; no necesita cámara. Hacerlo después de
+  validar la precisión en el cielo y junto con el catálogo de estrellas. Es la antesala de la Fase 5.
 
 ## Fase 4 — Avisos
 
