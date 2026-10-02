@@ -7,8 +7,8 @@
     Title="CieloHud">
 
     <ShellContent
-        Title="Diagnóstico"
-        ContentTemplate="{DataTemplate local:DiagnosticsPage}"
-        Route="DiagnosticsPage" />
+        Title="HUD"
+        ContentTemplate="{DataTemplate local:HudPage}"
+        Route="HudPage" />
 
 </Shell>

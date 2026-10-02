@@ -223,8 +223,21 @@ Solo orientación vertical.
 - Verificado en el OPPO: GPS con precisión de ±13 m, declinación +0,7°, Sol a 230,2° SO / 32,5° a las 16:46 local, Luna a -13,8° (puesta a las 14:55, coincide con Stellarium).
   Pendiente: prueba real apuntando al Sol (el usuario), que valida la cadena sensor → cielo.
 
+### Paso 5 — HUD (2026-10-02)
+
+- Core `Guidance/HudProjection`: indicación → punto de pantalla (escala fija de grados por píxel según campo de visión de 60°, acimut acortado por cos(altura);
+  fuera de vista se recorta al borde conservando la dirección). Tests.
+- App `Hud/`: `SkyTarget` (`BodyTarget` para Luna y planetas, `SatelliteTarget` para la ISS con descarga del TLE bajo demanda), `TargetCatalog`,
+  `HudFrame` (datos de un fotograma) y `HudDrawable` (retícula con pulso al fijar, marcador en rombo con esquinas, flecha de borde, texto en palabras
+  "derecha 170° · sube 54°" / "AQUÍ · Baja el móvil y mira justo ahí", estado "bajo el horizonte", mensajes de espera).
+- `HudPage`: chips de objetivo (Luna, Venus, Marte, Júpiter, Saturno, Mercurio, ISS), lienzo a 30 fps, pie con posición y declinación, botón a Diagnóstico.
+  Es la página inicial; `DiagnosticsPage` queda como ruta.
+- DI: `HttpClient`, `CelesTrakTleProvider` con caché en `FileSystem.AppDataDirectory/tle`, `Sgp4SatelliteService`, `TargetCatalog`.
+- Verificado en el OPPO: captura con Venus seleccionado fuera de vista, flecha en el borde hacia arriba-derecha coherente con el texto. 182 tests en verde.
+- Pendiente de validar en el cielo (paso 7): esta noche Saturno (23:00, SE, 31°) y la Luna (desde las 00:30, ENE).
+- Limitaciones conocidas: el roll de la pantalla no se compensa (solo vertical); sin aviso de calibración del magnetómetro (paso 6).
+
 ### Pendiente (Fase 3)
 
-5. HUD: retícula, marcador, flecha y texto, estado "en objetivo"; selector de objetivo.
 6. Ruido del magnetómetro: suavizado, zona, aviso de calibración.
 7. Validación en el cielo (Luna, luego planetas); resultados aquí.

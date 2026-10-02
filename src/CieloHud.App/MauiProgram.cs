@@ -1,4 +1,6 @@
+using CieloHud.App.Hud;
 using CieloHud.App.Services;
+using CieloHud.Core.Satellites;
 using CieloHud.Core.SolarSystem;
 using Microsoft.Extensions.Logging;
 
@@ -22,12 +24,23 @@ public static class MauiProgram
 		// Core (no UI, no state)
 		builder.Services.AddSingleton<ISolarSystemService, AstronomyEngineSolarSystemService>();
 		builder.Services.AddSingleton<ISunService, AstronomyEngineSunService>();
+		builder.Services.AddSingleton<ISatelliteService, Sgp4SatelliteService>();
+		builder.Services.AddSingleton(_ =>
+		{
+			var http = new HttpClient();
+			http.DefaultRequestHeaders.UserAgent.ParseAdd("CieloHud/0.1");
+			return http;
+		});
+		builder.Services.AddSingleton<ITleProvider>(sp =>
+			new CelesTrakTleProvider(sp.GetRequiredService<HttpClient>(), Path.Combine(FileSystem.AppDataDirectory, "tle")));
 
 		// Device
 		builder.Services.AddSingleton<IPointingSource, OrientationSensorPointingSource>();
 		builder.Services.AddSingleton<ILocationSource, GeolocationSource>();
 
-		// Pages
+		// HUD
+		builder.Services.AddSingleton<TargetCatalog>();
+		builder.Services.AddTransient<HudPage>();
 		builder.Services.AddTransient<DiagnosticsPage>();
 
 #if DEBUG
