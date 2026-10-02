@@ -1,6 +1,6 @@
 # Estado
 
-Fase actual: 1 (ver PLAN.md).
+Fase actual: 1, completada (ver PLAN.md). Siguiente: Fase 2.
 
 ## Hecho
 
@@ -69,6 +69,25 @@ Fase actual: 1 (ver PLAN.md).
 - Verificado a mano: la tabla a las 2026-10-02 11:26 UTC da ISS 334.63° / 47.35° y a las 21:00 UTC Saturno 118.11° / 31.71°, los mismos valores que los tests contra Horizons.
   Argumento inválido → mensaje + ayuda + código 1; `--help` → ayuda + código 0.
 
-## Pendiente (Fase 1)
+### Paso 7 — Validación contra Stellarium (2026-10-02)
+
+Stellarium Web, ubicación Humanes de Madrid (en CieloHud: 40.2525, -3.8278, 620 m; Stellarium no muestra sus coordenadas exactas), hora local UTC+2.
+
+| Hora local | Objeto | Stellarium Az / Alt | CieloHud Az / Alt | Diferencia |
+|---|---|---|---|---|
+| 02/10 14:23:34 | Luna | 302.685° / 4.426° | 302.678° / 4.435° | 0.007° / 0.009° |
+| 02/10 23:00:00 | Luna | 44.581° / -7.468° | 44.553° / -7.490 (geométrica) | 0.028° / 0.022° |
+| 03/10 06:00:00 | Luna | 110.945° / 63.720° | 110.942° / 63.720° | 0.003° / 0.000° |
+
+- Distancias: 368 911,6 km frente a 368 916,7 km (14:23) y 364 061,3 km frente a 364 085,9 km (06:00): < 0,01 %.
+- Bajo el horizonte Stellarium no aplica refracción; se compara con la altura geométrica. Irrelevante para el uso real.
+- Lección: el reloj de Stellarium Web corre en tiempo real; hay que pausarlo antes de leer. Una lectura con 60 s de desfase dio 0,16° en la Luna cerca del horizonte.
+- Luna, Júpiter y Saturno ya se habían contrastado con JPL Horizons (paso 3) y la ISS con Horizons en dos pasos reales (paso 4): todo < 0,01°.
+
+## Fase 1 — Hecho
+
+- `dotnet test`: 71 tests en verde. `dotnet build`: 0 avisos.
+- Tabla de la consola contrastada con Stellarium en 3 instantes y con JPL Horizons en 5 (planetas, Luna, ISS), todo dentro de tolerancia (< 0,5° / < 1°) con margen de dos órdenes de magnitud.
+- Pendiente opcional: lecturas de Marte/Júpiter/Saturno en Stellarium para completar la tabla (ya validados con Horizons).
 
 7. Validación contra Stellarium en al menos 3 instantes; resultados aquí.
