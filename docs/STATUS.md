@@ -134,7 +134,15 @@ Stellarium Web, ubicación Humanes de Madrid (en CieloHud: 40.2525, -3.8278, 620
 - Sondeo 2-16 oct (TLE del 1 oct): 3 pasos visibles, todos de madrugada saliendo de la sombra: 14 oct 05:08 UTC (máx 21°), 15 oct 04:24 (13°), 16 oct 05:12 (67°). 290 ms para 14 días.
 - Validado con `dotnet build` (0 avisos) y `dotnet test` (114 tests).
 
+### Paso 5 — Consola: pasos visibles (2026-10-02)
+
+- `--passes <días>` (1-30) lista los pasos visibles de la ISS desde `--time` (por defecto ahora) en lugar de la tabla de posiciones.
+  Tabla tipo Heavens-Above en hora local: fecha; inicio, máximo y fin con hora, altura y acimut (punto cardinal en español); duración del tramo visible;
+  nota si "aparece a media altura (sale de la sombra)" o "se apaga antes de ponerse (entra en sombra)". Cabecera con el criterio aplicado y pie con la época del TLE.
+- `PassTableFormatter` (solo formato); `Program` elige entre las dos tablas. Sin TLE (sin red ni caché) en modo pasos → error y código 2.
+- Verificado a mano: `--passes 14` desde el 2 oct da los tres pasos del sondeo del paso 4 (14, 15 y 16 oct de madrugada); `--passes 2` da "(ninguno)";
+  `--passes 0` → mensaje + ayuda + código 1; la tabla de posiciones sigue igual.
+
 ### Pendiente (Fase 2)
 
-5. Consola: `--passes N` con tabla tipo Heavens-Above.
 6. Validación contra Heavens-Above; resultados aquí.
