@@ -121,8 +121,20 @@ Stellarium Web, ubicación Humanes de Madrid (en CieloHud: 40.2525, -3.8278, 620
 - Observación: entre el 2 y el 4 de octubre todos los pasos sobre Madrid (incluido uno rasante con el Sol a -19°) son con la ISS iluminada; no hay pasos nocturnos profundos en esas fechas.
 - Validado con `dotnet build` (0 avisos) y `dotnet test` (101 tests).
 
+### Paso 4 — Visibilidad (2026-10-02)
+
+- `Passes/`: `VisibilityCriteria` (Sol ≤ -6°, máximo ≥ 10°, paso 10 s), `VisiblePass` (paso geométrico + tramo visible: inicio, máximo, fin;
+  `EndsInShadow`, `StartsFromShadow`), `IVisiblePassFinder.Find(tle, observer, desde, hasta)` y `VisiblePassFinder` (decisión 011).
+- Tests unitarios con servicios falsos (paso sintético de 10 min con máximo a 40°): noche, día, crepúsculo en el umbral, entrada en sombra a mitad,
+  salida de sombra a mitad, siempre en sombra, paso bajo con criterios relajados, sombra antes de alcanzar los 10°.
+- Tests de integración con servicios reales: 2-4 oct nada visible sobre Madrid (todo de día o rasante); con máximo mínimo 0° aparece el rasante
+  del 2 oct 19:30 UTC; en dos semanas, cada paso devuelto cumple todos los criterios en sus tres puntos y las banderas cuadran con la iluminación.
+- Fallo corregido durante el paso: descartaba muestras con altura < 0, y los extremos del paso geométrico tienen ±0,05° por su resolución de 1 s,
+  lo que acortaba el tramo y falseaba las banderas.
+- Sondeo 2-16 oct (TLE del 1 oct): 3 pasos visibles, todos de madrugada saliendo de la sombra: 14 oct 05:08 UTC (máx 21°), 15 oct 04:24 (13°), 16 oct 05:12 (67°). 290 ms para 14 días.
+- Validado con `dotnet build` (0 avisos) y `dotnet test` (114 tests).
+
 ### Pendiente (Fase 2)
 
-4. Visibilidad: combinar Sol + paso + iluminación; tramo visible; tests con servicios falsos.
 5. Consola: `--passes N` con tabla tipo Heavens-Above.
 6. Validación contra Heavens-Above; resultados aquí.
