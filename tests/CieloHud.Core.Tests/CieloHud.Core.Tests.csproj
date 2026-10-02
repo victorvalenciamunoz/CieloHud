@@ -19,6 +19,7 @@
     <Using Include="CieloHud.Core.Sky" />
     <Using Include="CieloHud.Core.SolarSystem" />
     <Using Include="CieloHud.Core.Satellites" />
+    <Using Include="CieloHud.Core.Passes" />
   </ItemGroup>
 
   <ItemGroup>

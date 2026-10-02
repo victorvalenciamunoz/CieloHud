@@ -99,9 +99,20 @@ Stellarium Web, ubicación Humanes de Madrid (en CieloHud: 40.2525, -3.8278, 620
 - Tests contra JPL Horizons (Sol, Madrid, sin atmósfera): día (12:00 UTC, alt 45.9°), crepúsculo (18:30 UTC, alt -7.4°) y noche (21:00 UTC, alt -34.8°). Tolerancia 0,05°.
 - Validado con `dotnet build` (0 avisos) y `dotnet test` (75 tests).
 
+### Paso 2 — Geometría de pasos (2026-10-02)
+
+- Carpeta `Passes/`: `PassPoint` (instante + posición), `SatellitePass` (inicio, máximo, fin; `Duration`, `MaxAltitudeDegrees`),
+  `ISatellitePassPredictor.Predict(tle, observer, desde, hasta)` y `Sgp4SatellitePassPredictor` (decisión 009).
+- `SgpConversions` (interno) comparte con `Sgp4SatelliteService` las conversiones a tipos de SGP.NET.
+- Tests contra JPL Horizons (ISS, Madrid, `R_T_S_ONLY='GEO'`, paso 1 min) para el 2026-10-01 20:00 → 2026-10-02 20:00 UTC:
+  7 pasos encontrados, salidas y puestas dentro de ±60 s de Horizons, máximos dentro de ±60 s y altura máxima compatible con la muestra.
+  Más tests de recorte en `desde`, paso completo aunque acabe tras `hasta`, instantes en UTC, rango vacío.
+- Medido: salidas 09:44:19, 11:20:27, 12:58:30, 14:36:34, 16:13:35, 17:50:29, 19:30:04 UTC (Horizons: 09:45, 11:21, 12:59, 14:37, 16:14, 17:51, 19:30 al minuto siguiente).
+  Máximo del paso de las 11:25:54: 47,54°; Horizons muestreó 47,35° a las 11:26.
+- Validado con `dotnet build` (0 avisos) y `dotnet test` (88 tests).
+
 ### Pendiente (Fase 2)
 
-2. Geometría de pasos: `Passes/`, `SatellitePass`, `SatellitePassPredictor` con el `Observe` de rango de SGP.NET; tests contra Horizons.
 3. Iluminación: `SatelliteIllumination.IsSunlit` con cono de sombra en ECI; tests y decisión.
 4. Visibilidad: combinar Sol + paso + iluminación; tramo visible; tests con servicios falsos.
 5. Consola: `--passes N` con tabla tipo Heavens-Above.
