@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="CieloHud.App.MainPage"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{StaticResource HudBackground}">
+
+    <VerticalStackLayout Padding="24" Spacing="12" VerticalOptions="Center">
+        <Label Text="CieloHud"
+               FontFamily="ChakraPetchBold"
+               FontSize="32"
+               CharacterSpacing="2"
+               TextColor="{StaticResource HudMint}"
+               HorizontalOptions="Center" />
+        <Label Text="Fase 3 · esqueleto"
+               FontFamily="ChakraPetch"
+               FontSize="14"
+               TextColor="{StaticResource HudTextMuted}"
+               HorizontalOptions="Center" />
+    </VerticalStackLayout>
+
+</ContentPage>

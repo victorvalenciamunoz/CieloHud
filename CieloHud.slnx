@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/CieloHud.App/CieloHud.App.csproj" />
     <Project Path="src/CieloHud.Console/CieloHud.Console.csproj" />
     <Project Path="src/CieloHud.Core/CieloHud.Core.csproj" />
   </Folder>

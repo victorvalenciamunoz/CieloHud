@@ -201,9 +201,20 @@ Solo orientación vertical.
 - Tests con poses conocidas: plano en la mesa (apunta a -90°), vertical mirando al norte (0°, 0°), guiñadas de ±90°/180°, inclinaciones (±30°, cénit), roll de 20°, cuaterniones sin normalizar, vectores mundo directos. Suavizado: primera lectura, fracción, cruce de norte en ambos sentidos, convergencia, reset.
 - Validado con `dotnet build` (0 avisos) y `dotnet test` (174 tests).
 
+### Paso 3 — Proyecto MAUI (2026-10-02)
+
+- `src/CieloHud.App`: plantilla `maui` recortada a `net10.0-android` (las carpetas de iOS/Mac/Windows quedan en el repo pero no se compilan),
+  `ApplicationId` `com.cielohud.app`, Android mínimo API 26, orientación fija en vertical (`MainActivity`), tema oscuro forzado,
+  `EmbedAssembliesIntoApk` en Debug (evita un crash conocido del Fast Deployment con ids de recursos desfasados; heredado de GincanaHud).
+- Permisos en el manifiesto: ubicación (fina y gruesa), internet; GPS/brújula/acelerómetro declarados como no obligatorios.
+- Recursos: paleta `Hud*` en `Colors.xaml` (misma que GincanaHud), fuentes Chakra Petch (regular/bold) y Open Sans registradas en `MauiProgram`.
+- Referencia a `CieloHud.Core`. `MainPage` es un marcador de posición ("CieloHud · Fase 3 · esqueleto").
+- Validado: `dotnet build src/CieloHud.App -f net10.0-android` en verde (4 min la primera vez, 0 avisos); `dotnet test` 174 tests;
+  instalada con `-t:Install` y arrancada en el OPPO CPH2699 (Android 16): sin crash, captura de pantalla con el diseño esperado.
+- Comandos útiles: `adb` está en `%LocalAppData%\Android\Sdk\platform-tools`; captura: `adb exec-out screencap -p > captura.png`.
+
 ### Pendiente (Fase 3)
 
-3. Proyecto `src/CieloHud.App` (MAUI, `net10.0-android`), referencia a Core, permisos; build en verde.
 4. Página de diagnóstico con GPS, orientación y posición de la Luna; primera prueba con el móvil.
 5. HUD: retícula, marcador, flecha y texto, estado "en objetivo"; selector de objetivo.
 6. Ruido del magnetómetro: suavizado, zona, aviso de calibración.
