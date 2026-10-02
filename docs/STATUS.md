@@ -89,5 +89,3 @@ Stellarium Web, ubicación Humanes de Madrid (en CieloHud: 40.2525, -3.8278, 620
 - `dotnet test`: 71 tests en verde. `dotnet build`: 0 avisos.
 - Tabla de la consola contrastada con Stellarium en 3 instantes y con JPL Horizons en 5 (planetas, Luna, ISS), todo dentro de tolerancia (< 0,5° / < 1°) con margen de dos órdenes de magnitud.
 - Pendiente opcional: lecturas de Marte/Júpiter/Saturno en Stellarium para completar la tabla (ya validados con Horizons).
-
-7. Validación contra Stellarium en al menos 3 instantes; resultados aquí.
