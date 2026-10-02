@@ -47,8 +47,18 @@ Fase actual: 1 (ver PLAN.md).
 - Comparación medida: acimut 0,002°-0,008°, altura 0,0003°, distancia 567,41 km frente a 567,35 km. El PLAN pedía < 1°.
 - Validado con `dotnet build` (0 avisos) y `dotnet test` (61 tests).
 
+### Paso 5 — Proveedor de TLE (2026-10-02)
+
+- `ITleProvider.GetTleAsync(norad)` con dos implementaciones: `FixedTleProvider` (TLE dado; tests y uso manual) y
+  `CelesTrakTleProvider` (descarga de `celestrak.org/NORAD/elements/gp.php?CATNR=…&FORMAT=TLE` y caché en fichero; decisión 007).
+- Caché: fichero `tle-{norad}.txt` con hora de descarga + 3 líneas; se reutiliza si tiene < 24 h; si falla la red se devuelve la copia vieja;
+  sin copia ni red, `TleUnavailableException`. Ruta de la caché, reloj (`TimeProvider`) y `HttpClient` inyectados.
+- Tests sin red con reloj y HTTP falsos: sin caché, caché fresca, caché caducada, caducada + red caída, sin caché + red caída,
+  respuesta "No GP data found", caché corrupta, formato del fichero.
+- Comprobación manual contra CelesTrak real: primera llamada 1,3 s (descarga y escribe caché), segunda 23 ms sin red. Época del TLE recibido: 2026-10-01 19:41 UTC.
+- Validado con `dotnet build` (0 avisos) y `dotnet test` (71 tests).
+
 ## Pendiente (Fase 1)
 
-5. Proveedor de TLE (CelesTrak + caché 24 h en fichero; implementación fija para tests).
 6. Consola con `--lat/--lon/--time` y tabla.
 7. Validación contra Stellarium en al menos 3 instantes; resultados aquí.
