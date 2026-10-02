@@ -111,9 +111,18 @@ Stellarium Web, ubicación Humanes de Madrid (en CieloHud: 40.2525, -3.8278, 620
   Máximo del paso de las 11:25:54: 47,54°; Horizons muestreó 47,35° a las 11:26.
 - Validado con `dotnet build` (0 avisos) y `dotnet test` (88 tests).
 
+### Paso 3 — Iluminación de la ISS (2026-10-02)
+
+- `Satellites/`: `EciPosition`, `EarthShadow.IsInUmbra(satélite, sol)` (umbra cónica, decisión 010), `ISatelliteIlluminationService.IsSunlit(tle, instant)`
+  y `Sgp4SatelliteIlluminationService` (ISS y Sol en ECI de SGP.NET).
+- Tests geométricos de la sombra: lado diurno, detrás de la Tierra, terminador, borde del cilindro, estrechamiento del cono, normalización del Sol.
+- Tests de integración: ISS iluminada sobre Madrid a mediodía y en el paso vespertino (Sol a -0,9°); comprobación física independiente:
+  en una órbita de 93 min hay exactamente un eclipse, del 20-45 % del periodo. Medido: 33,9 %, un tramo de 31,5 min (01:01-01:32 UTC del 2 de octubre).
+- Observación: entre el 2 y el 4 de octubre todos los pasos sobre Madrid (incluido uno rasante con el Sol a -19°) son con la ISS iluminada; no hay pasos nocturnos profundos en esas fechas.
+- Validado con `dotnet build` (0 avisos) y `dotnet test` (101 tests).
+
 ### Pendiente (Fase 2)
 
-3. Iluminación: `SatelliteIllumination.IsSunlit` con cono de sombra en ECI; tests y decisión.
 4. Visibilidad: combinar Sol + paso + iluminación; tramo visible; tests con servicios falsos.
 5. Consola: `--passes N` con tabla tipo Heavens-Above.
 6. Validación contra Heavens-Above; resultados aquí.
