@@ -237,6 +237,14 @@ Solo orientación vertical.
 - Pendiente de validar en el cielo (paso 7): esta noche Saturno (23:00, SE, 31°) y la Luna (desde las 00:30, ENE).
 - Limitaciones conocidas: el roll de la pantalla no se compensa (solo vertical); sin aviso de calibración del magnetómetro (paso 6).
 
+### Paso 5b — Referencias en el HUD (2026-10-02)
+
+- Sin cámara, por diseño (VISION: el móvil guía, los ojos miran). Para que la pantalla "se mueva contigo": línea del horizonte con escala de altura cada 10°,
+  brújula con puntos cardinales (N en rojo) y marcas cada 10° a lo largo del horizonte (pegada abajo si el horizonte sale de pantalla),
+  y los demás objetos del catálogo como puntos cian con nombre (grises si están bajo el horizonte). Las posiciones del cielo se recalculan una vez por segundo.
+- Idea futura acordada: opción para elegir entre referencias dibujadas o cámara de fondo (requeriría `CommunityToolkit.Maui.Camera` y permiso de cámara).
+- Verificado en el OPPO por el usuario: "superchulo".
+
 ### Pendiente (Fase 3)
 
 6. Ruido del magnetómetro: suavizado, zona, aviso de calibración.

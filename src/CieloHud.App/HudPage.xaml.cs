@@ -3,6 +3,7 @@ using CieloHud.App.Hud;
 using CieloHud.App.Services;
 using CieloHud.Core.Guidance;
 using CieloHud.Core.Sky;
+using Guidance = CieloHud.Core.Guidance.Guidance;
 
 namespace CieloHud.App;
 
@@ -26,6 +27,11 @@ public partial class HudPage : ContentPage
     private bool _onTarget;
     private IDispatcherTimer? _frameTimer;
     private readonly DateTimeOffset _started = DateTimeOffset.UtcNow;
+
+    // Sky positions move slowly; recompute once a second, not every frame.
+    private DateTimeOffset _skyComputedAt = DateTimeOffset.MinValue;
+    private HorizontalPosition? _targetPosition;
+    private IReadOnlyList<ReferenceObject> _references = [];
 
     public HudPage(IPointingSource pointing, ILocationSource location, TargetCatalog catalog)
     {
@@ -73,6 +79,7 @@ public partial class HudPage : ContentPage
     {
         _target = target;
         _onTarget = false;
+        _skyComputedAt = DateTimeOffset.MinValue;
         StyleChips();
         if (target is SatelliteTarget satellite)
             await satellite.PrepareAsync();
@@ -115,10 +122,10 @@ public partial class HudPage : ContentPage
     {
         var now = DateTimeOffset.UtcNow;
         var pointing = _pointing.Last?.Pointing;
-        HorizontalPosition? target = _observer is { } o ? _target.Locate(o, now) : null;
+        UpdateSky(now);
 
         Guidance? guidance = null;
-        if (pointing is { } p && target is { } t)
+        if (pointing is { } p && _targetPosition is { } t)
         {
             var g = _guidance.Compute(p, t, _onTarget);
             _onTarget = g.IsOnTarget;
@@ -128,14 +135,32 @@ public partial class HudPage : ContentPage
         _drawable.Frame = new HudFrame
         {
             TargetName = _target.Name,
-            Target = target,
+            Target = _targetPosition,
             Unavailable = _target.Unavailable,
             Pointing = pointing,
             Guidance = guidance,
             HasLocation = _observer is not null,
             Pulse = (now - _started).TotalSeconds % 1.0,
+            References = _references,
         };
         Canvas.Invalidate();
+    }
+
+    private void UpdateSky(DateTimeOffset now)
+    {
+        if (_observer is not { } observer)
+            return;
+        if (now - _skyComputedAt < TimeSpan.FromSeconds(1))
+            return;
+        _skyComputedAt = now;
+
+        _targetPosition = _target.Locate(observer, now);
+        _references = _catalog.Targets
+            .Where(t => t != _target)
+            .Select(t => (t.Name, Position: t.Locate(observer, now)))
+            .Where(x => x.Position is not null)
+            .Select(x => new ReferenceObject(x.Name, x.Position!.Value))
+            .ToList();
     }
 
     private async void OnDiagnosticsClicked(object? sender, EventArgs e)
