@@ -18,6 +18,8 @@ y, cuando lo encuentras, una IA te explica lo que estás viendo a nivel de no-ex
 ## Qué NO es
 
 - No es un planetario completo tipo Stellarium. Pocos objetos, bien elegidos, visibles a simple vista desde ciudad.
+  El HUD puede pintar unas pocas referencias (estrellas muy brillantes, otros planetas, la Luna, horizonte) para que al
+  bajar el móvil sepas dónde mirar, pero son ayudas para encontrar el objetivo, no un mapa del cielo.
 - No es una red social ni guarda historial en un servidor.
 
 ## Objetos objetivo (visibles desde Madrid con contaminación lumínica)

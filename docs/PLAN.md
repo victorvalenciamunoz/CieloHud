@@ -74,6 +74,10 @@ dotnet run --project src/CieloHud.Console -- [--lat 40.4168] [--lon -3.7038] [--
 - Orientación del dispositivo -> hacia qué acimut/altura apunta el móvil.
 - Flecha/retícula que guía al objeto elegido. Probar primero con la Luna.
 - Tolerar el ruido del magnetómetro: guiar a una zona, no a un píxel.
+- Referencias en el HUD para orientarse al bajar el móvil: las 15-20 estrellas más brillantes (catálogo fijo pequeño en el repo),
+  los demás cuerpos de `CelestialBody` y marcas de horizonte con puntos cardinales. Pocas cosas, todas visibles desde ciudad.
+  Nada de líneas de constelaciones ni catálogos grandes. Las estrellas se calculan con la misma conversión ecuatorial → horizontal
+  que los planetas (AstronomyEngine `Horizon`).
 
 ## Fase 4 — Avisos
 
