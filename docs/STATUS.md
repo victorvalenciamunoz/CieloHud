@@ -194,9 +194,15 @@ Solo orientación vertical.
   histéresis en los dos sentidos, validación de ajustes.
 - Validado con `dotnet build` (0 avisos) y `dotnet test` (147 tests).
 
+### Paso 2 — Orientación y suavizado (2026-10-02)
+
+- `Guidance/OrientationMath`: cuaternión dispositivo→mundo (convención Android) → `PointingDirection` del eje -Z (cámara trasera); `RollDegrees` (giro de pantalla). Decisión 012.
+- `Guidance/PointingSmoother`: suavizado exponencial con el acimut en el círculo (350°→10° pasa por 0°).
+- Tests con poses conocidas: plano en la mesa (apunta a -90°), vertical mirando al norte (0°, 0°), guiñadas de ±90°/180°, inclinaciones (±30°, cénit), roll de 20°, cuaterniones sin normalizar, vectores mundo directos. Suavizado: primera lectura, fracción, cruce de norte en ambos sentidos, convergencia, reset.
+- Validado con `dotnet build` (0 avisos) y `dotnet test` (174 tests).
+
 ### Pendiente (Fase 3)
 
-2. Orientación: cuaternión del sensor → `PointingDirection` (eje -Z del móvil, vertical); suavizado circular; tests con rotaciones conocidas.
 3. Proyecto `src/CieloHud.App` (MAUI, `net10.0-android`), referencia a Core, permisos; build en verde.
 4. Página de diagnóstico con GPS, orientación y posición de la Luna; primera prueba con el móvil.
 5. HUD: retícula, marcador, flecha y texto, estado "en objetivo"; selector de objetivo.
