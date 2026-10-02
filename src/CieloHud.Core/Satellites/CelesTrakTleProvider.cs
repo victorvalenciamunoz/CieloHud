@@ -14,20 +14,17 @@ public sealed class CelesTrakTleProvider : ITleProvider
 
     private readonly HttpClient _httpClient;
     private readonly string _cacheDirectory;
-    private readonly TimeProvider _timeProvider;
     private readonly string _baseUrl;
 
     public TimeSpan MaxCacheAge { get; }
 
     /// <param name="httpClient">Client used for downloads. The caller owns its lifetime.</param>
     /// <param name="cacheDirectory">Writable directory for cache files; created on first write.</param>
-    /// <param name="timeProvider">Clock used to judge cache age. Defaults to the system clock.</param>
     /// <param name="maxCacheAge">How long a downloaded TLE is reused before re-downloading. Defaults to 24 h.</param>
     /// <param name="baseUrl">CelesTrak GP endpoint; overridable for tests.</param>
     public CelesTrakTleProvider(
         HttpClient httpClient,
         string cacheDirectory,
-        TimeProvider? timeProvider = null,
         TimeSpan? maxCacheAge = null,
         string baseUrl = DefaultBaseUrl)
     {
@@ -37,7 +34,6 @@ public sealed class CelesTrakTleProvider : ITleProvider
 
         _httpClient = httpClient;
         _cacheDirectory = cacheDirectory;
-        _timeProvider = timeProvider ?? TimeProvider.System;
         MaxCacheAge = maxCacheAge ?? DefaultMaxCacheAge;
         _baseUrl = baseUrl;
     }
@@ -45,7 +41,7 @@ public sealed class CelesTrakTleProvider : ITleProvider
     public async Task<Tle> GetTleAsync(int noradNumber, CancellationToken cancellationToken = default)
     {
         var cached = await ReadCacheAsync(noradNumber, cancellationToken).ConfigureAwait(false);
-        if (cached is { } entry && _timeProvider.GetUtcNow() - entry.DownloadedAt < MaxCacheAge)
+        if (cached is { } entry && DateTimeOffset.UtcNow - entry.DownloadedAt < MaxCacheAge)
             return entry.Tle;
 
         try
@@ -106,7 +102,7 @@ public sealed class CelesTrakTleProvider : ITleProvider
         Directory.CreateDirectory(_cacheDirectory);
         var lines = new[]
         {
-            _timeProvider.GetUtcNow().ToString("O", CultureInfo.InvariantCulture),
+            DateTimeOffset.UtcNow.ToString("O", CultureInfo.InvariantCulture),
             tle.Name,
             tle.Line1,
             tle.Line2,
