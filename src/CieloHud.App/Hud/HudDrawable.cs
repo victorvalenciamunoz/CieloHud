@@ -219,7 +219,9 @@ public sealed class HudDrawable : IDrawable
         canvas.FontColor = color;
         canvas.FontSize = 14;
         canvas.Font = new Microsoft.Maui.Graphics.Font(FontBold);
-        canvas.DrawString(Frame.TargetName.ToUpperInvariant(), x - 80, y + b + 6, 160, 20, HorizontalAlignment.Center, VerticalAlignment.Top);
+        // When locked the pulse ring surrounds the marker; push the label below it.
+        var labelY = locked ? y + 78 : y + b + 6;
+        canvas.DrawString(Frame.TargetName.ToUpperInvariant(), x - 80, labelY, 160, 20, HorizontalAlignment.Center, VerticalAlignment.Top);
     }
 
     private void DrawEdgeArrow(ICanvas canvas, float x, float y, float directionDegrees)
