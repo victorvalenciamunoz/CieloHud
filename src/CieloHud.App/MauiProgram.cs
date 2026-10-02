@@ -35,7 +35,11 @@ public static class MauiProgram
 			new CelesTrakTleProvider(sp.GetRequiredService<HttpClient>(), Path.Combine(FileSystem.AppDataDirectory, "tle")));
 
 		// Device
+#if ANDROID
+		builder.Services.AddSingleton<IPointingSource, Platforms.Android.RotationVectorPointingSource>();
+#else
 		builder.Services.AddSingleton<IPointingSource, OrientationSensorPointingSource>();
+#endif
 		builder.Services.AddSingleton<ILocationSource, GeolocationSource>();
 
 		// HUD

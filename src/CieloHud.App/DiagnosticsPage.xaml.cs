@@ -105,6 +105,15 @@ public partial class DiagnosticsPage : ContentPage
 
         MainThread.BeginInvokeOnMainThread(() =>
         {
+            AccuracyLabel2.Text = _pointing.Accuracy switch
+            {
+                PointingAccuracy.High => "alta",
+                PointingAccuracy.Medium => "media",
+                PointingAccuracy.Low => "BAJA · haz un 8 con el móvil",
+                PointingAccuracy.Unreliable => "NO FIABLE · haz un 8 con el móvil",
+                _ => "desconocida",
+            };
+            AccuracyLabel2.TextColor = _pointing.Accuracy.NeedsCalibration() ? Color.FromArgb("#FF5C5C") : Color.FromArgb("#E8EEF4");
             AzimuthLabel.Text = $"{reading.Pointing.AzimuthDegrees.ToString("F1", Culture)}°  {Cardinal(reading.Pointing.CardinalPoint())}";
             AltitudeLabel.Text = $"{reading.Pointing.AltitudeDegrees.ToString("F1", Culture)}°";
             RollLabel.Text = $"{reading.RollDegrees.ToString("F0", Culture)}°";

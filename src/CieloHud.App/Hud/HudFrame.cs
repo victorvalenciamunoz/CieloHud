@@ -17,6 +17,7 @@ public sealed record HudFrame
     public bool HasLocation { get; init; }
     public double Pulse { get; init; } // 0..1, loops once per second
     public IReadOnlyList<ReferenceObject> References { get; init; } = [];
+    public bool NeedsCalibration { get; init; }
 
     public bool TargetBelowHorizon => Target is { AltitudeDegrees: < 0 };
     public bool Ready => HasLocation && Pointing is not null && Target is not null && Guidance is not null;

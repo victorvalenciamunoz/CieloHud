@@ -35,6 +35,9 @@ public sealed class HudDrawable : IDrawable
 
         DrawReticle(canvas, r, Frame.Guidance?.IsOnTarget == true);
 
+        if (Frame.NeedsCalibration)
+            DrawCalibrationBanner(canvas, r);
+
         if (!Frame.Ready)
         {
             DrawCenteredText(canvas, r, StatusText(), r.Center.Y + 70, 15, Muted, FontRegular);
@@ -144,6 +147,19 @@ public sealed class HudDrawable : IDrawable
             canvas.Font = new Microsoft.Maui.Graphics.Font(FontRegular);
             canvas.DrawString(reference.Name, x - 40, y + 7, 80, 16, HorizontalAlignment.Center, VerticalAlignment.Top);
         }
+    }
+
+    private void DrawCalibrationBanner(ICanvas canvas, RectF r)
+    {
+        var alpha = 0.6f + 0.4f * (float)Math.Abs(Math.Sin(Frame.Pulse * Math.PI));
+        var y = r.Top + 16;
+        canvas.FillColor = Color.FromArgb("#0B1218").WithAlpha(0.85f);
+        canvas.FillRoundedRectangle(r.Left + 16, y, r.Width - 32, 52, 8);
+        canvas.StrokeColor = Alert.WithAlpha(alpha);
+        canvas.StrokeSize = 1.5f;
+        canvas.DrawRoundedRectangle(r.Left + 16, y, r.Width - 32, 52, 8);
+        DrawCenteredText(canvas, r, "BRÚJULA SIN CALIBRAR", y + 6, 14, Alert.WithAlpha(alpha), FontBold);
+        DrawCenteredText(canvas, r, "Mueve el móvil dibujando un 8 en el aire", y + 26, 12, Muted, FontRegular);
     }
 
     private string StatusText()

@@ -245,7 +245,18 @@ Solo orientación vertical.
 - Idea futura acordada: opción para elegir entre referencias dibujadas o cámara de fondo (requeriría `CommunityToolkit.Maui.Camera` y permiso de cámara).
 - Verificado en el OPPO por el usuario: "superchulo".
 
+### Paso 6 — Ruido del magnetómetro (2026-10-02)
+
+- Prueba de precisión sin cielo (llovía): punto de referencia en tierra, a unos 400 m, con acimut conocido calculado desde coordenadas de mapa:
+  acimut de referencia **58,6°** (±0,7°). Apuntando con el móvil como mira (objeto tapado por el centro de la pantalla):
+  primera lectura **43°** y saltando (magnetómetro descalibrado); tras un "8" en el aire, **53°**; en una tercera medición, **56°** (error 2,6°).
+  Conclusión: convenciones de ejes y signos correctas; el error residual es el del sensor, dentro de la zona de 4°/6° de `GuidanceSettings`.
+- `RotationVectorPointingSource` (Android, `SensorManager` directo): mismo cuaternión que el sensor de MAUI pero con la **precisión** del sensor
+  (`Unreliable/Low/Medium/High`). `IPointingSource.Accuracy` y `AccuracyChanged`; la implementación de MAUI queda como reserva portátil sin precisión.
+- HUD: banner rojo "BRÚJULA SIN CALIBRAR · mueve el móvil dibujando un 8" cuando la precisión es baja o no fiable; diagnóstico muestra la precisión.
+- Suavizado: alfa de 0,2 a **0,08** (`PointingSmoothing.Alpha`), ~medio segundo de respuesta a 50 Hz; antes bailaba.
+- Validado: build Android 0 avisos, 182 tests, instalado y arrancado sin errores en el OPPO.
+
 ### Pendiente (Fase 3)
 
-6. Ruido del magnetómetro: suavizado, zona, aviso de calibración.
 7. Validación en el cielo (Luna, luego planetas); resultados aquí.

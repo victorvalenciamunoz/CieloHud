@@ -42,7 +42,7 @@
             </Grid>
 
             <Label Text="MÓVIL APUNTA A" Style="{StaticResource Section}" />
-            <Grid ColumnDefinitions="110,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="4">
+            <Grid ColumnDefinitions="110,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="4">
                 <Label Grid.Row="0" Text="Acimut" Style="{StaticResource Key}" />
                 <Label Grid.Row="0" Grid.Column="1" x:Name="AzimuthLabel" Text="–" Style="{StaticResource Value}" />
                 <Label Grid.Row="1" Text="Altura" Style="{StaticResource Key}" />
@@ -51,6 +51,8 @@
                 <Label Grid.Row="2" Grid.Column="1" x:Name="RollLabel" Text="–" Style="{StaticResource Value}" />
                 <Label Grid.Row="3" Text="Sin suavizar" Style="{StaticResource Key}" />
                 <Label Grid.Row="3" Grid.Column="1" x:Name="RawLabel" Text="–" Style="{StaticResource Value}" TextColor="{StaticResource HudTextMuted}" />
+                <Label Grid.Row="4" Text="Precisión" Style="{StaticResource Key}" />
+                <Label Grid.Row="4" Grid.Column="1" x:Name="AccuracyLabel2" Text="–" Style="{StaticResource Value}" />
             </Grid>
 
             <Label Text="SOL" Style="{StaticResource Section}" />

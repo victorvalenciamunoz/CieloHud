@@ -142,6 +142,7 @@ public partial class HudPage : ContentPage
             HasLocation = _observer is not null,
             Pulse = (now - _started).TotalSeconds % 1.0,
             References = _references,
+            NeedsCalibration = _pointing.Accuracy.NeedsCalibration(),
         };
         Canvas.Invalidate();
     }
