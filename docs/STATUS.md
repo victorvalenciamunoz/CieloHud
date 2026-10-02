@@ -1,6 +1,6 @@
 # Estado
 
-Fase actual: 2 (ver PLAN.md). Fase 1 completada el 2026-10-02.
+Fase actual: 3 (ver PLAN.md). Fases 1 y 2 completadas el 2026-10-02.
 
 ## Hecho
 
@@ -177,3 +177,28 @@ así que se compara el máximo y, cuando la ISS aparece saliendo de la sombra, e
 - `dotnet test`: 118 tests en verde. `dotnet build`: 0 avisos.
 - Pasos visibles de la ISS contrastados con Heavens-Above: 10 de 10 coincidentes a segundos; las únicas diferencias son casos en el filo del corte de -6° que Heavens-Above tampoco resuelve de forma consistente.
 - Geometría de pasos contrastada con JPL Horizons (7 de 7 pasos, ±60 s); iluminación con un test físico (un eclipse por órbita, 34 % del periodo).
+
+## Fase 3 — HUD en MAUI (Android)
+
+Entorno comprobado el 2026-10-02: workloads MAUI (android, ios, maccatalyst, maui-windows), SDK Android (API 35-37), Java 17, VS 2022/18.
+Móvil de pruebas: OPPO CPH2699, Android 16 (API 36), con sensores Rotation Vector, Geomagnetic Rotation Vector y Game Rotation Vector.
+Estética: la de GincanaHud (fondo `#0B1218`, menta `#7CFFB2`, cian `#4DD2FF`, ámbar `#FFC42E`, rojo `#FF5C5C`, texto `#C5D0DB`/`#E8EEF4`; fuentes Chakra Petch y Open Sans).
+Solo orientación vertical.
+
+### Paso 1 — Geometría de guiado (2026-10-02)
+
+- `Guidance/`: `PointingDirection` (hacia dónde apunta el móvil), `GuidanceSettings` (zona de objetivo con histéresis: entra a 4°, sale a 6°),
+  `Guidance` (giro de acimut con signo en (-180, 180], positivo = derecha; diferencia de altura, positivo = subir; distancia angular; en objetivo)
+  y `GuidanceCalculator.Compute(pointing, target, wasOnTarget)`. Sin estado; el llamador pasa el estado anterior.
+- Tests: giro más corto con envoltura (350→10 = +20), caso 180°, distancia angular por fórmula del haversine (horizonte, cénit, cerca del cénit),
+  histéresis en los dos sentidos, validación de ajustes.
+- Validado con `dotnet build` (0 avisos) y `dotnet test` (147 tests).
+
+### Pendiente (Fase 3)
+
+2. Orientación: cuaternión del sensor → `PointingDirection` (eje -Z del móvil, vertical); suavizado circular; tests con rotaciones conocidas.
+3. Proyecto `src/CieloHud.App` (MAUI, `net10.0-android`), referencia a Core, permisos; build en verde.
+4. Página de diagnóstico con GPS, orientación y posición de la Luna; primera prueba con el móvil.
+5. HUD: retícula, marcador, flecha y texto, estado "en objetivo"; selector de objetivo.
+6. Ruido del magnetómetro: suavizado, zona, aviso de calibración.
+7. Validación en el cielo (Luna, luego planetas); resultados aquí.

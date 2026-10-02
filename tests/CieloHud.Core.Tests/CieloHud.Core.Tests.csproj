@@ -20,6 +20,7 @@
     <Using Include="CieloHud.Core.SolarSystem" />
     <Using Include="CieloHud.Core.Satellites" />
     <Using Include="CieloHud.Core.Passes" />
+    <Using Include="CieloHud.Core.Guidance" />
   </ItemGroup>
 
   <ItemGroup>
