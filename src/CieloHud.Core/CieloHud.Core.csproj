@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="CosineKitty.AstronomyEngine" Version="2.1.19" />
+    <PackageReference Include="SGP.NET" Version="1.6.0" />
   </ItemGroup>
 
 </Project>

@@ -37,9 +37,18 @@ Fase actual: 1 (ver PLAN.md).
   `SolarSystem/` (CelestialBody, ISolarSystemService, AstronomyEngineSolarSystemService). `Satellites/` llegará en el paso 4.
   Los tests siguen la misma estructura y tienen `using` globales de esos namespaces en el csproj.
 
+### Paso 4 — Satélites (2026-10-02)
+
+- Paquete `SGP.NET` 1.6.0 en Core (decisión 004). Carpeta `Satellites/`.
+- `Tle` (`record struct`): nombre, dos líneas verbatim, número NORAD y época UTC parseados; `Tle.Parse` acepta el formato de 3 líneas de CelesTrak. Valida longitud (69) y número de línea.
+- `ISatelliteService.Locate(tle, observer, instant)` e implementación `Sgp4SatelliteService`. Altura geométrica (sin refracción): los satélites solo interesan bien por encima del horizonte.
+- Tests con TLE fijo de la ISS (CelesTrak, época 2026-10-01 19:41 UTC) frente a **JPL Horizons** (`-125544`, sin atmósfera) en dos pasos reales sobre Madrid:
+  2026-10-02 11:26 UTC (alt 47°) y 17:56 UTC (alt 32°), más un instante bajo el horizonte. Tolerancia 0,1° / 0,5 %.
+- Comparación medida: acimut 0,002°-0,008°, altura 0,0003°, distancia 567,41 km frente a 567,35 km. El PLAN pedía < 1°.
+- Validado con `dotnet build` (0 avisos) y `dotnet test` (61 tests).
+
 ## Pendiente (Fase 1)
 
-4. Satélites con `SGP.NET`; test de la ISS con TLE fijo.
 5. Proveedor de TLE (CelesTrak + caché 24 h en fichero; implementación fija para tests).
 6. Consola con `--lat/--lon/--time` y tabla.
 7. Validación contra Stellarium en al menos 3 instantes; resultados aquí.

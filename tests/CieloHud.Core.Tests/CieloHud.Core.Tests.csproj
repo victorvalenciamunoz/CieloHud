@@ -18,6 +18,7 @@
     <Using Include="Xunit" />
     <Using Include="CieloHud.Core.Sky" />
     <Using Include="CieloHud.Core.SolarSystem" />
+    <Using Include="CieloHud.Core.Satellites" />
   </ItemGroup>
 
   <ItemGroup>
