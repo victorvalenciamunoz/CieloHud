@@ -1,6 +1,6 @@
 # Estado
 
-Fase actual: 1, completada (ver PLAN.md). Siguiente: Fase 2.
+Fase actual: 2 (ver PLAN.md). Fase 1 completada el 2026-10-02.
 
 ## Hecho
 
@@ -89,3 +89,20 @@ Stellarium Web, ubicación Humanes de Madrid (en CieloHud: 40.2525, -3.8278, 620
 - `dotnet test`: 71 tests en verde. `dotnet build`: 0 avisos.
 - Tabla de la consola contrastada con Stellarium en 3 instantes y con JPL Horizons en 5 (planetas, Luna, ISS), todo dentro de tolerancia (< 0,5° / < 1°) con margen de dos órdenes de magnitud.
 - Pendiente opcional: lecturas de Marte/Júpiter/Saturno en Stellarium para completar la tabla (ya validados con Horizons).
+
+## Fase 2 — Próximos pasos visibles de la ISS
+
+### Paso 1 — Sol desde el observador (2026-10-02)
+
+- `ISunService.Locate(observer, instant)` e implementación `AstronomyEngineSunService`, en `SolarSystem/`. Altura **geométrica**, sin refracción (decisión 008): los crepúsculos se definen así.
+- Refactor: `AstronomyEngineLocator` (interno) comparte la llamada a Astronomy Engine entre planetas (refracción normal) y Sol (sin refracción).
+- Tests contra JPL Horizons (Sol, Madrid, sin atmósfera): día (12:00 UTC, alt 45.9°), crepúsculo (18:30 UTC, alt -7.4°) y noche (21:00 UTC, alt -34.8°). Tolerancia 0,05°.
+- Validado con `dotnet build` (0 avisos) y `dotnet test` (75 tests).
+
+### Pendiente (Fase 2)
+
+2. Geometría de pasos: `Passes/`, `SatellitePass`, `SatellitePassPredictor` con el `Observe` de rango de SGP.NET; tests contra Horizons.
+3. Iluminación: `SatelliteIllumination.IsSunlit` con cono de sombra en ECI; tests y decisión.
+4. Visibilidad: combinar Sol + paso + iluminación; tramo visible; tests con servicios falsos.
+5. Consola: `--passes N` con tabla tipo Heavens-Above.
+6. Validación contra Heavens-Above; resultados aquí.
