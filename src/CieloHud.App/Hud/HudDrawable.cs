@@ -167,9 +167,14 @@ public sealed class HudDrawable : IDrawable
             return;
         }
 
+        // Where the reticle is, in words: always available, even in empty sky or below the horizon.
+        var looking = Frame.PointingConstellation is { } c
+            ? $"Estás mirando hacia {c}" + (Frame.Pointing.Value.AltitudeDegrees < 0 ? " (bajo el horizonte)" : "")
+            : "";
+
         if (Frame.Identified is not { } found)
         {
-            DrawCenteredText(canvas, r, "Apunta a algo brillante", y, 22, Text, FontBold);
+            DrawCenteredText(canvas, r, looking, y, 20, Text, FontBold);
             DrawCenteredText(canvas, r, "No hay nada conocido sobre el horizonte", y + 40, 13, Muted, FontRegular);
             return;
         }
@@ -177,7 +182,7 @@ public sealed class HudDrawable : IDrawable
         if (found.IsMatch)
         {
             DrawCenteredText(canvas, r, found.Name.ToUpperInvariant(), y - 6, 34, Mint, FontBold);
-            var sub = $"{found.Kind} · altura {found.Position.AltitudeDegrees.ToString("F0", Culture)}° · a {found.AngularDistanceDegrees.ToString("F1", Culture)}° del centro";
+            var sub = $"{found.Kind} · en {found.Constellation} · altura {found.Position.AltitudeDegrees.ToString("F0", Culture)}°";
             DrawCenteredText(canvas, r, sub, y + 44, 13, Muted, FontRegular);
             return;
         }
@@ -191,7 +196,7 @@ public sealed class HudDrawable : IDrawable
         var horizontal = Math.Abs(g.AzimuthDeltaDegrees) < 1.5 ? null : g.AzimuthDeltaDegrees > 0 ? "a la derecha" : "a la izquierda";
         var vertical = Math.Abs(g.AltitudeDeltaDegrees) < 1.5 ? null : g.AltitudeDeltaDegrees > 0 ? "más arriba" : "más abajo";
         var where = string.Join(" y ", new[] { horizontal, vertical }.Where(s => s is not null));
-        DrawCenteredText(canvas, r, "Nada conocido aquí", y, 22, Text, FontBold);
+        DrawCenteredText(canvas, r, looking, y, 20, Text, FontBold);
         DrawCenteredText(canvas, r, $"Lo más cercano: {found.Name}, {found.AngularDistanceDegrees.ToString("F0", Culture)}° {where}", y + 40, 13, Muted, FontRegular);
     }
 
@@ -331,7 +336,8 @@ public sealed class HudDrawable : IDrawable
             var turn = Math.Abs(g.AzimuthDeltaDegrees) < 1.5 ? null : (g.AzimuthDeltaDegrees > 0 ? "derecha" : "izquierda") + " " + Math.Abs(g.AzimuthDeltaDegrees).ToString("F0", Culture) + "°";
             var tilt = Math.Abs(g.AltitudeDeltaDegrees) < 1.5 ? null : (g.AltitudeDeltaDegrees > 0 ? "sube" : "baja") + " " + Math.Abs(g.AltitudeDeltaDegrees).ToString("F0", Culture) + "°";
             main = string.Join("  ·  ", new[] { turn, tilt }.Where(s => s is not null));
-            sub = $"{Frame.TargetName}: acimut {Frame.Target!.Value.AzimuthDegrees.ToString("F0", Culture)}°, altura {Frame.Target.Value.AltitudeDegrees.ToString("F0", Culture)}°";
+            var where = Frame.TargetConstellation is { } tc ? $", en {tc}" : "";
+            sub = $"{Frame.TargetName}{where} · acimut {Frame.Target!.Value.AzimuthDegrees.ToString("F0", Culture)}°, altura {Frame.Target.Value.AltitudeDegrees.ToString("F0", Culture)}°";
             color = g.AngularDistanceDegrees < 15 ? Amber : Text;
         }
 

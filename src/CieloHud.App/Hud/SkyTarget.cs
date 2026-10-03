@@ -99,15 +99,6 @@ public sealed class SatelliteTarget : SkyTarget
 /// </summary>
 public sealed class TargetCatalog
 {
-    private static readonly Dictionary<string, string> SpanishStarNames = new()
-    {
-        ["Sirius"] = "Sirio", ["Arcturus"] = "Arturo", ["Vega"] = "Vega", ["Capella"] = "Capella", ["Rigel"] = "Rigel",
-        ["Procyon"] = "Proción", ["Betelgeuse"] = "Betelgeuse", ["Altair"] = "Altair", ["Aldebaran"] = "Aldebarán",
-        ["Antares"] = "Antares", ["Spica"] = "Espiga", ["Pollux"] = "Pólux", ["Fomalhaut"] = "Fomalhaut", ["Deneb"] = "Deneb",
-        ["Regulus"] = "Régulo", ["Adhara"] = "Adhara", ["Castor"] = "Cástor", ["Shaula"] = "Shaula", ["Bellatrix"] = "Bellatrix",
-        ["Elnath"] = "Elnath", ["Polaris"] = "Estrella Polar",
-    };
-
     public IReadOnlyList<SkyTarget> Targets { get; }
     public IReadOnlyList<SkyTarget> All { get; }
 
@@ -127,7 +118,7 @@ public sealed class TargetCatalog
         All =
         [
             .. Targets,
-            .. BrightStars.All.Select(s => new StarTarget(SpanishStarNames.GetValueOrDefault(s.Name, s.Name), s, stars)),
+            .. BrightStars.All.Select(s => new StarTarget(SpanishNames.Star(s.Name), s, stars)),
         ];
     }
 }

@@ -277,6 +277,21 @@ Solo orientación vertical.
 - Referencias: las estrellas se dibujan en blanco con tamaño según su magnitud; Luna, planetas e ISS en cian.
 - Validado: build Android 0 avisos, 204 tests. Pendiente instalarlo en el móvil (estaba desconectado) y probarlo en el cielo.
 
+### Paso 10 — Constelaciones (2026-10-03)
+
+- Core `Constellations/`: `Constellation` (símbolo IAU, nombre latino), `IConstellationLocator` y `AstronomyEngineConstellationLocator`
+  (dirección aparente → J2000 → límites oficiales de la IAU). Decisión 014.
+- Fallo de Astronomy Engine 2.1.19 encontrado y esquivado: `VectorFromHorizon` con refracción normal no termina nunca en altura 90° o -71°
+  (apuntar al cénit habría congelado la app). Se quita la refracción con la fórmula directa. Barrido de 34.608 direcciones sin bloqueos.
+- Tests: 10 estrellas en su constelación de Bayer; Saturno (Ballena), Júpiter (Leo), Marte (Cáncer), Venus (Virgo) y Luna (Géminis) contra JPL Horizons;
+  la esfera completa cubre las 88 constelaciones; alturas extremas con límite de tiempo.
+- App: `SpanishNames` con las 88 constelaciones en español con artículo ("la Ballena", "Orión"), comprobadas contra los 88 símbolos de la librería,
+  y los nombres españoles de estrellas. HUD: en "¿QUÉ ES?", "Estás mirando hacia Orión" siempre, y "planeta · en la Ballena · altura 31°" al acertar;
+  en modo guía, "Saturno, en la Ballena · acimut…".
+- VISION: pocos objetos que buscar, más cosas que reconocer.
+- Validado: 227 tests; build Android 0 avisos; instalada y arrancada sin errores.
+
 ### Pendiente (Fase 3)
 
 7. Validación en el cielo (Luna, luego planetas); resultados aquí.
+11. Estrellas hasta magnitud 3 con preferencia por las brillantes al reconocer.

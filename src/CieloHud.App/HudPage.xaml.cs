@@ -1,6 +1,7 @@
 using System.Globalization;
 using CieloHud.App.Hud;
 using CieloHud.App.Services;
+using CieloHud.Core.Constellations;
 using CieloHud.Core.Guidance;
 using CieloHud.Core.Sky;
 using CieloHud.Core.Stars;
@@ -20,6 +21,7 @@ public partial class HudPage : ContentPage
     private readonly IPointingSource _pointing;
     private readonly ILocationSource _location;
     private readonly TargetCatalog _catalog;
+    private readonly IConstellationLocator _constellations;
     private readonly GuidanceCalculator _guidance = new();
     private readonly HudDrawable _drawable = new();
     private readonly Dictionary<SkyTarget, Button> _chips = new();
@@ -35,13 +37,15 @@ public partial class HudPage : ContentPage
     // Sky positions move slowly; recompute once a second, not every frame.
     private DateTimeOffset _skyComputedAt = DateTimeOffset.MinValue;
     private IReadOnlyList<(SkyTarget Target, HorizontalPosition Position)> _sky = [];
+    private string? _targetConstellation;
 
-    public HudPage(IPointingSource pointing, ILocationSource location, TargetCatalog catalog)
+    public HudPage(IPointingSource pointing, ILocationSource location, TargetCatalog catalog, IConstellationLocator constellations)
     {
         InitializeComponent();
         _pointing = pointing;
         _location = location;
         _catalog = catalog;
+        _constellations = constellations;
         _target = catalog.Targets[0];
         Canvas.Drawable = _drawable;
         BuildTargetBar();
@@ -169,12 +173,14 @@ public partial class HudPage : ContentPage
                 .ToList(),
             NeedsCalibration = _pointing.Accuracy.NeedsCalibration(),
             IdentifyMode = _target is null,
-            Identified = _target is null && pointing is { } here ? Identify(here) : null,
+            Identified = _target is null && pointing is { } here ? Identify(here, now) : null,
+            PointingConstellation = _target is null && pointing is { } dir ? ConstellationAt(dir.AzimuthDegrees, dir.AltitudeDegrees, now) : null,
+            TargetConstellation = _targetConstellation,
         };
         Canvas.Invalidate();
     }
 
-    private IdentifyResult? Identify(PointingDirection pointing)
+    private IdentifyResult? Identify(PointingDirection pointing, DateTimeOffset now)
     {
         var candidates = _sky.Select(s => new SkyCandidate(s.Target.Name, s.Position)).ToList();
         var match = SkyIdentifier.Identify(pointing, candidates);
@@ -183,8 +189,13 @@ public partial class HudPage : ContentPage
             return null;
 
         var kind = _sky.First(s => s.Target.Name == f.Candidate.Name).Target.Kind;
-        return new IdentifyResult(f.Candidate.Name, kind, f.Candidate.Position, f.AngularDistanceDegrees, IsMatch: match is not null);
+        var constellation = ConstellationAt(f.Candidate.Position.AzimuthDegrees, f.Candidate.Position.AltitudeDegrees, now) ?? "";
+        return new IdentifyResult(f.Candidate.Name, kind, f.Candidate.Position, f.AngularDistanceDegrees, IsMatch: match is not null, constellation);
     }
+
+    /// <summary>Spanish constellation name with article for a direction, or null without a location fix.</summary>
+    private string? ConstellationAt(double azimuthDegrees, double altitudeDegrees, DateTimeOffset now) =>
+        _observer is { } o ? SpanishNames.Constellation(_constellations.Locate(azimuthDegrees, altitudeDegrees, o, now)) : null;
 
     private void UpdateSky(DateTimeOffset now)
     {
@@ -199,6 +210,10 @@ public partial class HudPage : ContentPage
             .Where(x => x.Position is not null)
             .Select(x => (x.Target, x.Position!.Value))
             .ToList();
+
+        _targetConstellation = _target is not null && _sky.FirstOrDefault(s => s.Target == _target) is { Target: not null } t
+            ? ConstellationAt(t.Position.AzimuthDegrees, t.Position.AltitudeDegrees, now)
+            : null;
     }
 
     private async void OnDiagnosticsClicked(object? sender, EventArgs e)
