@@ -1,4 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg width="456" height="456" viewBox="0 0 456 456" version="1.1" xmlns="http://www.w3.org/2000/svg">
-    <rect x="0" y="0" width="456" height="456" fill="#512BD4" />
+    <defs>
+        <radialGradient id="sky" cx="50%" cy="42%" r="70%">
+            <stop offset="0%" stop-color="#14222D" />
+            <stop offset="100%" stop-color="#0B1218" />
+        </radialGradient>
+    </defs>
+    <rect x="0" y="0" width="456" height="456" fill="url(#sky)" />
+    <!-- A few faint background stars, kept outside the reticle -->
+    <circle cx="74" cy="92" r="3" fill="#C5D0DB" opacity="0.55" />
+    <circle cx="384" cy="70" r="2.5" fill="#C5D0DB" opacity="0.45" />
+    <circle cx="398" cy="352" r="3" fill="#C5D0DB" opacity="0.5" />
+    <circle cx="62" cy="376" r="2" fill="#C5D0DB" opacity="0.4" />
+    <circle cx="112" cy="232" r="1.8" fill="#C5D0DB" opacity="0.35" />
 </svg>

@@ -172,23 +172,24 @@ public sealed class HudDrawable : IDrawable
             return;
         }
 
+        DrawTextPanel(canvas, r, y);
+
         // Where the reticle is, in words: always available, even in empty sky or below the horizon.
-        var looking = Frame.PointingConstellation is { } c
-            ? $"Estás mirando hacia {c}" + (Frame.Pointing.Value.AltitudeDegrees < 0 ? " (bajo el horizonte)" : "")
-            : "";
+        var looking = Frame.PointingConstellation is { } c ? $"Hacia {c}" : "";
+        var belowHorizon = Frame.Pointing.Value.AltitudeDegrees < 0 ? "bajo el horizonte · " : "";
 
         if (Frame.Identified is not { } found)
         {
-            DrawCenteredText(canvas, r, looking, y, 20, Text, FontBold);
-            DrawCenteredText(canvas, r, "No hay nada conocido sobre el horizonte", y + 40, 13, Muted, FontRegular);
+            DrawCenteredText(canvas, r, looking, y, 22, Text, FontBold);
+            DrawCenteredText(canvas, r, belowHorizon + "nada conocido sobre el horizonte", y + 44, 13, Muted, FontRegular, lines: 2);
             return;
         }
 
         if (found.IsMatch)
         {
-            DrawCenteredText(canvas, r, found.Name.ToUpperInvariant(), y - 6, 34, Mint, FontBold);
+            DrawCenteredText(canvas, r, found.Name.ToUpperInvariant(), y - 6, 30, Mint, FontBold);
             var sub = $"{found.Kind} · en {found.Constellation} · altura {found.Position.AltitudeDegrees.ToString("F0", Culture)}°";
-            DrawCenteredText(canvas, r, sub, y + 44, 13, Muted, FontRegular);
+            DrawCenteredText(canvas, r, sub, y + 44, 13, Muted, FontRegular, lines: 2);
             return;
         }
 
@@ -198,11 +199,18 @@ public sealed class HudDrawable : IDrawable
             GuidanceCalculator.WrapToHalfTurn(found.Position.AzimuthDegrees - pointing.AzimuthDegrees),
             found.Position.AltitudeDegrees - pointing.AltitudeDegrees,
             found.AngularDistanceDegrees, false);
-        var horizontal = Math.Abs(g.AzimuthDeltaDegrees) < 1.5 ? null : g.AzimuthDeltaDegrees > 0 ? "a la derecha" : "a la izquierda";
-        var vertical = Math.Abs(g.AltitudeDeltaDegrees) < 1.5 ? null : g.AltitudeDeltaDegrees > 0 ? "más arriba" : "más abajo";
+        var horizontal = Math.Abs(g.AzimuthDeltaDegrees) < 1.5 ? null : g.AzimuthDeltaDegrees > 0 ? "derecha" : "izquierda";
+        var vertical = Math.Abs(g.AltitudeDeltaDegrees) < 1.5 ? null : g.AltitudeDeltaDegrees > 0 ? "arriba" : "abajo";
         var where = string.Join(" y ", new[] { horizontal, vertical }.Where(s => s is not null));
-        DrawCenteredText(canvas, r, looking, y, 20, Text, FontBold);
-        DrawCenteredText(canvas, r, $"Lo más cercano: {found.Name}, {found.AngularDistanceDegrees.ToString("F0", Culture)}° {where}", y + 40, 13, Muted, FontRegular);
+        DrawCenteredText(canvas, r, looking, y, 22, Text, FontBold);
+        DrawCenteredText(canvas, r, $"{belowHorizon}cerca: {found.Name}, {found.AngularDistanceDegrees.ToString("F0", Culture)}° {where}", y + 44, 13, Muted, FontRegular, lines: 2);
+    }
+
+    /// <summary>Dark backing for the bottom text block, so the altitude ladder and star labels never run through it.</summary>
+    private static void DrawTextPanel(ICanvas canvas, RectF r, float y)
+    {
+        canvas.FillColor = Color.FromArgb("#0B1218").WithAlpha(0.88f);
+        canvas.FillRoundedRectangle(r.Left + 12, y - 14, r.Width - 24, 112, 10);
     }
 
     private void DrawCalibrationBanner(ICanvas canvas, RectF r)
@@ -347,15 +355,17 @@ public sealed class HudDrawable : IDrawable
         }
 
         var y = r.Bottom - 150;
+        DrawTextPanel(canvas, r, y);
         DrawCenteredText(canvas, r, main, y, g.IsOnTarget ? 34 : 24, color, FontBold);
-        DrawCenteredText(canvas, r, sub, y + 44, 13, Muted, FontRegular);
+        DrawCenteredText(canvas, r, sub, y + 44, 13, Muted, FontRegular, lines: 2);
     }
 
-    private static void DrawCenteredText(ICanvas canvas, RectF r, string text, float y, float size, Color color, string font)
+    /// <param name="lines">Height reserved for wrapping; place the next text below accordingly.</param>
+    private static void DrawCenteredText(ICanvas canvas, RectF r, string text, float y, float size, Color color, string font, int lines = 1)
     {
         canvas.FontColor = color;
         canvas.FontSize = size;
         canvas.Font = new Microsoft.Maui.Graphics.Font(font);
-        canvas.DrawString(text, r.Left + 16, y, r.Width - 32, size + 12, HorizontalAlignment.Center, VerticalAlignment.Top);
+        canvas.DrawString(text, r.Left + 20, y, r.Width - 40, lines * (size + 8) + 4, HorizontalAlignment.Center, VerticalAlignment.Top);
     }
 }
