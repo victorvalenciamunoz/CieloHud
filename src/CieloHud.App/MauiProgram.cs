@@ -25,6 +25,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<ISolarSystemService, AstronomyEngineSolarSystemService>();
 		builder.Services.AddSingleton<ISunService, AstronomyEngineSunService>();
 		builder.Services.AddSingleton<ISatelliteService, Sgp4SatelliteService>();
+		builder.Services.AddSingleton<CieloHud.Core.Stars.IStarService, CieloHud.Core.Stars.AstronomyEngineStarService>();
 		builder.Services.AddSingleton(_ =>
 		{
 			var http = new HttpClient();

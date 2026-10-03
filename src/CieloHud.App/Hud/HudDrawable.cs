@@ -33,12 +33,17 @@ public sealed class HudDrawable : IDrawable
             DrawReferences(canvas, r, pointing);
         }
 
-        DrawReticle(canvas, r, Frame.Guidance?.IsOnTarget == true);
+        var locked = Frame.IdentifyMode ? Frame.Identified?.IsMatch == true : Frame.Guidance?.IsOnTarget == true;
+        DrawReticle(canvas, r, locked);
 
         if (Frame.NeedsCalibration)
             DrawCalibrationBanner(canvas, r);
 
-        if (!Frame.Ready)
+        if (Frame.IdentifyMode)
+        {
+            DrawIdentify(canvas, r);
+        }
+        else if (!Frame.Ready)
         {
             DrawCenteredText(canvas, r, StatusText(), r.Center.Y + 70, 15, Muted, FontRegular);
         }
@@ -139,14 +144,55 @@ public sealed class HudDrawable : IDrawable
             var x = (float)p.X;
             var y = (float)p.Y;
             var below = reference.Position.AltitudeDegrees < 0;
-            var color = below ? Muted.WithAlpha(0.3f) : Cyan.WithAlpha(0.7f);
+            // Stars in white, sized by brightness (Sirius ~5 px, Polaris ~2 px); Moon, planets and ISS in cyan.
+            var isStar = reference.Magnitude is not null;
+            var color = below ? Muted.WithAlpha(0.3f) : isStar ? Text.WithAlpha(0.6f) : Cyan.WithAlpha(0.7f);
+            var radius = below ? 2.5f : isStar ? (float)Math.Clamp(3.5 - reference.Magnitude!.Value, 1.5, 5) : 4;
             canvas.FillColor = color;
-            canvas.FillCircle(x, y, below ? 2.5f : 4);
+            canvas.FillCircle(x, y, radius);
             canvas.FontColor = color;
             canvas.FontSize = 11;
             canvas.Font = new Microsoft.Maui.Graphics.Font(FontRegular);
             canvas.DrawString(reference.Name, x - 40, y + 7, 80, 16, HorizontalAlignment.Center, VerticalAlignment.Top);
         }
+    }
+
+    /// <summary>"What is that?": the name of what sits under the reticle, or a nudge towards the nearest known object.</summary>
+    private void DrawIdentify(ICanvas canvas, RectF r)
+    {
+        var y = r.Bottom - 150;
+        if (!Frame.HasLocation || Frame.Pointing is null)
+        {
+            DrawCenteredText(canvas, r, StatusText(), r.Center.Y + 70, 15, Muted, FontRegular);
+            return;
+        }
+
+        if (Frame.Identified is not { } found)
+        {
+            DrawCenteredText(canvas, r, "Apunta a algo brillante", y, 22, Text, FontBold);
+            DrawCenteredText(canvas, r, "No hay nada conocido sobre el horizonte", y + 40, 13, Muted, FontRegular);
+            return;
+        }
+
+        if (found.IsMatch)
+        {
+            DrawCenteredText(canvas, r, found.Name.ToUpperInvariant(), y - 6, 34, Mint, FontBold);
+            var sub = $"{found.Kind} · altura {found.Position.AltitudeDegrees.ToString("F0", Culture)}° · a {found.AngularDistanceDegrees.ToString("F1", Culture)}° del centro";
+            DrawCenteredText(canvas, r, sub, y + 44, 13, Muted, FontRegular);
+            return;
+        }
+
+        // Nothing under the reticle: say what is closest and which way.
+        var pointing = Frame.Pointing.Value;
+        var g = new Guidance(
+            GuidanceCalculator.WrapToHalfTurn(found.Position.AzimuthDegrees - pointing.AzimuthDegrees),
+            found.Position.AltitudeDegrees - pointing.AltitudeDegrees,
+            found.AngularDistanceDegrees, false);
+        var horizontal = Math.Abs(g.AzimuthDeltaDegrees) < 1.5 ? null : g.AzimuthDeltaDegrees > 0 ? "a la derecha" : "a la izquierda";
+        var vertical = Math.Abs(g.AltitudeDeltaDegrees) < 1.5 ? null : g.AltitudeDeltaDegrees > 0 ? "más arriba" : "más abajo";
+        var where = string.Join(" y ", new[] { horizontal, vertical }.Where(s => s is not null));
+        DrawCenteredText(canvas, r, "Nada conocido aquí", y, 22, Text, FontBold);
+        DrawCenteredText(canvas, r, $"Lo más cercano: {found.Name}, {found.AngularDistanceDegrees.ToString("F0", Culture)}° {where}", y + 40, 13, Muted, FontRegular);
     }
 
     private void DrawCalibrationBanner(ICanvas canvas, RectF r)

@@ -1,15 +1,23 @@
 using CieloHud.Core.Satellites;
 using CieloHud.Core.Sky;
 using CieloHud.Core.SolarSystem;
+using CieloHud.Core.Stars;
 
 namespace CieloHud.App.Hud;
 
-/// <summary>Something the HUD can guide to.</summary>
+/// <summary>Something the HUD can guide to or identify.</summary>
 public abstract class SkyTarget
 {
-    protected SkyTarget(string name) => Name = name;
+    protected SkyTarget(string name, string kind)
+    {
+        Name = name;
+        Kind = kind;
+    }
 
     public string Name { get; }
+
+    /// <summary>What it is, in plain words ("planeta", "estrella"…).</summary>
+    public string Kind { get; }
 
     /// <summary>Null when the target cannot be located yet (e.g. ISS without elements).</summary>
     public abstract HorizontalPosition? Locate(Observer observer, DateTimeOffset instant);
@@ -23,13 +31,29 @@ public sealed class BodyTarget : SkyTarget
     private readonly ISolarSystemService _service;
     private readonly CelestialBody _body;
 
-    public BodyTarget(string name, CelestialBody body, ISolarSystemService service) : base(name)
+    public BodyTarget(string name, CelestialBody body, ISolarSystemService service)
+        : base(name, body == CelestialBody.Moon ? "nuestro satélite" : "planeta")
     {
         _body = body;
         _service = service;
     }
 
     public override HorizontalPosition? Locate(Observer observer, DateTimeOffset instant) => _service.Locate(_body, observer, instant);
+}
+
+public sealed class StarTarget : SkyTarget
+{
+    private readonly IStarService _service;
+
+    public StarTarget(string name, Star star, IStarService service) : base(name, "estrella")
+    {
+        Star = star;
+        _service = service;
+    }
+
+    public Star Star { get; }
+
+    public override HorizontalPosition? Locate(Observer observer, DateTimeOffset instant) => _service.Locate(Star, observer, instant);
 }
 
 public sealed class SatelliteTarget : SkyTarget
@@ -41,7 +65,7 @@ public sealed class SatelliteTarget : SkyTarget
     private Tle? _tle;
     private string? _error;
 
-    public SatelliteTarget(string name, ISatelliteService service, ITleProvider tleProvider) : base(name)
+    public SatelliteTarget(string name, ISatelliteService service, ITleProvider tleProvider) : base(name, "estación espacial")
     {
         _service = service;
         _tleProvider = tleProvider;
@@ -69,12 +93,25 @@ public sealed class SatelliteTarget : SkyTarget
     }
 }
 
-/// <summary>The fixed list of things worth looking at, in display order.</summary>
+/// <summary>
+/// What the app knows about: <see cref="Targets"/> can be chosen and guided to; <see cref="All"/> adds the bright stars,
+/// drawn as references and used to answer "what is that?".
+/// </summary>
 public sealed class TargetCatalog
 {
-    public IReadOnlyList<SkyTarget> Targets { get; }
+    private static readonly Dictionary<string, string> SpanishStarNames = new()
+    {
+        ["Sirius"] = "Sirio", ["Arcturus"] = "Arturo", ["Vega"] = "Vega", ["Capella"] = "Capella", ["Rigel"] = "Rigel",
+        ["Procyon"] = "Proción", ["Betelgeuse"] = "Betelgeuse", ["Altair"] = "Altair", ["Aldebaran"] = "Aldebarán",
+        ["Antares"] = "Antares", ["Spica"] = "Espiga", ["Pollux"] = "Pólux", ["Fomalhaut"] = "Fomalhaut", ["Deneb"] = "Deneb",
+        ["Regulus"] = "Régulo", ["Adhara"] = "Adhara", ["Castor"] = "Cástor", ["Shaula"] = "Shaula", ["Bellatrix"] = "Bellatrix",
+        ["Elnath"] = "Elnath", ["Polaris"] = "Estrella Polar",
+    };
 
-    public TargetCatalog(ISolarSystemService solarSystem, ISatelliteService satellites, ITleProvider tleProvider)
+    public IReadOnlyList<SkyTarget> Targets { get; }
+    public IReadOnlyList<SkyTarget> All { get; }
+
+    public TargetCatalog(ISolarSystemService solarSystem, ISatelliteService satellites, ITleProvider tleProvider, IStarService stars)
     {
         Targets =
         [
@@ -85,6 +122,12 @@ public sealed class TargetCatalog
             new BodyTarget("Saturno", CelestialBody.Saturn, solarSystem),
             new BodyTarget("Mercurio", CelestialBody.Mercury, solarSystem),
             new SatelliteTarget("ISS", satellites, tleProvider),
+        ];
+
+        All =
+        [
+            .. Targets,
+            .. BrightStars.All.Select(s => new StarTarget(SpanishStarNames.GetValueOrDefault(s.Name, s.Name), s, stars)),
         ];
     }
 }

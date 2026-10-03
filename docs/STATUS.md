@@ -266,7 +266,17 @@ Solo orientación vertical.
 - Error corregido en el propio test durante el paso: asumía culminación al sur para todas; y el muestreo por minutos no basta cerca del cénit (Vega), se afina a segundos.
 - Validado con `dotnet test` (195 tests).
 
+### Paso 9 — Modo "¿qué es eso?" y estrellas en el HUD (2026-10-03)
+
+- Core `Guidance/SkyIdentifier`: `Identify` (candidato más cercano a donde apuntas, si está a ≤ 5°; ignora lo que está bajo el horizonte) y `Nearest` (el más cercano a cualquier distancia).
+  Tests: acierto, nada en el radio, bajo el horizonte ignorado/incluible, el más cercano gana, cruce del norte, radio configurable.
+- App: `StarTarget` y nombres en español de las 21 estrellas; `TargetCatalog.All` = objetivos seleccionables + estrellas. Cada objetivo tiene un "tipo" en palabras
+  (planeta, estrella, nuestro satélite, estación espacial).
+- HUD: chip "¿QUÉ ES?" al principio de la barra. En ese modo la retícula se ilumina cuando hay algo a ≤ 5° y muestra su nombre en grande con tipo, altura y distancia
+  al centro; si no, "Nada conocido aquí · Lo más cercano: Vega, 12° a la derecha y más arriba". La ISS se descarga también en este modo.
+- Referencias: las estrellas se dibujan en blanco con tamaño según su magnitud; Luna, planetas e ISS en cian.
+- Validado: build Android 0 avisos, 204 tests. Pendiente instalarlo en el móvil (estaba desconectado) y probarlo en el cielo.
+
 ### Pendiente (Fase 3)
 
 7. Validación en el cielo (Luna, luego planetas); resultados aquí.
-9. Modo "¿qué es eso?" y estrellas en el HUD.
