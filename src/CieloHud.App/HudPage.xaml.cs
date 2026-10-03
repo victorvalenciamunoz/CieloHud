@@ -182,7 +182,7 @@ public partial class HudPage : ContentPage
 
     private IdentifyResult? Identify(PointingDirection pointing, DateTimeOffset now)
     {
-        var candidates = _sky.Select(s => new SkyCandidate(s.Target.Name, s.Position)).ToList();
+        var candidates = _sky.Select(s => new SkyCandidate(s.Target.Name, s.Position, (s.Target as StarTarget)?.Star.Magnitude)).ToList();
         var match = SkyIdentifier.Identify(pointing, candidates);
         var found = match ?? SkyIdentifier.Nearest(pointing, candidates);
         if (found is not { } f)

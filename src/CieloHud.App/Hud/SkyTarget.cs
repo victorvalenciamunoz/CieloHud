@@ -118,7 +118,7 @@ public sealed class TargetCatalog
         All =
         [
             .. Targets,
-            .. BrightStars.All.Select(s => new StarTarget(SpanishNames.Star(s.Name), s, stars)),
+            .. BrightStars.All.Select(s => new StarTarget(SpanishNames.Star(s), s, stars)),
         ];
     }
 }

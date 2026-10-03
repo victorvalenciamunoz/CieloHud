@@ -43,6 +43,37 @@ public static class SpanishNames
 
     public static string Star(string iauName) => Stars.GetValueOrDefault(iauName, iauName);
 
+    /// <summary>Spanish name of the Greek letter abbreviations SIMBAD uses in Bayer designations.</summary>
+    private static readonly IReadOnlyDictionary<string, string> GreekLetters = new Dictionary<string, string>
+    {
+        ["alf"] = "Alfa", ["bet"] = "Beta", ["gam"] = "Gamma", ["del"] = "Delta", ["eps"] = "Épsilon", ["zet"] = "Zeta",
+        ["eta"] = "Eta", ["tet"] = "Theta", ["iot"] = "Iota", ["kap"] = "Kappa", ["lam"] = "Lambda", ["mu."] = "Mu",
+        ["nu."] = "Nu", ["ksi"] = "Xi", ["omi"] = "Ómicron", ["pi."] = "Pi", ["rho"] = "Rho", ["sig"] = "Sigma",
+        ["tau"] = "Tau", ["ups"] = "Ípsilon", ["phi"] = "Fi", ["chi"] = "Ji", ["psi"] = "Psi", ["ome"] = "Omega",
+    };
+
+    /// <summary>
+    /// Display name for a catalog star: its proper name (in Spanish when there is a usual form), or for stars the IAU
+    /// has not named, the Bayer designation in words: "gam Cas" → "Gamma de Casiopea", "gam02 Vel" → "Gamma 2 de la Vela",
+    /// "eps Cyg" → "Épsilon del Cisne".
+    /// </summary>
+    public static string Star(Core.Stars.Star star)
+    {
+        if (star.ProperName is { } proper)
+            return Star(proper);
+
+        var parts = star.Designation.Split(' ', 2);
+        if (parts.Length != 2)
+            return star.Designation;
+
+        var letterCode = parts[0].TrimEnd('0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+        var index = parts[0][letterCode.Length..].TrimStart('0');
+        var letter = GreekLetters.GetValueOrDefault(letterCode, parts[0]);
+        var constellation = Constellations.TryGetValue(parts[1], out var c) ? c : parts[1];
+        var of = constellation.StartsWith("el ", StringComparison.Ordinal) ? "del " + constellation[3..] : "de " + constellation;
+        return index.Length > 0 ? $"{letter} {index} {of}" : $"{letter} {of}";
+    }
+
     /// <summary>"la Ballena", "Orión"…; falls back to the Latin name for an unknown symbol.</summary>
     public static string Constellation(Core.Constellations.Constellation c) => Constellations.GetValueOrDefault(c.Symbol, c.Name);
 

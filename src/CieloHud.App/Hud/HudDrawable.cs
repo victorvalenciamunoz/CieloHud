@@ -20,6 +20,9 @@ public sealed class HudDrawable : IDrawable
     private const string FontRegular = "ChakraPetch";
     private const string FontBold = "ChakraPetchBold";
 
+    /// <summary>Stars brighter than this are labelled on screen (the 20 or so brightest).</summary>
+    private const double LabelMagnitudeLimit = 1.7;
+
     public HudFrame Frame { get; set; } = new();
 
     public void Draw(ICanvas canvas, RectF r)
@@ -153,7 +156,9 @@ public sealed class HudDrawable : IDrawable
             canvas.FontColor = color;
             canvas.FontSize = 11;
             canvas.Font = new Microsoft.Maui.Graphics.Font(FontRegular);
-            canvas.DrawString(reference.Name, x - 40, y + 7, 80, 16, HorizontalAlignment.Center, VerticalAlignment.Top);
+            // Only the brightest stars get a label; the rest are dots, or the screen turns into a star chart.
+            if (!isStar || reference.Magnitude < LabelMagnitudeLimit)
+                canvas.DrawString(reference.Name, x - 60, y + 7, 120, 16, HorizontalAlignment.Center, VerticalAlignment.Top);
         }
     }
 

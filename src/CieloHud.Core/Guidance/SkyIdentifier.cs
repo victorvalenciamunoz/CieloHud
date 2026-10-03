@@ -3,21 +3,27 @@ using CieloHud.Core.Sky;
 namespace CieloHud.Core.Guidance;
 
 /// <summary>Something in the sky that could be identified, with where it is now.</summary>
-public sealed record SkyCandidate(string Name, HorizontalPosition Position);
+/// <param name="Magnitude">Brightness for stars (lower = brighter); null for objects that always win ties (Moon, planets, ISS).</param>
+public sealed record SkyCandidate(string Name, HorizontalPosition Position, double? Magnitude = null);
 
-/// <summary>The candidate closest to where the device points, and how far it is.</summary>
+/// <summary>The candidate chosen for where the device points, and its true angular distance.</summary>
 public readonly record struct Identification(SkyCandidate Candidate, double AngularDistanceDegrees);
 
 /// <summary>
 /// Answers "what am I pointing at?": the same geometry as guidance, run over every candidate.
-/// Objects below the horizon are ignored by default: you cannot see them, however well you point.
+/// Phone compasses are good to a few degrees, so when several objects are in range the brighter one is preferred:
+/// each magnitude above 0 counts as <see cref="DegreesPerMagnitude"/> of extra distance. What you see first is what you
+/// are most likely pointing at. Objects below the horizon are ignored by default.
 /// </summary>
 public static class SkyIdentifier
 {
-    /// <summary>A little wider than the on-target zone: phone compasses are good to a few degrees.</summary>
+    /// <summary>A little wider than the on-target zone.</summary>
     public const double DefaultRadiusDegrees = 5;
 
-    /// <summary>Nearest candidate within <paramref name="radiusDegrees"/>, or null when nothing is close enough.</summary>
+    /// <summary>Penalty per magnitude, in degrees: a magnitude-3 star must be 3° closer than a magnitude-0 one to win.</summary>
+    public const double DegreesPerMagnitude = 1.0;
+
+    /// <summary>Best candidate within <paramref name="radiusDegrees"/>, or null when nothing is close enough.</summary>
     public static Identification? Identify(
         PointingDirection pointing,
         IEnumerable<SkyCandidate> candidates,
@@ -27,17 +33,23 @@ public static class SkyIdentifier
         if (radiusDegrees <= 0)
             throw new ArgumentOutOfRangeException(nameof(radiusDegrees), radiusDegrees, "Radius must be positive.");
 
-        return Nearest(pointing, candidates, minAltitudeDegrees) is { } nearest && nearest.AngularDistanceDegrees <= radiusDegrees
-            ? nearest
-            : null;
+        return Best(pointing, candidates, minAltitudeDegrees, radiusDegrees);
     }
 
-    /// <summary>Nearest visible candidate at any distance, or null when none is above <paramref name="minAltitudeDegrees"/>.</summary>
-    public static Identification? Nearest(PointingDirection pointing, IEnumerable<SkyCandidate> candidates, double minAltitudeDegrees = 0)
+    /// <summary>Best visible candidate at any distance (same brightness preference), or null when none is up.</summary>
+    public static Identification? Nearest(PointingDirection pointing, IEnumerable<SkyCandidate> candidates, double minAltitudeDegrees = 0) =>
+        Best(pointing, candidates, minAltitudeDegrees, double.PositiveInfinity);
+
+    /// <summary>Distance plus brightness penalty; lower is better.</summary>
+    public static double Score(double angularDistanceDegrees, double? magnitude) =>
+        angularDistanceDegrees + DegreesPerMagnitude * Math.Max(0, magnitude ?? 0);
+
+    private static Identification? Best(PointingDirection pointing, IEnumerable<SkyCandidate> candidates, double minAltitudeDegrees, double radiusDegrees)
     {
         ArgumentNullException.ThrowIfNull(candidates);
 
         Identification? best = null;
+        var bestScore = double.PositiveInfinity;
         foreach (var candidate in candidates)
         {
             if (candidate.Position.AltitudeDegrees < minAltitudeDegrees)
@@ -45,8 +57,14 @@ public static class SkyIdentifier
             var distance = GuidanceCalculator.AngularDistance(
                 pointing.AzimuthDegrees, pointing.AltitudeDegrees,
                 candidate.Position.AzimuthDegrees, candidate.Position.AltitudeDegrees);
-            if (best is null || distance < best.Value.AngularDistanceDegrees)
+            if (distance > radiusDegrees)
+                continue;
+            var score = Score(distance, candidate.Magnitude);
+            if (score < bestScore)
+            {
+                bestScore = score;
                 best = new Identification(candidate, distance);
+            }
         }
         return best;
     }

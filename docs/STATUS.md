@@ -291,7 +291,17 @@ Solo orientación vertical.
 - VISION: pocos objetos que buscar, más cosas que reconocer.
 - Validado: 227 tests; build Android 0 avisos; instalada y arrancada sin errores.
 
+### Paso 11 — Estrellas hasta magnitud 3 (2026-10-03)
+
+- `BrightStars`: 155 estrellas generadas desde SIMBAD (V < 3,05) y el catálogo de nombres de la IAU cruzado por posición. 130 con nombre propio;
+  las otras 25, por designación de Bayer. `Star.ProperName` opcional; `BrightStars.Get` busca por nombre o por designación. Decisión 015.
+- `SkyIdentifier`: preferencia por la más brillante (1° por magnitud); `SkyCandidate.Magnitude`. La distancia que se informa sigue siendo la real.
+- App: "Gamma de Casiopea", "Alfa del Lobo", "Ómicron 2 del Can Mayor"… (comprobados los 25); solo se rotulan las de magnitud < 1,7.
+- Tests: 155 estrellas, designaciones y nombres únicos, sin dos estrellas en la misma posición, orden por brillo, búsqueda por nombre y por designación,
+  y cuatro casos de preferencia por brillo (la brillante gana si la débil solo está un poco más cerca; la débil gana si está claramente centrada;
+  los planetas no se penalizan; el brillo nunca mete algo de fuera del radio).
+- Validado: 236 tests; build Android 0 avisos. Pendiente instalar (móvil desconectado).
+
 ### Pendiente (Fase 3)
 
 7. Validación en el cielo (Luna, luego planetas); resultados aquí.
-11. Estrellas hasta magnitud 3 con preferencia por las brillantes al reconocer.

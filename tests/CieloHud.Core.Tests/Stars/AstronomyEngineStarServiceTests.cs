@@ -80,13 +80,50 @@ public class AstronomyEngineStarServiceTests
     [Fact]
     public void Catalog_HasUniqueNamesAndPlausibleData()
     {
-        Assert.Equal(BrightStars.All.Count, BrightStars.All.Select(s => s.Name).Distinct().Count());
+        Assert.Equal(155, BrightStars.All.Count);
+        Assert.Equal(BrightStars.All.Count, BrightStars.All.Select(s => s.Designation).Distinct().Count());
+        var named = BrightStars.All.Where(s => s.ProperName is not null).ToList();
+        Assert.Equal(named.Count, named.Select(s => s.ProperName).Distinct().Count());
         foreach (var star in BrightStars.All)
         {
             Assert.InRange(star.RightAscensionDegrees, 0, 360);
             Assert.InRange(star.DeclinationDegrees, -50, 90);
-            Assert.InRange(star.Magnitude, -1.5, 2.1);
+            Assert.InRange(star.Magnitude, -1.5, 3.05);
         }
+        Assert.Equal(BrightStars.All.OrderBy(s => s.Magnitude), BrightStars.All);
+    }
+
+    [Fact]
+    public void Catalog_NoTwoStarsAtTheSamePlace()
+    {
+        // System rows and their components (bet Sco / bet01 Sco) must have collapsed into one entry.
+        var stars = BrightStars.All;
+        for (var i = 0; i < stars.Count; i++)
+            for (var j = i + 1; j < stars.Count; j++)
+            {
+                var separation = GuidanceCalculator.AngularDistance(
+                    stars[i].RightAscensionDegrees, stars[i].DeclinationDegrees,
+                    stars[j].RightAscensionDegrees, stars[j].DeclinationDegrees);
+                Assert.True(separation > 0.01, $"{stars[i].Designation} and {stars[j].Designation} are {separation:F4}° apart");
+            }
+    }
+
+    [Theory]
+    [InlineData("Alnitak", "zet Ori")]
+    [InlineData("Dubhe", "alf UMa")]
+    [InlineData("gam Cas", "gam Cas")] // no IAU proper name: found by designation, named by it
+    public void Get_FindsByProperNameOrDesignation(string query, string expectedDesignation)
+    {
+        Assert.Equal(expectedDesignation, BrightStars.Get(query).Designation);
+    }
+
+    [Fact]
+    public void UnnamedStar_UsesDesignationAsName()
+    {
+        var gammaCas = BrightStars.Get("gam Cas");
+
+        Assert.Null(gammaCas.ProperName);
+        Assert.Equal("gam Cas", gammaCas.Name);
     }
 
     [Fact]
