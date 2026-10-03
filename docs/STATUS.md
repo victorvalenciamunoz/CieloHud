@@ -257,6 +257,16 @@ Solo orientación vertical.
 - Suavizado: alfa de 0,2 a **0,08** (`PointingSmoothing.Alpha`), ~medio segundo de respuesta a 50 Hz; antes bailaba.
 - Validado: build Android 0 avisos, 182 tests, instalado y arrancado sin errores en el OPPO.
 
+### Paso 8 — Catálogo de estrellas brillantes (2026-10-03)
+
+- Core `Stars/`: `Star` (nombre IAU, designación Bayer, AR/Dec J2000, magnitud), `BrightStars` (20 estrellas con V < 1,65 visibles desde Madrid + Polaris, datos de SIMBAD),
+  `IStarService` y `AstronomyEngineStarService` (precesión/nutación a la fecha y horizonte con refracción). Decisión 013.
+- Tests: Polaris a la altura de la latitud (±0,75°) en cuatro horas del día; culminación de Vega, Sirio, Arturo, Antares, Deneb y Capella a 90° − |lat − dec|,
+  por el sur o por el norte (Deneb y Capella, con declinación mayor que la latitud, culminan al norte del cénit). Unicidad y rangos del catálogo.
+- Error corregido en el propio test durante el paso: asumía culminación al sur para todas; y el muestreo por minutos no basta cerca del cénit (Vega), se afina a segundos.
+- Validado con `dotnet test` (195 tests).
+
 ### Pendiente (Fase 3)
 
 7. Validación en el cielo (Luna, luego planetas); resultados aquí.
+9. Modo "¿qué es eso?" y estrellas en el HUD.

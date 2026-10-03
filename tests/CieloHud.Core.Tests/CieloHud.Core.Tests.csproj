@@ -21,6 +21,7 @@
     <Using Include="CieloHud.Core.Satellites" />
     <Using Include="CieloHud.Core.Passes" />
     <Using Include="CieloHud.Core.Guidance" />
+    <Using Include="CieloHud.Core.Stars" />
   </ItemGroup>
 
   <ItemGroup>
