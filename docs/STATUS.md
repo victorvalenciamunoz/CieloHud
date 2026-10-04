@@ -212,6 +212,7 @@ Solo orientación vertical.
 - Validado: `dotnet build src/CieloHud.App -f net10.0-android` en verde (4 min la primera vez, 0 avisos); `dotnet test` 174 tests;
   instalada con `-t:Install` y arrancada en el OPPO CPH2699 (Android 16): sin crash, captura de pantalla con el diseño esperado.
 - Comandos útiles: `adb` está en `%LocalAppData%\Android\Sdk\platform-tools`; captura: `adb exec-out screencap -p > captura.png`.
+  Si cambian las fechas de muchos ficheros (p. ej. al reescribir el historial) y la app se cae al arrancar: desinstalarla y borrar `bin/` y `obj/` de la app.
 
 ### Paso 4 — Página de diagnóstico (2026-10-02)
 
@@ -312,7 +313,12 @@ Solo orientación vertical.
   y las figuras de Orión, Osa Mayor, Casiopea, Cisne, Lira, Osa Menor y Escorpio pasan a < 0,02° de sus estrellas del catálogo de SIMBAD.
 - HUD: todo con la misma proyección (horizonte, escala de alturas, brújula, referencias, marcador); figura de la constelación bajo la retícula en cian tenue
   con su nombre junto al vértice más alto. Se recalcula al cambiar de constelación o una vez por segundo.
-- Validado: 253 tests; build Android 0 avisos. Pendiente instalar en el móvil (desconectado) y captura.
+- Validado: 253 tests; build Android 0 avisos. En el OPPO: la "tetera" de Sagitario reconocible apuntando casi al nadir (-85°), y el Dragón con su cabeza
+  cerca del horizonte norte ("Hacia el Dragón · cerca: Pherkad"). Sin errores en el registro.
+- Incidencia: tras reescribir el historial la app se caía al arrancar (`IllegalArgumentException … Theme.MaterialComponents` al crear la barra del `Shell`),
+  también en `main`. Causa: compilación incremental con recursos de Android desfasados. Solución: desinstalar y borrar `bin/` y `obj/` de la app.
+- Detalles estéticos pendientes: la etiqueta de una estrella puede pisar "HORIZONTE" en el borde izquierdo, y la letra de la brújula queda medio tapada
+  por el panel de texto cuando el horizonte cae a su altura.
 
 ### Pendiente (Fase 3)
 

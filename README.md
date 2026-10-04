@@ -28,11 +28,13 @@ CieloHud responde a dos preguntas, con el móvil en la mano y sin escribir nada:
 Además calcula **cuándo pasa la ISS por encima de ti y si se va a ver**: iluminada por el Sol, con tu cielo ya oscuro y lo bastante alta.
 
 <p align="center">
-  <img src="docs/images/hud-guia.png" width="300" alt="Modo guía: flecha hacia Júpiter, 'izquierda 48° · sube 44°', Júpiter en Leo" />
-  &nbsp;&nbsp;
-  <img src="docs/images/hud-que-es.png" width="300" alt="Modo ¿qué es?: 'Hacia Tauro', cerca Elnath a 6°" />
+  <img src="docs/images/hud-guia.png" width="260" alt="Modo guía: flecha hacia Júpiter, 'izquierda 48° · sube 44°', Júpiter en Leo" />
+  &nbsp;
+  <img src="docs/images/hud-que-es.png" width="260" alt="Modo ¿qué es?: 'Hacia Tauro', cerca Elnath a 6°" />
+  &nbsp;
+  <img src="docs/images/hud-constelacion.png" width="260" alt="Figura del Dragón sobre el cielo del norte: 'Hacia el Dragón'" />
 </p>
-<p align="center"><sub>Izquierda: modo guía hacia Júpiter. Derecha: modo «¿qué es?». Horizonte, brújula y estrellas se mueven con el móvil.</sub></p>
+<p align="center"><sub>Modo guía hacia Júpiter · modo «¿qué es?» · figura de la constelación bajo la retícula. Horizonte, brújula, estrellas y figuras se mueven con el móvil.</sub></p>
 
 ### Principios
 
