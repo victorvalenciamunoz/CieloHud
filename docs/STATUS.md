@@ -302,6 +302,18 @@ Solo orientación vertical.
   los planetas no se penalizan; el brillo nunca mete algo de fuera del radio).
 - Validado: 236 tests; build Android 0 avisos. Pendiente instalar (móvil desconectado).
 
+### Paso 12 — Figuras de constelaciones y proyección gnomónica (2026-10-04)
+
+- Core `HudProjection`: proyección gnomónica (como una cámara) en lugar de la aproximación plana; `ToScreen` (null si está detrás) y `Project`
+  (al borde con dirección, también para lo que está detrás). Decisión 016. Tests: centro, tangentes, objeto al otro lado del cénit,
+  un círculo máximo sale recto, detrás sin posición, flechas a derecha/arriba, recorte en diagonal.
+- Core `Constellations/ConstellationFigures`: 88 figuras de d3-celestial generadas a C# (150 trazos, 893 vértices), `IConstellationFigureLocator`
+  y `J2000Sky`, el camino J2000 → horizonte compartido con las estrellas. Decisión 017. Tests: 88 figuras completas, la Serpiente en dos trozos,
+  y las figuras de Orión, Osa Mayor, Casiopea, Cisne, Lira, Osa Menor y Escorpio pasan a < 0,02° de sus estrellas del catálogo de SIMBAD.
+- HUD: todo con la misma proyección (horizonte, escala de alturas, brújula, referencias, marcador); figura de la constelación bajo la retícula en cian tenue
+  con su nombre junto al vértice más alto. Se recalcula al cambiar de constelación o una vez por segundo.
+- Validado: 253 tests; build Android 0 avisos. Pendiente instalar en el móvil (desconectado) y captura.
+
 ### Pendiente (Fase 3)
 
 7. Validación en el cielo (Luna, luego planetas); resultados aquí.

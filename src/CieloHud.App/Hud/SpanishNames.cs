@@ -77,6 +77,15 @@ public static class SpanishNames
     /// <summary>"la Ballena", "Orión"…; falls back to the Latin name for an unknown symbol.</summary>
     public static string Constellation(Core.Constellations.Constellation c) => Constellations.GetValueOrDefault(c.Symbol, c.Name);
 
+    /// <summary>"la Osa Mayor" → "Osa Mayor", "los Perros de Caza" → "Perros de Caza"; names without article unchanged.</summary>
+    public static string WithoutArticle(string name)
+    {
+        foreach (var article in new[] { "el ", "la ", "los " })
+            if (name.StartsWith(article, StringComparison.Ordinal))
+                return name[article.Length..];
+        return name;
+    }
+
     /// <summary>"en la Ballena", "en Orión".</summary>
     public static string InConstellation(Core.Constellations.Constellation c) => "en " + Constellation(c);
 

@@ -34,6 +34,12 @@ public sealed record HudFrame
     /// <summary>Spanish constellation the selected target is in, with article.</summary>
     public string? TargetConstellation { get; init; }
 
+    /// <summary>Stick figure of the constellation under the reticle, as horizontal positions; empty when unknown.</summary>
+    public IReadOnlyList<IReadOnlyList<HorizontalPosition>> ConstellationFigure { get; init; } = [];
+
+    /// <summary>Spanish name of that constellation, without article, for the label next to the figure.</summary>
+    public string? ConstellationFigureName { get; init; }
+
     public bool TargetBelowHorizon => Target is { AltitudeDegrees: < 0 };
     public bool Ready => HasLocation && Pointing is not null && Target is not null && Guidance is not null;
 }
