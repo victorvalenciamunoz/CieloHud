@@ -27,6 +27,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<ISatelliteService, Sgp4SatelliteService>();
 		builder.Services.AddSingleton<CieloHud.Core.Stars.IStarService, CieloHud.Core.Stars.AstronomyEngineStarService>();
 		builder.Services.AddSingleton<CieloHud.Core.Constellations.IConstellationLocator, CieloHud.Core.Constellations.AstronomyEngineConstellationLocator>();
+		builder.Services.AddSingleton<CieloHud.Core.Constellations.IConstellationFigureLocator, CieloHud.Core.Constellations.AstronomyEngineConstellationFigureLocator>();
 		builder.Services.AddSingleton(_ =>
 		{
 			var http = new HttpClient();

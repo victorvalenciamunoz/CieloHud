@@ -33,6 +33,7 @@ public sealed class HudDrawable : IDrawable
         if (Frame.Pointing is { } pointing)
         {
             DrawHorizonAndCompass(canvas, r, pointing);
+            DrawConstellationFigure(canvas, r, pointing);
             DrawReferences(canvas, r, pointing);
         }
 
@@ -58,7 +59,8 @@ public sealed class HudDrawable : IDrawable
         else
         {
             var g = Frame.Guidance!.Value;
-            var p = HudProjection.Project(g, Frame.Pointing!.Value.AltitudeDegrees, r.Width, r.Height);
+            var target = Frame.Target!.Value;
+            var p = HudProjection.Project(Frame.Pointing!.Value, target.AzimuthDegrees, target.AltitudeDegrees, r.Width, r.Height);
             if (p.InView)
                 DrawMarker(canvas, (float)p.X, (float)p.Y, g.IsOnTarget);
             else
@@ -70,32 +72,30 @@ public sealed class HudDrawable : IDrawable
     }
 
     /// <summary>
-    /// The world drawn as the phone sees it: the horizon line slides down as you tilt up, cardinal letters slide
-    /// sideways as you turn. Altitude ticks every 10° on the left; azimuth ticks every 10° along the horizon.
+    /// The world drawn as the phone sees it, through the same camera-like projection as everything else: the horizon
+    /// (a great circle, so a straight line) slides down as you tilt up and the cardinal letters slide sideways as you turn.
+    /// Altitude ticks every 10° on the left; azimuth ticks every 10° along the horizon.
     /// </summary>
     private static void DrawHorizonAndCompass(ICanvas canvas, RectF r, PointingDirection pointing)
     {
-        var ppd = (float)(r.Width / HudProjection.DefaultFieldOfViewDegrees);
-        var foreshortening = (float)Math.Max(0.1, Math.Cos(pointing.AltitudeDegrees * Math.PI / 180));
-        var cx = r.Center.X;
-        var cy = r.Center.Y;
         var dim = Muted.WithAlpha(0.55f);
         var faint = Muted.WithAlpha(0.25f);
+        ScreenPoint? At(double az, double alt) => HudProjection.ToScreen(pointing, az, alt, r.Width, r.Height);
 
-        // Altitude ladder: a short tick and label for each 10° line that falls on screen.
+        // Altitude ladder along the vertical through the reticle.
         canvas.StrokeSize = 1;
         canvas.FontSize = 11;
         canvas.Font = new Microsoft.Maui.Graphics.Font(FontRegular);
         for (var alt = -80; alt <= 90; alt += 10)
         {
-            var y = cy + (float)(pointing.AltitudeDegrees - alt) * ppd;
-            if (y < r.Top + 10 || y > r.Bottom - 10)
+            if (At(pointing.AzimuthDegrees, alt) is not { } p || p.Y < r.Top + 10 || p.Y > r.Bottom - 10)
                 continue;
+            var y = (float)p.Y;
             var isHorizon = alt == 0;
             canvas.StrokeColor = isHorizon ? Muted.WithAlpha(0.8f) : faint;
             canvas.StrokeSize = isHorizon ? 1.5f : 1;
             if (isHorizon)
-                canvas.DrawLine(r.Left, y, r.Right, y);
+                DrawHorizonLine(canvas, pointing, r);
             else
                 canvas.DrawLine(r.Left + 12, y, r.Left + 32, y);
             canvas.FontColor = isHorizon ? Muted : dim;
@@ -103,13 +103,14 @@ public sealed class HudDrawable : IDrawable
         }
 
         // Compass along the horizon (or pinned near the bottom when the horizon is off screen).
-        var horizonY = cy + (float)pointing.AltitudeDegrees * ppd;
-        var compassY = Math.Clamp(horizonY, r.Top + 60, r.Bottom - 60);
-        var pinned = compassY != horizonY;
+        var horizonY = At(pointing.AzimuthDegrees, 0)?.Y ?? (pointing.AltitudeDegrees > 0 ? r.Bottom + 1000 : r.Top - 1000);
+        var compassY = (float)Math.Clamp(horizonY, r.Top + 60, r.Bottom - 60);
+        var pinned = Math.Abs(compassY - horizonY) > 0.5;
         for (var az = 0; az < 360; az += 10)
         {
-            var delta = GuidanceCalculator.WrapToHalfTurn(az - pointing.AzimuthDegrees);
-            var x = cx + (float)delta * foreshortening * ppd;
+            if (At(az, 0) is not { } p)
+                continue;
+            var x = (float)p.X;
             if (x < r.Left + 8 || x > r.Right - 8)
                 continue;
             var cardinal = az % 45 == 0 ? CardinalLabel(az) : null;
@@ -127,21 +128,62 @@ public sealed class HudDrawable : IDrawable
         }
     }
 
+    /// <summary>The horizon is a great circle: under a gnomonic projection, a straight line through two of its points.</summary>
+    private static void DrawHorizonLine(ICanvas canvas, PointingDirection pointing, RectF r)
+    {
+        var left = HudProjection.ToScreen(pointing, pointing.AzimuthDegrees - 80, 0, r.Width, r.Height);
+        var right = HudProjection.ToScreen(pointing, pointing.AzimuthDegrees + 80, 0, r.Width, r.Height);
+        if (left is { } a && right is { } b)
+            canvas.DrawLine((float)a.X, (float)a.Y, (float)b.X, (float)b.Y);
+    }
+
     private static string CardinalLabel(int azimuth) => azimuth switch
     {
         0 => "N", 45 => "NE", 90 => "E", 135 => "SE", 180 => "S", 225 => "SO", 270 => "O", 315 => "NO", _ => "",
     };
+
+    /// <summary>
+    /// The stick figure of the constellation under the reticle, faint, with its name by the highest vertex on screen.
+    /// Only that one: drawing them all would turn the HUD into a star chart.
+    /// </summary>
+    private void DrawConstellationFigure(ICanvas canvas, RectF r, PointingDirection pointing)
+    {
+        if (Frame.ConstellationFigure.Count == 0)
+            return;
+
+        canvas.StrokeColor = Cyan.WithAlpha(0.3f);
+        canvas.StrokeSize = 1.5f;
+        ScreenPoint? top = null;
+        foreach (var line in Frame.ConstellationFigure)
+        {
+            ScreenPoint? previous = null;
+            foreach (var vertex in line)
+            {
+                var p = HudProjection.ToScreen(pointing, vertex.AzimuthDegrees, vertex.AltitudeDegrees, r.Width, r.Height);
+                if (p is { } a && previous is { } b)
+                    canvas.DrawLine((float)b.X, (float)b.Y, (float)a.X, (float)a.Y);
+                if (p is { } q && r.Contains((float)q.X, (float)q.Y) && (top is null || q.Y < top.Value.Y))
+                    top = q;
+                previous = p;
+            }
+        }
+
+        if (top is { } t && Frame.ConstellationFigureName is { } name)
+        {
+            canvas.FontColor = Cyan.WithAlpha(0.55f);
+            canvas.FontSize = 12;
+            canvas.Font = new Microsoft.Maui.Graphics.Font(FontBold);
+            canvas.DrawString(name.ToUpperInvariant(), (float)t.X - 90, (float)t.Y - 26, 180, 18, HorizontalAlignment.Center, VerticalAlignment.Center);
+        }
+    }
 
     /// <summary>Other objects as faint dots, so you know what else is around.</summary>
     private void DrawReferences(ICanvas canvas, RectF r, PointingDirection pointing)
     {
         foreach (var reference in Frame.References)
         {
-            var delta = new Guidance(
-                GuidanceCalculator.WrapToHalfTurn(reference.Position.AzimuthDegrees - pointing.AzimuthDegrees),
-                reference.Position.AltitudeDegrees - pointing.AltitudeDegrees, 0, false);
-            var p = HudProjection.Project(delta, pointing.AltitudeDegrees, r.Width, r.Height, edgeMargin: 0);
-            if (!p.InView)
+            if (HudProjection.ToScreen(pointing, reference.Position.AzimuthDegrees, reference.Position.AltitudeDegrees, r.Width, r.Height) is not { } p
+                || !r.Contains((float)p.X, (float)p.Y))
                 continue;
 
             var x = (float)p.X;

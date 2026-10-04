@@ -12,7 +12,7 @@
 <p align="center">
   <img alt=".NET 10" src="https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white" />
   <img alt=".NET MAUI Android" src="https://img.shields.io/badge/MAUI-Android-3DDC84?logo=android&logoColor=white" />
-  <img alt="Tests" src="https://img.shields.io/badge/tests-236%20en%20verde-7CFFB2" />
+  <img alt="Tests" src="https://img.shields.io/badge/tests-253%20en%20verde-7CFFB2" />
   <img alt="Sin backend" src="https://img.shields.io/badge/backend-ninguno-0B1218" />
 </p>
 
@@ -28,11 +28,13 @@ CieloHud responde a dos preguntas, con el móvil en la mano y sin escribir nada:
 Además calcula **cuándo pasa la ISS por encima de ti y si se va a ver**: iluminada por el Sol, con tu cielo ya oscuro y lo bastante alta.
 
 <p align="center">
-  <img src="docs/images/hud-guia.png" width="300" alt="Modo guía: flecha hacia Júpiter, 'izquierda 48° · sube 44°', Júpiter en Leo" />
-  &nbsp;&nbsp;
-  <img src="docs/images/hud-que-es.png" width="300" alt="Modo ¿qué es?: 'Hacia Tauro', cerca Elnath a 6°" />
+  <img src="docs/images/hud-guia.png" width="260" alt="Modo guía: flecha hacia Júpiter, 'izquierda 48° · sube 44°', Júpiter en Leo" />
+  &nbsp;
+  <img src="docs/images/hud-que-es.png" width="260" alt="Modo ¿qué es?: 'Hacia Tauro', cerca Elnath a 6°" />
+  &nbsp;
+  <img src="docs/images/hud-constelacion.png" width="260" alt="Figura del Dragón sobre el cielo del norte: 'Hacia el Dragón'" />
 </p>
-<p align="center"><sub>Izquierda: modo guía hacia Júpiter. Derecha: modo «¿qué es?». Horizonte, brújula y estrellas se mueven con el móvil.</sub></p>
+<p align="center"><sub>Modo guía hacia Júpiter · modo «¿qué es?» · figura de la constelación bajo la retícula. Horizonte, brújula, estrellas y figuras se mueven con el móvil.</sub></p>
 
 ### Principios
 
@@ -47,7 +49,7 @@ Además calcula **cuándo pasa la ISS por encima de ti y si se va a ver**: ilumi
 |---|---|
 | 🎯 **Guía** | Luna, Mercurio, Venus, Marte, Júpiter, Saturno e ISS. Flecha en el borde cuando está fuera de pantalla, marcador cuando está a la vista, **AQUÍ** con histéresis (entra a 4°, sale a 6°) para que no parpadee con el ruido de la brújula. |
 | 🔭 **¿Qué es eso?** | Reconoce Luna, planetas, ISS y **155 estrellas** (todas las de magnitud < 3 visibles desde España, con su nombre IAU o su letra griega). Prefiere la más brillante cuando hay varias candidatas. Dice siempre en cuál de las **88 constelaciones** estás mirando. |
-| 🧭 **Referencias** | Línea del horizonte con escala de altura, brújula con puntos cardinales, estrellas por brillo y planetas, todo moviéndose con el móvil. Aviso cuando la brújula necesita calibración («dibuja un 8»). |
+| 🧭 **Referencias** | Línea del horizonte con escala de altura, brújula con puntos cardinales, estrellas por brillo y planetas, todo moviéndose con el móvil. La **figura de la constelación** que tienes en la retícula, dibujada tenue con su nombre. Aviso cuando la brújula necesita calibración («dibuja un 8»). |
 | 🛰️ **Pasos de la ISS** | Inicio, máximo y fin de cada paso visible en los próximos días, indicando si la ISS «aparece» saliendo de la sombra de la Tierra o «se apaga» a media travesía. |
 | 💻 **Consola** | Tabla de posiciones para cualquier lugar e instante, y tabla de pasos de la ISS al estilo Heavens-Above. |
 
@@ -99,7 +101,7 @@ Todo objeto, sea una estrella, un planeta o la ISS, acaba en el mismo sitio: **a
 - **Luna y planetas**: efemérides que dan su posición de hoy vista desde tu punto de la Tierra → el mismo paso final.
 - **ISS**: su órbita cambia cada día, así que se descarga la «foto» orbital (TLE) y se propaga con SGP4.
 
-El móvil hace la pregunta inversa: el sensor de rotación da un cuaternión, que se convierte en la dirección hacia la que mira la cámara trasera, en el mismo sistema de acimut y altura.
+El móvil hace la pregunta inversa: el sensor de rotación da un cuaternión, que se convierte en la dirección hacia la que mira la cámara trasera, en el mismo sistema de acimut y altura. Todo se dibuja con una proyección gnomónica, la misma que forma la imagen en una cámara, así que el horizonte y las líneas de las constelaciones salen rectas incluso mirando cerca del cénit.
 
 ## Estructura
 
@@ -116,7 +118,7 @@ src/
   CieloHud.Console/     Consola para validar cálculos (solo formatea lo que devuelve Core)
   CieloHud.App/         App .NET MAUI para Android: HUD, sensores, GPS
 tests/
-  CieloHud.Core.Tests/  236 tests xUnit, con referencias de JPL Horizons, Stellarium y Heavens-Above
+  CieloHud.Core.Tests/  253 tests xUnit, con referencias de JPL Horizons, Stellarium y Heavens-Above
 docs/                   Visión, plan por fases, estado y decisiones (en español)
 ```
 
@@ -180,6 +182,7 @@ Se apoya en:
 - [CelesTrak](https://celestrak.org): elementos orbitales de la ISS.
 - [SIMBAD](https://simbad.cds.unistra.fr), CDS, Estrasburgo: coordenadas y magnitudes de las estrellas. *This research has made use of the SIMBAD database, operated at CDS, Strasbourg, France.*
 - [IAU Catalog of Star Names](https://www.iau.org/public/themes/naming_stars/) (WGSN): nombres propios de las estrellas.
+- [d3-celestial](https://github.com/ofrohn/d3-celestial) (Olaf Frohn, BSD): figuras de las constelaciones.
 - Fuentes [Chakra Petch](https://github.com/m4rc1e/Chakra-Petch) y [Open Sans](https://github.com/googlefonts/opensans) (SIL OFL 1.1).
 
 Las referencias de validación son [JPL Horizons](https://ssd.jpl.nasa.gov/horizons/), [Stellarium](https://stellarium.org) y [Heavens-Above](https://www.heavens-above.com). Las licencias de terceros están en [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md).

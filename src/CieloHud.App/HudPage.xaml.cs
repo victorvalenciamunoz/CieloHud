@@ -22,6 +22,7 @@ public partial class HudPage : ContentPage
     private readonly ILocationSource _location;
     private readonly TargetCatalog _catalog;
     private readonly IConstellationLocator _constellations;
+    private readonly IConstellationFigureLocator _figures;
     private readonly GuidanceCalculator _guidance = new();
     private readonly HudDrawable _drawable = new();
     private readonly Dictionary<SkyTarget, Button> _chips = new();
@@ -39,13 +40,20 @@ public partial class HudPage : ContentPage
     private IReadOnlyList<(SkyTarget Target, HorizontalPosition Position)> _sky = [];
     private string? _targetConstellation;
 
-    public HudPage(IPointingSource pointing, ILocationSource location, TargetCatalog catalog, IConstellationLocator constellations)
+    // Figure of the constellation under the reticle: recomputed when the reticle moves to another one, or once a second.
+    private string? _figureSymbol;
+    private DateTimeOffset _figureComputedAt = DateTimeOffset.MinValue;
+    private IReadOnlyList<IReadOnlyList<HorizontalPosition>> _figure = [];
+
+    public HudPage(IPointingSource pointing, ILocationSource location, TargetCatalog catalog,
+        IConstellationLocator constellations, IConstellationFigureLocator figures)
     {
         InitializeComponent();
         _pointing = pointing;
         _location = location;
         _catalog = catalog;
         _constellations = constellations;
+        _figures = figures;
         _target = catalog.Targets[0];
         Canvas.Drawable = _drawable;
         BuildTargetBar();
@@ -147,6 +155,10 @@ public partial class HudPage : ContentPage
         var now = DateTimeOffset.UtcNow;
         var pointing = _pointing.Last?.Pointing;
         UpdateSky(now);
+        var underReticle = pointing is { } aim && _observer is { } observer
+            ? _constellations.Locate(aim.AzimuthDegrees, aim.AltitudeDegrees, observer, now)
+            : null;
+        UpdateFigure(underReticle?.Symbol, now);
 
         HorizontalPosition? targetPosition = _target is null ? null : _sky.FirstOrDefault(s => s.Target == _target) is { Target: not null } hit ? hit.Position : null;
 
@@ -174,10 +186,28 @@ public partial class HudPage : ContentPage
             NeedsCalibration = _pointing.Accuracy.NeedsCalibration(),
             IdentifyMode = _target is null,
             Identified = _target is null && pointing is { } here ? Identify(here, now) : null,
-            PointingConstellation = _target is null && pointing is { } dir ? ConstellationAt(dir.AzimuthDegrees, dir.AltitudeDegrees, now) : null,
+            PointingConstellation = underReticle is { } c ? SpanishNames.Constellation(c) : null,
             TargetConstellation = _targetConstellation,
+            ConstellationFigure = _figure,
+            ConstellationFigureName = underReticle is { } n ? SpanishNames.WithoutArticle(SpanishNames.Constellation(n)) : null,
         };
         Canvas.Invalidate();
+    }
+
+    private void UpdateFigure(string? symbol, DateTimeOffset now)
+    {
+        if (symbol is null || _observer is not { } observer)
+        {
+            _figure = [];
+            _figureSymbol = null;
+            return;
+        }
+        if (symbol == _figureSymbol && now - _figureComputedAt < TimeSpan.FromSeconds(1))
+            return;
+
+        _figure = _figures.Locate(symbol, observer, now);
+        _figureSymbol = symbol;
+        _figureComputedAt = now;
     }
 
     private IdentifyResult? Identify(PointingDirection pointing, DateTimeOffset now)

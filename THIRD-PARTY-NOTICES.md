@@ -28,3 +28,6 @@ CieloHud incluye o usa el siguiente software, datos y fuentes.
   incluida en Astronomy Engine.
 - **Elementos orbitales de la ISS**: se descargan en tiempo de ejecución de CelesTrak (https://celestrak.org).
   El TLE fijo de los tests procede de CelesTrak (2026-10-01).
+- **Figuras de constelaciones** (`src/CieloHud.Core/Constellations/ConstellationFigures.Data.cs`): d3-celestial,
+  Copyright (c) 2015, Olaf Frohn, https://github.com/ofrohn/d3-celestial, licencia BSD de 3 cláusulas:
+  [`licenses/BSD-d3-celestial.txt`](licenses/BSD-d3-celestial.txt).
