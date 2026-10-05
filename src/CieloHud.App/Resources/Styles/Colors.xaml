@@ -5,16 +5,8 @@
 
     <!-- Note: For Android please see also Platforms\Android\Resources\values\colors.xml -->
 
-    <!-- CieloHud palette (shared with GincanaHud) -->
-    <Color x:Key="HudBackground">#0B1218</Color>
-    <Color x:Key="HudPanel">#141C24</Color>
-    <Color x:Key="HudMint">#7CFFB2</Color>
-    <Color x:Key="HudCyan">#4DD2FF</Color>
-    <Color x:Key="HudAmber">#FFC42E</Color>
-    <Color x:Key="HudAlert">#FF5C5C</Color>
-    <Color x:Key="HudText">#E8EEF4</Color>
-    <Color x:Key="HudTextMuted">#C5D0DB</Color>
-    <Color x:Key="HudTextDim">#5A6A7A</Color>
+    <!-- The Hud* colors (HudBackground, HudText...) are not here: NightMode publishes them from Hud/HudPalette.cs,
+         normal or night, and pages read them as DynamicResource. -->
 
     <Color x:Key="Primary">#7CFFB2</Color>
     <Color x:Key="PrimaryDark">#ac99ea</Color>

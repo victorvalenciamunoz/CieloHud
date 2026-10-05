@@ -9,12 +9,6 @@ namespace CieloHud.App.Hud;
 /// </summary>
 public sealed class HudDrawable : IDrawable
 {
-    private static readonly Color Mint = Color.FromArgb("#7CFFB2");
-    private static readonly Color Cyan = Color.FromArgb("#4DD2FF");
-    private static readonly Color Amber = Color.FromArgb("#FFC42E");
-    private static readonly Color Alert = Color.FromArgb("#FF5C5C");
-    private static readonly Color Text = Color.FromArgb("#E8EEF4");
-    private static readonly Color Muted = Color.FromArgb("#8FA0B0");
     private static readonly CultureInfo Culture = CultureInfo.InvariantCulture;
 
     private const string FontRegular = "ChakraPetch";
@@ -24,6 +18,8 @@ public sealed class HudDrawable : IDrawable
     private const double LabelMagnitudeLimit = 1.7;
 
     public HudFrame Frame { get; set; } = new();
+
+    public HudPalette Palette { get; set; } = HudPalette.Normal;
 
     public void Draw(ICanvas canvas, RectF r)
     {
@@ -50,12 +46,12 @@ public sealed class HudDrawable : IDrawable
         }
         else if (!Frame.Ready)
         {
-            DrawCenteredText(canvas, r, StatusText(), r.Center.Y + 70, 15, Muted, FontRegular);
+            DrawCenteredText(canvas, r, StatusText(), r.Center.Y + 70, 15, Palette.TextMuted, FontRegular);
         }
         else if (Frame.TargetBelowHorizon)
         {
-            DrawCenteredText(canvas, r, $"{Frame.TargetName} está bajo el horizonte", r.Center.Y + 70, 16, Amber, FontBold);
-            DrawCenteredText(canvas, r, $"altura {Frame.Target!.Value.AltitudeDegrees.ToString("F0", Culture)}°", r.Center.Y + 94, 13, Muted, FontRegular);
+            DrawCenteredText(canvas, r, $"{Frame.TargetName} está bajo el horizonte", r.Center.Y + 70, 16, Palette.Marker, FontBold);
+            DrawCenteredText(canvas, r, $"altura {Frame.Target!.Value.AltitudeDegrees.ToString("F0", Culture)}°", r.Center.Y + 94, 13, Palette.TextMuted, FontRegular);
         }
         else
         {
@@ -77,10 +73,10 @@ public sealed class HudDrawable : IDrawable
     /// (a great circle, so a straight line) slides down as you tilt up and the cardinal letters slide sideways as you turn.
     /// Altitude ticks every 10° on the left; azimuth ticks every 10° along the horizon.
     /// </summary>
-    private static void DrawHorizonAndCompass(ICanvas canvas, RectF r, PointingDirection pointing)
+    private void DrawHorizonAndCompass(ICanvas canvas, RectF r, PointingDirection pointing)
     {
-        var dim = Muted.WithAlpha(0.55f);
-        var faint = Muted.WithAlpha(0.25f);
+        var dim = Palette.TextMuted.WithAlpha(0.55f);
+        var faint = Palette.TextMuted.WithAlpha(0.25f);
         ScreenPoint? At(double az, double alt) => HudProjection.ToScreen(pointing, az, alt, r.Width, r.Height);
 
         // Altitude ladder along the vertical through the reticle: lines here, labels later (DrawAltitudeLabels) so
@@ -88,7 +84,7 @@ public sealed class HudDrawable : IDrawable
         foreach (var (alt, y) in AltitudeLadder(pointing, r))
         {
             var isHorizon = alt == 0;
-            canvas.StrokeColor = isHorizon ? Muted.WithAlpha(0.8f) : faint;
+            canvas.StrokeColor = isHorizon ? Palette.TextMuted.WithAlpha(0.8f) : faint;
             canvas.StrokeSize = isHorizon ? 1.5f : 1;
             if (isHorizon)
                 DrawHorizonLine(canvas, pointing, r);
@@ -115,7 +111,7 @@ public sealed class HudDrawable : IDrawable
             canvas.DrawLine(x, compassY - tick, x, compassY + tick);
             if (cardinal is not null)
             {
-                canvas.FontColor = az == 0 ? Alert.WithAlpha(0.9f) : Muted;
+                canvas.FontColor = az == 0 ? Palette.Alert.WithAlpha(0.9f) : Palette.TextMuted;
                 canvas.FontSize = 13;
                 canvas.Font = new Microsoft.Maui.Graphics.Font(FontBold);
                 canvas.DrawString(cardinal, x - 20, compassY + (pinned ? -34 : 14), 40, 18, HorizontalAlignment.Center, VerticalAlignment.Center);
@@ -135,7 +131,7 @@ public sealed class HudDrawable : IDrawable
     }
 
     /// <summary>Ladder labels on a dark backing, drawn after stars and planets so their names cannot cover them.</summary>
-    private static void DrawAltitudeLabels(ICanvas canvas, RectF r, PointingDirection pointing)
+    private void DrawAltitudeLabels(ICanvas canvas, RectF r, PointingDirection pointing)
     {
         canvas.FontSize = 11;
         canvas.Font = new Microsoft.Maui.Graphics.Font(FontRegular);
@@ -144,9 +140,9 @@ public sealed class HudDrawable : IDrawable
             var isHorizon = alt == 0;
             var label = isHorizon ? "HORIZONTE" : $"{alt}°";
             var width = isHorizon ? 74f : 34f;
-            canvas.FillColor = Color.FromArgb("#0B1218").WithAlpha(0.8f);
+            canvas.FillColor = Palette.Background.WithAlpha(0.8f);
             canvas.FillRoundedRectangle(r.Left + 34, y - 8, width, 16, 3);
-            canvas.FontColor = isHorizon ? Muted : Muted.WithAlpha(0.55f);
+            canvas.FontColor = isHorizon ? Palette.TextMuted : Palette.TextMuted.WithAlpha(0.55f);
             canvas.DrawString(label, r.Left + 36, y - 8, 90, 16, HorizontalAlignment.Left, VerticalAlignment.Center);
         }
     }
@@ -177,7 +173,7 @@ public sealed class HudDrawable : IDrawable
         if (Frame.ConstellationFigure.Count == 0)
             return;
 
-        canvas.StrokeColor = Cyan.WithAlpha(0.3f);
+        canvas.StrokeColor = Palette.Guide.WithAlpha(0.3f);
         canvas.StrokeSize = 1.5f;
         ScreenPoint? top = null;
         foreach (var line in Frame.ConstellationFigure)
@@ -196,7 +192,7 @@ public sealed class HudDrawable : IDrawable
 
         if (top is { } t && Frame.ConstellationFigureName is { } name)
         {
-            canvas.FontColor = Cyan.WithAlpha(0.55f);
+            canvas.FontColor = Palette.Guide.WithAlpha(0.55f);
             canvas.FontSize = 12;
             canvas.Font = new Microsoft.Maui.Graphics.Font(FontBold);
             canvas.DrawString(name.ToUpperInvariant(), (float)t.X - 90, (float)t.Y - 26, 180, 18, HorizontalAlignment.Center, VerticalAlignment.Center);
@@ -215,9 +211,9 @@ public sealed class HudDrawable : IDrawable
             var x = (float)p.X;
             var y = (float)p.Y;
             var below = reference.Position.AltitudeDegrees < 0;
-            // Stars in white, sized by brightness (Sirius ~5 px, Polaris ~2 px); Moon, planets and ISS in cyan.
+            // Stars sized by brightness (Sirius ~5 px, Polaris ~2 px); Moon, planets and ISS in the guide color.
             var isStar = reference.Magnitude is not null;
-            var color = below ? Muted.WithAlpha(0.3f) : isStar ? Text.WithAlpha(0.6f) : Cyan.WithAlpha(0.7f);
+            var color = below ? Palette.TextMuted.WithAlpha(0.3f) : isStar ? Palette.Star.WithAlpha(0.6f) : Palette.Guide.WithAlpha(0.7f);
             var radius = below ? 2.5f : isStar ? (float)Math.Clamp(3.5 - reference.Magnitude!.Value, 1.5, 5) : 4;
             canvas.FillColor = color;
             canvas.FillCircle(x, y, radius);
@@ -236,7 +232,7 @@ public sealed class HudDrawable : IDrawable
         var y = r.Bottom - 150;
         if (!Frame.HasLocation || Frame.Pointing is null)
         {
-            DrawCenteredText(canvas, r, StatusText(), r.Center.Y + 70, 15, Muted, FontRegular);
+            DrawCenteredText(canvas, r, StatusText(), r.Center.Y + 70, 15, Palette.TextMuted, FontRegular);
             return;
         }
 
@@ -248,16 +244,16 @@ public sealed class HudDrawable : IDrawable
 
         if (Frame.Identified is not { } found)
         {
-            DrawCenteredText(canvas, r, looking, y, 22, Text, FontBold);
-            DrawCenteredText(canvas, r, belowHorizon + "nada conocido sobre el horizonte", y + 44, 13, Muted, FontRegular, lines: 2);
+            DrawCenteredText(canvas, r, looking, y, 22, Palette.Text, FontBold);
+            DrawCenteredText(canvas, r, belowHorizon + "nada conocido sobre el horizonte", y + 44, 13, Palette.TextMuted, FontRegular, lines: 2);
             return;
         }
 
         if (found.IsMatch)
         {
-            DrawCenteredText(canvas, r, found.Name.ToUpperInvariant(), y - 6, 30, Mint, FontBold);
+            DrawCenteredText(canvas, r, found.Name.ToUpperInvariant(), y - 6, 30, Palette.Locked, FontBold);
             var sub = $"{found.Kind} · en {found.Constellation} · altura {found.Position.AltitudeDegrees.ToString("F0", Culture)}°";
-            DrawCenteredText(canvas, r, sub, y + 44, 13, Muted, FontRegular, lines: 2);
+            DrawCenteredText(canvas, r, sub, y + 44, 13, Palette.TextMuted, FontRegular, lines: 2);
             return;
         }
 
@@ -270,14 +266,14 @@ public sealed class HudDrawable : IDrawable
         var horizontal = Math.Abs(g.AzimuthDeltaDegrees) < 1.5 ? null : g.AzimuthDeltaDegrees > 0 ? "derecha" : "izquierda";
         var vertical = Math.Abs(g.AltitudeDeltaDegrees) < 1.5 ? null : g.AltitudeDeltaDegrees > 0 ? "arriba" : "abajo";
         var where = string.Join(" y ", new[] { horizontal, vertical }.Where(s => s is not null));
-        DrawCenteredText(canvas, r, looking, y, 22, Text, FontBold);
-        DrawCenteredText(canvas, r, $"{belowHorizon}cerca: {found.Name}, {found.AngularDistanceDegrees.ToString("F0", Culture)}° {where}", y + 44, 13, Muted, FontRegular, lines: 2);
+        DrawCenteredText(canvas, r, looking, y, 22, Palette.Text, FontBold);
+        DrawCenteredText(canvas, r, $"{belowHorizon}cerca: {found.Name}, {found.AngularDistanceDegrees.ToString("F0", Culture)}° {where}", y + 44, 13, Palette.TextMuted, FontRegular, lines: 2);
     }
 
     /// <summary>Dark backing for the bottom text block, so the altitude ladder and star labels never run through it.</summary>
-    private static void DrawTextPanel(ICanvas canvas, RectF r, float y)
+    private void DrawTextPanel(ICanvas canvas, RectF r, float y)
     {
-        canvas.FillColor = Color.FromArgb("#0B1218").WithAlpha(0.88f);
+        canvas.FillColor = Palette.Background.WithAlpha(0.88f);
         canvas.FillRoundedRectangle(r.Left + 12, y - 14, r.Width - 24, 112, 10);
     }
 
@@ -285,13 +281,13 @@ public sealed class HudDrawable : IDrawable
     {
         var alpha = 0.6f + 0.4f * (float)Math.Abs(Math.Sin(Frame.Pulse * Math.PI));
         var y = r.Top + 16;
-        canvas.FillColor = Color.FromArgb("#0B1218").WithAlpha(0.85f);
+        canvas.FillColor = Palette.Background.WithAlpha(0.85f);
         canvas.FillRoundedRectangle(r.Left + 16, y, r.Width - 32, 52, 8);
-        canvas.StrokeColor = Alert.WithAlpha(alpha);
+        canvas.StrokeColor = Palette.Alert.WithAlpha(alpha);
         canvas.StrokeSize = 1.5f;
         canvas.DrawRoundedRectangle(r.Left + 16, y, r.Width - 32, 52, 8);
-        DrawCenteredText(canvas, r, "BRÚJULA SIN CALIBRAR", y + 6, 14, Alert.WithAlpha(alpha), FontBold);
-        DrawCenteredText(canvas, r, "Mueve el móvil dibujando un 8 en el aire", y + 26, 12, Muted, FontRegular);
+        DrawCenteredText(canvas, r, "BRÚJULA SIN CALIBRAR", y + 6, 14, Palette.Alert.WithAlpha(alpha), FontBold);
+        DrawCenteredText(canvas, r, "Mueve el móvil dibujando un 8 en el aire", y + 26, 12, Palette.TextMuted, FontRegular);
     }
 
     private string StatusText()
@@ -306,7 +302,7 @@ public sealed class HudDrawable : IDrawable
     {
         var cx = r.Center.X;
         var cy = r.Center.Y;
-        var color = locked ? Mint : Cyan;
+        var color = locked ? Palette.Locked : Palette.Guide;
         var radius = 34f;
 
         if (locked)
@@ -335,7 +331,7 @@ public sealed class HudDrawable : IDrawable
 
     private void DrawMarker(ICanvas canvas, float x, float y, bool locked)
     {
-        var color = locked ? Mint : Amber;
+        var color = locked ? Palette.Locked : Palette.Marker;
         var d = 18f;
 
         var path = new PathF();
@@ -351,13 +347,13 @@ public sealed class HudDrawable : IDrawable
         canvas.StrokeColor = color;
         canvas.DrawPath(path);
 
-        canvas.FillColor = Colors.White;
+        canvas.FillColor = Palette.MarkerCore;
         canvas.FillCircle(x, y, 3);
 
         // Bracket corners.
         var b = d * 1.5f;
         var l = d * 0.5f;
-        canvas.StrokeColor = Colors.White.WithAlpha(0.7f);
+        canvas.StrokeColor = Palette.MarkerCore.WithAlpha(0.7f);
         canvas.StrokeSize = 1.5f;
         canvas.DrawLine(x - b, y - b, x - b + l, y - b); canvas.DrawLine(x - b, y - b, x - b, y - b + l);
         canvas.DrawLine(x + b, y - b, x + b - l, y - b); canvas.DrawLine(x + b, y - b, x + b, y - b + l);
@@ -387,14 +383,14 @@ public sealed class HudDrawable : IDrawable
         path.LineTo(-10, 14);
         path.Close();
 
-        canvas.FillColor = Amber.WithAlpha(0.35f + 0.4f * (float)Frame.Pulse);
+        canvas.FillColor = Palette.Marker.WithAlpha(0.35f + 0.4f * (float)Frame.Pulse);
         canvas.FillPath(path);
-        canvas.StrokeColor = Amber;
+        canvas.StrokeColor = Palette.Marker;
         canvas.StrokeSize = 2;
         canvas.DrawPath(path);
         canvas.RestoreState();
 
-        canvas.FontColor = Amber;
+        canvas.FontColor = Palette.Marker;
         canvas.FontSize = 13;
         canvas.Font = new Microsoft.Maui.Graphics.Font(FontBold);
         var label = Frame.TargetName.ToUpperInvariant();
@@ -410,7 +406,7 @@ public sealed class HudDrawable : IDrawable
         {
             main = "AQUÍ";
             sub = "Baja el móvil y mira justo ahí";
-            color = Mint;
+            color = Palette.Locked;
         }
         else
         {
@@ -419,13 +415,13 @@ public sealed class HudDrawable : IDrawable
             main = string.Join("  ·  ", new[] { turn, tilt }.Where(s => s is not null));
             var where = Frame.TargetConstellation is { } tc ? $", en {tc}" : "";
             sub = $"{Frame.TargetName}{where} · acimut {Frame.Target!.Value.AzimuthDegrees.ToString("F0", Culture)}°, altura {Frame.Target.Value.AltitudeDegrees.ToString("F0", Culture)}°";
-            color = g.AngularDistanceDegrees < 15 ? Amber : Text;
+            color = g.AngularDistanceDegrees < 15 ? Palette.Marker : Palette.Text;
         }
 
         var y = r.Bottom - 150;
         DrawTextPanel(canvas, r, y);
         DrawCenteredText(canvas, r, main, y, g.IsOnTarget ? 34 : 24, color, FontBold);
-        DrawCenteredText(canvas, r, sub, y + 44, 13, Muted, FontRegular, lines: 2);
+        DrawCenteredText(canvas, r, sub, y + 44, 13, Palette.TextMuted, FontRegular, lines: 2);
     }
 
     /// <param name="lines">Height reserved for wrapping; place the next text below accordingly.</param>

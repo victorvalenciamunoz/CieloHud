@@ -342,3 +342,30 @@ Solo orientación vertical.
   horizonte, brújula y referencias; aviso de calibración; proyección gnomónica; icono propio.
 - Validado en tierra (punto de referencia, 2,6° tras calibrar) y en el cielo (la Luna).
 - 253 tests en verde, también en el CI de GitHub en cada PR.
+
+## Mejoras fuera de fase
+
+Priorizadas por el usuario aunque la fase actual sea la 4.
+
+### Modo nocturno rojo (2026-10-05)
+
+- Por qué: de noche, los blancos, verdes y cianes del HUD rompen la adaptación del ojo a la oscuridad (unos 20 minutos en conseguirse).
+- `Hud/HudPalette`: todos los colores de la app por función (fondo, cuatro niveles de texto, fijado, guía, marcador, alerta, estrella…), con `Normal`
+  (la estética de siempre) y `Night` (negro puro y cinco niveles de rojo). Ya no hay colores sueltos en `HudDrawable`, los chips ni los XAML. Decisión 019.
+- `Hud/NightMode`: se recuerda en `Preferences`, publica la paleta como recursos de la app (`DynamicResource` en `HudPage` y `DiagnosticsPage`)
+  y en Android (`Platforms/Android/NightWindow`) oculta las barras del sistema y baja el brillo **de la ventana** al mínimo (0,01), sin tocar el ajuste del sistema.
+  Se re-aplica cada vez que la app vuelve al frente.
+- Botón **NOCHE** en el pie del HUD, junto a DIAGNÓSTICO; relleno cuando está activo.
+- En modo nocturno: retícula, marcador, flecha, estrellas, figuras, horizonte, brújula, textos, paneles, chips, pie, botones y la página de diagnóstico en rojo;
+  los estados se distinguen por intensidad y grosor (fijado: rojo más vivo, trazo de 3 px y pulso; aviso de calibración: el rojo más vivo parpadeando).
+- Validado en el OPPO (Android 16), con capturas:
+  - modo normal idéntico al de antes del cambio;
+  - al pulsar NOCHE cambian en el acto HUD, chips, pie y diagnóstico; sin blancos ni azules;
+  - barras del sistema ocultas; `dumpsys display` muestra `mWindowManagerBrightnessOverride=0.01` con la app delante y `NaN` en la pantalla de inicio,
+    y de nuevo 0,01 al volver;
+  - cerrando la app a la fuerza y abriéndola de nuevo arranca en modo nocturno;
+  - al desactivarlo vuelven las barras, los colores normales y el brillo del sistema.
+  - `dotnet test` 253 tests; build Android 0 avisos.
+- Pendiente: probarlo de noche de verdad (si los rojos más tenues, como figuras y estrellas débiles, se ven con el brillo al mínimo, y si el brillo es cómodo).
+  Sin comprobar en pantalla: el estado "en objetivo" y el aviso de calibración en rojo (no se pueden forzar desde adb); usan los mismos colores de rol que se ven en las capturas.
+- Sin comprobar: el efecto de pulsación de los botones de Android (ripple), que no usa la paleta y podría verse claro un instante.

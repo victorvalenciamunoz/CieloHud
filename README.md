@@ -52,6 +52,7 @@ Además calcula **cuándo pasa la ISS por encima de ti y si se va a ver**: ilumi
 | 🎯 **Guía** | Luna, Mercurio, Venus, Marte, Júpiter, Saturno e ISS. Flecha en el borde cuando está fuera de pantalla, marcador cuando está a la vista, **AQUÍ** con histéresis (entra a 4°, sale a 6°) para que no parpadee con el ruido de la brújula. |
 | 🔭 **¿Qué es eso?** | Reconoce Luna, planetas, ISS y **155 estrellas** (todas las de magnitud < 3 visibles desde España, con su nombre IAU o su letra griega). Prefiere la más brillante cuando hay varias candidatas. Dice siempre en cuál de las **88 constelaciones** estás mirando. |
 | 🧭 **Referencias** | Línea del horizonte con escala de altura, brújula con puntos cardinales, estrellas por brillo y planetas, todo moviéndose con el móvil. La **figura de la constelación** que tienes en la retícula, dibujada tenue con su nombre. Aviso cuando la brújula necesita calibración («dibuja un 8»). |
+| 🔴 **Modo nocturno** | Botón NOCHE: todo pasa a rojos tenues sobre negro puro para no perder la adaptación a la oscuridad, se ocultan las barras del sistema y la pantalla baja al brillo mínimo mientras la app está abierta (sin tocar el ajuste del móvil). Se recuerda entre sesiones. |
 | 🛰️ **Pasos de la ISS** | Inicio, máximo y fin de cada paso visible en los próximos días, indicando si la ISS «aparece» saliendo de la sombra de la Tierra o «se apaga» a media travesía. |
 | 💻 **Consola** | Tabla de posiciones para cualquier lugar e instante, y tabla de pasos de la ISS al estilo Heavens-Above. |
 
