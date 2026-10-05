@@ -320,6 +320,14 @@ Solo orientación vertical.
 - Detalles estéticos pendientes: la etiqueta de una estrella puede pisar "HORIZONTE" en el borde izquierdo, y la letra de la brújula queda medio tapada
   por el panel de texto cuando el horizonte cae a su altura.
 
+### Paso 13 — Integración continua y retoques del HUD (2026-10-05)
+
+- `.github/workflows/ci.yml`: en cada PR a `main` restaura, compila en Release y pasa los tests de Core en Ubuntu con el SDK de `global.json`.
+  Obligatorio para fusionar (protección de `main`). La app MAUI se sigue compilando y probando a mano. Decisión 018. Insignia de CI en el README.
+- HUD: los rótulos de la escala de alturas ("HORIZONTE", "20°"…) se dibujan después de estrellas y planetas, sobre una franja oscura, para que
+  ningún nombre los tape; la brújula no baja nunca por detrás del panel de texto inferior (se queda justo encima).
+- Validado: 253 tests en Release; build Android 0 avisos. Pendiente: prueba visual en el móvil.
+
 ### Pendiente (Fase 3)
 
 7. Validación en el cielo (Luna, luego planetas); resultados aquí.

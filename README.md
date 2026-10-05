@@ -12,7 +12,8 @@
 <p align="center">
   <img alt=".NET 10" src="https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white" />
   <img alt=".NET MAUI Android" src="https://img.shields.io/badge/MAUI-Android-3DDC84?logo=android&logoColor=white" />
-  <img alt="Tests" src="https://img.shields.io/badge/tests-253%20en%20verde-7CFFB2" />
+  <a href="https://github.com/victorvalenciamunoz/CieloHud/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/victorvalenciamunoz/CieloHud/actions/workflows/ci.yml/badge.svg" /></a>
+  <img alt="Tests" src="https://img.shields.io/badge/tests-253-7CFFB2" />
   <img alt="Sin backend" src="https://img.shields.io/badge/backend-ninguno-0B1218" />
 </p>
 
