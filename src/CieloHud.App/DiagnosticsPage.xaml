@@ -3,26 +3,26 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="CieloHud.App.DiagnosticsPage"
              Shell.NavBarIsVisible="False"
-             BackgroundColor="{StaticResource HudBackground}">
+             BackgroundColor="{DynamicResource HudBackground}">
 
     <ContentPage.Resources>
         <Style TargetType="Label" x:Key="Key">
             <Setter Property="FontFamily" Value="ChakraPetch" />
             <Setter Property="FontSize" Value="13" />
-            <Setter Property="TextColor" Value="{StaticResource HudTextDim}" />
+            <Setter Property="TextColor" Value="{DynamicResource HudTextDim}" />
             <Setter Property="VerticalOptions" Value="Center" />
         </Style>
         <Style TargetType="Label" x:Key="Value">
             <Setter Property="FontFamily" Value="ChakraPetchBold" />
             <Setter Property="FontSize" Value="18" />
-            <Setter Property="TextColor" Value="{StaticResource HudText}" />
+            <Setter Property="TextColor" Value="{DynamicResource HudText}" />
             <Setter Property="VerticalOptions" Value="Center" />
         </Style>
         <Style TargetType="Label" x:Key="Section">
             <Setter Property="FontFamily" Value="ChakraPetchBold" />
             <Setter Property="FontSize" Value="14" />
             <Setter Property="CharacterSpacing" Value="1.5" />
-            <Setter Property="TextColor" Value="{StaticResource HudMint}" />
+            <Setter Property="TextColor" Value="{DynamicResource HudLocked}" />
             <Setter Property="Margin" Value="0,14,0,2" />
         </Style>
     </ContentPage.Resources>
@@ -50,7 +50,7 @@
                 <Label Grid.Row="2" Text="Roll" Style="{StaticResource Key}" />
                 <Label Grid.Row="2" Grid.Column="1" x:Name="RollLabel" Text="–" Style="{StaticResource Value}" />
                 <Label Grid.Row="3" Text="Sin suavizar" Style="{StaticResource Key}" />
-                <Label Grid.Row="3" Grid.Column="1" x:Name="RawLabel" Text="–" Style="{StaticResource Value}" TextColor="{StaticResource HudTextMuted}" />
+                <Label Grid.Row="3" Grid.Column="1" x:Name="RawLabel" Text="–" Style="{StaticResource Value}" TextColor="{DynamicResource HudTextSoft}" />
                 <Label Grid.Row="4" Text="Precisión" Style="{StaticResource Key}" />
                 <Label Grid.Row="4" Grid.Column="1" x:Name="AccuracyLabel2" Text="–" Style="{StaticResource Value}" />
             </Grid>
@@ -60,7 +60,7 @@
                 <Label Grid.Row="0" Text="Posición" Style="{StaticResource Key}" />
                 <Label Grid.Row="0" Grid.Column="1" x:Name="SunLabel" Text="–" Style="{StaticResource Value}" />
                 <Label Grid.Row="1" Text="Para llegar" Style="{StaticResource Key}" />
-                <Label Grid.Row="1" Grid.Column="1" x:Name="SunGuidanceLabel" Text="–" Style="{StaticResource Value}" TextColor="{StaticResource HudAmber}" />
+                <Label Grid.Row="1" Grid.Column="1" x:Name="SunGuidanceLabel" Text="–" Style="{StaticResource Value}" TextColor="{DynamicResource HudMarker}" />
             </Grid>
 
             <Label Text="LUNA" Style="{StaticResource Section}" />
@@ -68,10 +68,10 @@
                 <Label Grid.Row="0" Text="Posición" Style="{StaticResource Key}" />
                 <Label Grid.Row="0" Grid.Column="1" x:Name="MoonLabel" Text="–" Style="{StaticResource Value}" />
                 <Label Grid.Row="1" Text="Para llegar" Style="{StaticResource Key}" />
-                <Label Grid.Row="1" Grid.Column="1" x:Name="MoonGuidanceLabel" Text="–" Style="{StaticResource Value}" TextColor="{StaticResource HudAmber}" />
+                <Label Grid.Row="1" Grid.Column="1" x:Name="MoonGuidanceLabel" Text="–" Style="{StaticResource Value}" TextColor="{DynamicResource HudMarker}" />
             </Grid>
 
-            <Label x:Name="StatusLabel" Text="" Style="{StaticResource Key}" Margin="0,16,0,0" TextColor="{StaticResource HudAlert}" />
+            <Label x:Name="StatusLabel" Text="" Style="{StaticResource Key}" Margin="0,16,0,0" TextColor="{DynamicResource HudAlert}" />
         </VerticalStackLayout>
     </ScrollView>
 
