@@ -71,6 +71,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<NightMode>();
 		builder.Services.AddTransient<HudPage>();
 		builder.Services.AddTransient<DiagnosticsPage>();
+		builder.Services.AddTransient<EventsPage>();
 
 #if DEBUG
 		builder.Logging.AddDebug();

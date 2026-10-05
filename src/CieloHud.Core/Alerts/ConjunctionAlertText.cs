@@ -16,8 +16,6 @@ public static class ConjunctionAlertText
     /// <summary>Quarter hours: the separation changes by about 0.1° in that time.</summary>
     private const int RoundingMinutes = 15;
 
-    private static readonly string[] Months = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
-
     /// <summary>Headline: "La Luna junto a Júpiter", "La Luna junto a Júpiter y Marte", "Marte junto a Júpiter".</summary>
     public static string Title(ConjunctionAlert alert) => alert.Closest.IsWithMoon
         ? $"La Luna junto a {JoinNames(alert.Conjunctions.Select(c => PlanetName(c.Companion)))}"
@@ -32,10 +30,7 @@ public static class ConjunctionAlertText
         var what = closest.IsWithMoon
             ? "la Luna junto a " + JoinNames(alert.Conjunctions.Select(c => $"{PlanetName(c.Companion)} ({Separation(c.Best.SeparationDegrees)})"))
             : $"{PlanetName(closest.Companion)} junto a {PlanetName(closest.Guide)} ({Separation(closest.Best.SeparationDegrees)}), lo más cerca en estas semanas";
-        // A single night needs no range.
-        var nights = closest.Nights is { } n && Local(n.First, timeZone).Date != Local(n.Last, timeZone).Date
-            ? $" · juntos {Nights(n, timeZone)}"
-            : "";
+        var nights = NightsTogether(closest, timeZone) is { } range ? $" · juntos {range}" : "";
         var best = closest.Best;
 
         // Opened late, past the best moment: say where it is now-ish and until when.
@@ -44,7 +39,7 @@ public static class ConjunctionAlertText
 
         var bestLocal = TimeZoneInfo.ConvertTime(best.Instant, timeZone);
         return $"{When(alert, notify, bestLocal)}, {what} · " +
-            $"mejor hacia {TheTime(Approximate(alert, bestLocal, timeZone))} al {Cardinal(best.Guide.CardinalPoint)}{nights}";
+            $"mejor hacia {TheTime(Approximate(closest, bestLocal, timeZone))} al {Cardinal(best.Guide.CardinalPoint)}{nights}";
     }
 
     /// <summary>What the HUD is called for the guide body: "Luna", "Júpiter"…</summary>
@@ -78,11 +73,15 @@ public static class ConjunctionAlertText
         };
     }
 
-    // "del 9 al 23 nov", "del 28 oct al 5 nov": the local dates the windows start on.
-    private static string Nights(ConjunctionNights nights, TimeZoneInfo timeZone)
+    // "del 9 al 23 nov", "del 28 oct al 5 nov": the local dates the windows start on. Null for the Moon, or a single night.
+    internal static string? NightsTogether(Conjunction conjunction, TimeZoneInfo timeZone)
     {
+        if (conjunction.Nights is not { } nights)
+            return null;
         var first = Local(nights.First, timeZone);
         var last = Local(nights.Last, timeZone);
+        if (first.Date == last.Date)
+            return null;
         var lastText = $"{last.Day.ToString(Culture)} {Months[last.Month - 1]}";
         return first.Month == last.Month && first.Year == last.Year
             ? $"del {first.Day.ToString(Culture)} al {lastText}"
@@ -90,7 +89,7 @@ public static class ConjunctionAlertText
     }
 
     // Whole degrees; under half a degree is still "less than one", not "0°".
-    private static string Separation(double degrees) =>
+    internal static string Separation(double degrees) =>
         Round(degrees) == 0 ? "menos de 1°" : $"{Degrees(degrees)}°";
 
     private static string JoinNames(IEnumerable<string> names)
@@ -102,10 +101,10 @@ public static class ConjunctionAlertText
     private static DateTimeOffset Local(DateTimeOffset instant, TimeZoneInfo timeZone) => TimeZoneInfo.ConvertTime(instant, timeZone);
 
     // To the quarter hour, unless that falls outside a short window (23:20-23:45 must not say "hacia las 23:15").
-    private static DateTimeOffset Approximate(ConjunctionAlert alert, DateTimeOffset bestLocal, TimeZoneInfo timeZone)
+    internal static DateTimeOffset Approximate(Conjunction conjunction, DateTimeOffset bestLocal, TimeZoneInfo timeZone)
     {
         var rounded = RoundToQuarter(bestLocal, timeZone);
-        return rounded >= alert.Closest.Start.Instant && rounded <= alert.Closest.End.Instant ? rounded : bestLocal;
+        return rounded >= conjunction.Start.Instant && rounded <= conjunction.End.Instant ? rounded : bestLocal;
     }
 
     private static DateTimeOffset RoundToQuarter(DateTimeOffset local, TimeZoneInfo timeZone)

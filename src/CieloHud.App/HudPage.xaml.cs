@@ -36,6 +36,8 @@ public partial class HudPage : ContentPage
     private SkyTarget? _target;
     private Observer? _observer;
     private bool _onTarget;
+    // No fix: the HUD says so instead of "searching".
+    private bool _locationFailed;
     private IDispatcherTimer? _frameTimer;
     private readonly DateTimeOffset _started = DateTimeOffset.UtcNow;
 
@@ -235,11 +237,11 @@ public partial class HudPage : ContentPage
             if (_alerts.IsOn)
                 _ = Task.Run(() => _alerts.RescheduleAsync("nueva ubicación"));
             _pointing.DeclinationDegrees = MagneticDeclination.Degrees(f.Observer, DateTimeOffset.UtcNow);
-            FooterLabel.Text = $"{f.Observer.LatitudeDegrees.ToString("F3", Culture)}, {f.Observer.LongitudeDegrees.ToString("F3", Culture)}  ·  decl {_pointing.DeclinationDegrees.ToString("+0.0;-0.0", Culture)}°";
+            _locationFailed = false;
         }
         else
         {
-            FooterLabel.Text = "Sin ubicación: activa el GPS y da permiso";
+            _locationFailed = true;
         }
 
         await PrepareSatellitesAsync();
@@ -280,6 +282,7 @@ public partial class HudPage : ContentPage
             Pointing = pointing,
             Guidance = guidance,
             HasLocation = _observer is not null,
+            LocationFailed = _locationFailed,
             Pulse = (now - _started).TotalSeconds % 1.0,
             References = _sky
                 .Where(s => s.Target != _target)
@@ -346,6 +349,11 @@ public partial class HudPage : ContentPage
         _targetConstellation = _target is not null && _sky.FirstOrDefault(s => s.Target == _target) is { Target: not null } t
             ? ConstellationAt(t.Position.AzimuthDegrees, t.Position.AltitudeDegrees, now)
             : null;
+    }
+
+    private async void OnEventsClicked(object? sender, EventArgs e)
+    {
+        await Shell.Current.GoToAsync(nameof(EventsPage));
     }
 
     private async void OnDiagnosticsClicked(object? sender, EventArgs e)

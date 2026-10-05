@@ -2,6 +2,7 @@ using System.Text.Json;
 using CieloHud.App.Services;
 using CieloHud.Core.Alerts;
 using CieloHud.Core.Conjunctions;
+using CieloHud.Core.Events;
 using CieloHud.Core.Passes;
 using CieloHud.Core.Satellites;
 
@@ -211,6 +212,46 @@ public sealed class AlertService
             : null;
     }
 
+    /// <summary>How many days ahead the list of upcoming events shows conjunctions. ISS passes, only as far as the alerts look.</summary>
+    public const int EventDays = 30;
+
+    /// <summary>
+    /// The upcoming events, computed now from the last location (decision 030): conjunctions for <see cref="EventDays"/> days and
+    /// visible ISS passes for the alert horizon, each with when its alert would go off. Works with the alerts off too. Slow: call off the main thread.
+    /// </summary>
+    public async Task<UpcomingEventList> UpcomingAsync()
+    {
+        if (_observers.Last is not { } observer)
+            return new UpcomingEventList([], "sin ubicación: abre el HUD con el GPS activo");
+
+        var now = DateTimeOffset.UtcNow;
+        var timeZone = TimeZoneInfo.Local;
+        var conjunctions = _conjunctionFinder.FindWithMoon(observer, now, now + TimeSpan.FromDays(EventDays), timeZone)
+            .Concat(_conjunctionFinder.FindPlanetPairs(observer, now, now + TimeSpan.FromDays(EventDays), timeZone))
+            .ToList();
+
+        IReadOnlyList<VisiblePass> passes = [];
+        DateTimeOffset? epoch = null;
+        string? problem = null;
+        try
+        {
+            using var timeout = new CancellationTokenSource(TleTimeout);
+            var tle = await _tleProvider.GetTleAsync(IssNoradNumber, timeout.Token).ConfigureAwait(false);
+            passes = _finder.Find(tle, observer, now, now + _planner.Settings.Horizon);
+            epoch = tle.Epoch;
+        }
+        catch (Exception ex) when (ex is TleUnavailableException or OperationCanceledException or IOException)
+        {
+            problem = "sin órbita de la ISS (sin red): solo la Luna y los planetas";
+        }
+
+        var events = UpcomingEvents.Build(passes, epoch, conjunctions, now, timeZone,
+            Read(NotifiedKey, AlertJsonContext.Default.ListDateTimeOffset),
+            Read(NotifiedConjunctionsKey, AlertJsonContext.Default.ListNotifiedConjunction),
+            _planner.Settings);
+        return new UpcomingEventList(events, problem);
+    }
+
     /// <summary>Brings the background planning forward to <paramref name="delay"/> from now, to try it with the app closed.</summary>
     public void ArmRefreshTest(TimeSpan delay) => ArmRefresh(DateTimeOffset.UtcNow + delay);
 
@@ -324,3 +365,6 @@ public sealed class AlertService
     private void Write<T>(string key, List<T> value, System.Text.Json.Serialization.Metadata.JsonTypeInfo<List<T>> type) =>
         _preferences.Set(key, JsonSerializer.Serialize(value, type));
 }
+
+/// <summary>The upcoming events, and why some may be missing (no location, no ISS orbit).</summary>
+public sealed record UpcomingEventList(IReadOnlyList<SkyEvent> Events, string? Problem);

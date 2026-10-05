@@ -24,7 +24,7 @@ public readonly record struct ConjunctionNights(DateTimeOffset First, DateTimeOf
 /// One night when two bodies are close together and both can be seen: the window when the criteria hold, the best moment
 /// to look, and the closest approach within the window. The guide is what the HUD leads to: the Moon, or the brighter planet.
 /// </summary>
-/// <param name="Start">First sample meeting the criteria (or the start of the search, if it was already met).</param>
+/// <param name="Start">First sample meeting the criteria (or the first sample of the search, if it was already met).</param>
 /// <param name="Best">When to look: see <see cref="ConjunctionFinder"/>.</param>
 /// <param name="Closest">Smallest separation within the window; may be low over the horizon.</param>
 /// <param name="End">Last sample meeting the criteria.</param>

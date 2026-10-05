@@ -20,6 +20,9 @@ public sealed record HudFrame
     public PointingDirection? Pointing { get; init; }
     public Guidance? Guidance { get; init; }
     public bool HasLocation { get; init; }
+
+    /// <summary>No location could be obtained (GPS off or no permission), as opposed to still searching.</summary>
+    public bool LocationFailed { get; init; }
     public double Pulse { get; init; } // 0..1, loops once per second
     public IReadOnlyList<ReferenceObject> References { get; init; } = [];
     public bool NeedsCalibration { get; init; }

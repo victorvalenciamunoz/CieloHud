@@ -15,10 +15,14 @@
         <GraphicsView Grid.Row="1" x:Name="Canvas" />
 
         <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="8" Padding="16,8,16,20">
-            <Label x:Name="FooterLabel"
-                   FontFamily="ChakraPetch" FontSize="12"
-                   TextColor="{DynamicResource HudTextDim}"
-                   VerticalOptions="Center" />
+            <!-- What is coming up. The coordinates that were here are in diagnostics. -->
+            <Button Text="EVENTOS" HorizontalOptions="Start"
+                    FontFamily="ChakraPetch" FontSize="11"
+                    TextColor="{DynamicResource HudTextSoft}"
+                    BackgroundColor="Transparent"
+                    BorderColor="{DynamicResource HudTextDim}" BorderWidth="1"
+                    CornerRadius="6" Padding="10,4"
+                    Clicked="OnEventsClicked" />
             <!-- Colors set from the palette in code: filled when on. -->
             <Button Grid.Column="1" x:Name="AlertsButton" Text="AVISOS"
                     FontFamily="ChakraPetch" FontSize="11"
