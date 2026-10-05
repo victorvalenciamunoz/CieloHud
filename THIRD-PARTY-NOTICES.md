@@ -1,6 +1,7 @@
 # Avisos de terceros
 
-CieloHud incluye o usa el siguiente software, datos y fuentes.
+El código propio de CieloHud se distribuye bajo la licencia MIT (ver [`LICENSE`](LICENSE)). Además, CieloHud incluye o usa
+el siguiente software, datos y fuentes de terceros, cada uno con su propia licencia.
 
 ## Software (paquetes NuGet)
 
