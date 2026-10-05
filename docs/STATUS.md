@@ -1,6 +1,6 @@
 # Estado
 
-Fase actual: 3 (ver PLAN.md). Fases 1 y 2 completadas el 2026-10-02.
+Fase actual: 4 (ver PLAN.md). Fases 1 y 2 completadas el 2026-10-02; fase 3 el 2026-10-05.
 
 ## Hecho
 
@@ -328,6 +328,17 @@ Solo orientación vertical.
   ningún nombre los tape; la brújula no baja nunca por detrás del panel de texto inferior (se queda justo encima).
 - Validado: 253 tests en Release; build Android 0 avisos. Pendiente: prueba visual en el móvil.
 
-### Pendiente (Fase 3)
+### Paso 7 — Validación en el cielo (2026-10-05)
 
-7. Validación en el cielo (Luna, luego planetas); resultados aquí.
+- Por la mañana, con el cielo despejado, el usuario usó la app en el móvil y el HUD le guió correctamente hasta la **Luna**, el objeto más visible en ese
+  momento: al llegar a "AQUÍ" y bajar el móvil, la Luna estaba donde indicaba. Era la prueba pendiente para cerrar la fase.
+- Junto con la prueba en tierra del paso 6 (acimut con 2,6° de error tras calibrar la brújula), confirma la cadena completa: sensor de orientación →
+  posición del objeto → guía en pantalla.
+- Pendiente para cuando se pueda (no bloquea): repetir con un planeta de noche y medir a ojo el desvío.
+
+## Fase 3 — Hecho
+
+- HUD en .NET MAUI para Android: guía a Luna, planetas e ISS; modo "¿qué es eso?" con 155 estrellas y las 88 constelaciones (nombre y figura);
+  horizonte, brújula y referencias; aviso de calibración; proyección gnomónica; icono propio.
+- Validado en tierra (punto de referencia, 2,6° tras calibrar) y en el cielo (la Luna).
+- 253 tests en verde, también en el CI de GitHub en cada PR.
