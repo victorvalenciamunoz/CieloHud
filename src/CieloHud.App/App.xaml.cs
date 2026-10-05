@@ -7,9 +7,9 @@ namespace CieloHud.App;
 public partial class App : Application
 {
 	private readonly NightMode _nightMode;
-	private readonly PassAlertService _alerts;
+	private readonly AlertService _alerts;
 
-	public App(NightMode nightMode, PassAlertService alerts)
+	public App(NightMode nightMode, AlertService alerts)
 	{
 		InitializeComponent();
 		_nightMode = nightMode;

@@ -9,11 +9,13 @@ namespace CieloHud.App.Platforms.Android.Alerts;
 /// <summary>
 /// Alerts on Android (decision 022): one <see cref="AlarmManager"/> alarm that wakes <see cref="AlertReceiver"/> even in Doze,
 /// exact when the user allows it ("Alarmas y recordatorios", <c>SCHEDULE_EXACT_ALARM</c>), otherwise a few minutes loose;
-/// notifications on their own channel, posted with <see cref="NotificationCompat"/>.
+/// notifications posted with <see cref="NotificationCompat"/>, on one channel for ISS passes and another for the Moon and the planets
+/// (decision 027), so each can be tuned on its own in the system settings.
 /// </summary>
 public sealed class AndroidAlertPlatform : IAlertPlatform
 {
-    public const string ChannelId = "iss_passes";
+    public const string PassChannelId = "iss_passes";
+    public const string ConjunctionChannelId = "moon_planets";
     private const int AlertRequestCode = 1;
     private const int TestRequestCode = 2;
     private const int RefreshRequestCode = 3;
@@ -69,21 +71,23 @@ public sealed class AndroidAlertPlatform : IAlertPlatform
 
     public void Show(ScheduledAlert alert)
     {
-        EnsureChannel();
+        EnsureChannels();
         var now = DateTimeOffset.UtcNow;
+        var isPass = alert.Kind == AlertKind.Pass;
         // The bindings return the builder as nullable; set one property per statement on the same instance.
-        var builder = new NotificationCompat.Builder(Context, ChannelId);
-        builder.SetSmallIcon(Resource.Drawable.ic_stat_iss);
+        var builder = new NotificationCompat.Builder(Context, isPass ? PassChannelId : ConjunctionChannelId);
+        builder.SetSmallIcon(isPass ? Resource.Drawable.ic_stat_iss : Resource.Drawable.ic_stat_moon);
         builder.SetColor(unchecked((int)0xFF7CFFB2));
         builder.SetContentTitle(alert.Title);
         builder.SetContentText(alert.Body);
         builder.SetStyle(new NotificationCompat.BigTextStyle().BigText(alert.Body));
         builder.SetCategory(NotificationCompat.CategoryEvent);
-        builder.SetPriority(NotificationCompat.PriorityHigh);
+        // Below Android 8 the priority stands in for the channel importance.
+        builder.SetPriority(isPass ? NotificationCompat.PriorityHigh : NotificationCompat.PriorityDefault);
         builder.SetContentIntent(OpenHudIntent(alert));
         builder.SetAutoCancel(true);
         builder.SetShowWhen(false);
-        // Gone by itself once the pass is over.
+        // Gone by itself once the pass, or the conjunction, is over.
         if (alert.VisibleEnd > now)
             builder.SetTimeoutAfter((long)(alert.VisibleEnd - now).TotalMilliseconds);
 
@@ -111,21 +115,30 @@ public sealed class AndroidAlertPlatform : IAlertPlatform
     private static PendingIntent OpenHudIntent(ScheduledAlert alert)
     {
         var intent = new Intent(Context, typeof(MainActivity))
-            .PutExtra(LaunchRequests.TargetExtra, "ISS")
+            .PutExtra(LaunchRequests.TargetExtra, alert.Target)
             .AddFlags(ActivityFlags.NewTask | ActivityFlags.SingleTop | ActivityFlags.ClearTop);
         return PendingIntent.GetActivity(Context, NotificationId(alert), intent, PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable)!;
     }
 
-    // One notification per pass: the same pass replaces its own (a test replaces the real one, which is fine).
-    private static int NotificationId(ScheduledAlert alert) => (int)(alert.VisibleStart.ToUnixTimeSeconds() / 60 % int.MaxValue);
-
-    private static void EnsureChannel()
+    // One notification per pass or conjunction: the same one replaces its own (a test replaces the real one, which is fine).
+    // Conjunctions count down from -1 so they never take the id of a pass that starts the same minute.
+    private static int NotificationId(ScheduledAlert alert)
     {
-        var channel = new NotificationChannel(ChannelId, "Pasos de la ISS", NotificationImportance.High)
+        var minutes = (int)(alert.VisibleStart.ToUnixTimeSeconds() / 60 % int.MaxValue);
+        return alert.Kind == AlertKind.Pass ? minutes : -1 - minutes;
+    }
+
+    private static void EnsureChannels()
+    {
+        var manager = (NotificationManager)Context.GetSystemService(Context.NotificationService)!;
+        manager.CreateNotificationChannel(new NotificationChannel(PassChannelId, "Pasos de la ISS", NotificationImportance.High)
         {
             Description = "Aviso 10 minutos antes de cada paso visible de la ISS; de madrugada, la víspera a las 22:00.",
-        };
-        var manager = (NotificationManager)Context.GetSystemService(Context.NotificationService)!;
-        manager.CreateNotificationChannel(channel);
+        });
+        // Lasts hours and is announced ahead: it makes a sound, but no banner over what you are doing.
+        manager.CreateNotificationChannel(new NotificationChannel(ConjunctionChannelId, "Luna y planetas", NotificationImportance.Default)
+        {
+            Description = "Aviso cuando la Luna pasa junto a Venus, Marte, Júpiter o Saturno: al anochecer, o la víspera a las 22:00 si es de madrugada.",
+        });
     }
 }

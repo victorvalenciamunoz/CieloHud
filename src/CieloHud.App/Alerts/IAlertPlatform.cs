@@ -27,6 +27,6 @@ public interface IAlertPlatform
     /// <summary>Arms the test alarm, which hands <paramref name="alert"/> back on waking. For trying the alerts without waiting for a pass.</summary>
     void ArmTest(DateTimeOffset wakeAt, ScheduledAlert alert);
 
-    /// <summary>Posts the notification. Tapping it opens the HUD on the ISS.</summary>
+    /// <summary>Posts the notification. Tapping it opens the HUD on what it announces (<see cref="ScheduledAlert.Target"/>).</summary>
     void Show(ScheduledAlert alert);
 }

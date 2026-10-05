@@ -25,7 +25,7 @@ public partial class HudPage : ContentPage
     private readonly IConstellationLocator _constellations;
     private readonly IConstellationFigureLocator _figures;
     private readonly NightMode _nightMode;
-    private readonly PassAlertService _alerts;
+    private readonly AlertService _alerts;
     private readonly ObserverStore _observers;
     private readonly GuidanceCalculator _guidance = new();
     private readonly HudDrawable _drawable = new();
@@ -51,7 +51,7 @@ public partial class HudPage : ContentPage
 
     public HudPage(IPointingSource pointing, ILocationSource location, TargetCatalog catalog,
         IConstellationLocator constellations, IConstellationFigureLocator figures, NightMode nightMode,
-        PassAlertService alerts, ObserverStore observers)
+        AlertService alerts, ObserverStore observers)
     {
         InitializeComponent();
         _pointing = pointing;
@@ -164,12 +164,15 @@ public partial class HudPage : ContentPage
 
     private string AlertsSummary()
     {
-        if (_alerts.Problem is { } problem)
-            return $"Avisos activados, pero ahora mismo no se pueden calcular: {problem}.";
+        // Without a location nothing can be planned; without the ISS orbit, the Moon and the planets still can.
+        if (_observers.Last is null && _alerts.Problem is { } blocking)
+            return $"Avisos activados, pero ahora mismo no se pueden calcular: {blocking}.";
+        var problem = _alerts.Problem is { } p ? $"\n\nAhora mismo: {p}." : "";
         if (_alerts.Pending.FirstOrDefault() is not { } next)
-            return $"Avisos activados. La ISS no tiene pasos visibles en los próximos {_alerts.PlanningDays} días; se vuelve a mirar cada vez que abres la app.";
+            return $"Avisos activados. Nada que avisar en los próximos {_alerts.PlanningDays} días: ni pasos visibles de la ISS " +
+                $"ni la Luna junto a un planeta. Se vuelve a mirar cada día y cada vez que abres la app.{problem}";
         var at = TimeZoneInfo.ConvertTime(next.NotifyAt, TimeZoneInfo.Local);
-        return $"Avisos activados. Próximo aviso: {at.ToString("ddd d HH:mm", SpanishCulture)}\n\n{next.Body}";
+        return $"Avisos activados. Próximo aviso: {at.ToString("ddd d HH:mm", SpanishCulture)}\n\n{next.Body}{problem}";
     }
 
     private static readonly CultureInfo SpanishCulture = CultureInfo.GetCultureInfo("es-ES");
@@ -189,7 +192,7 @@ public partial class HudPage : ContentPage
         if (LaunchRequests.Take() is not { } name || _catalog.Targets.FirstOrDefault(t => t.Name == name) is not { } target)
             return;
         SelectTarget(target);
-        // The ISS chip is the last one, off screen on most phones: show which target the HUD is guiding to.
+        // The chip may be off screen (the ISS is the last one on most phones): show which target the HUD is guiding to.
         await TargetScroll.ScrollToAsync(_chips[target], ScrollToPosition.MakeVisible, false);
     }
 

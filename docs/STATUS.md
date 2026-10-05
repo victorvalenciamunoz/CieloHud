@@ -502,6 +502,36 @@ La validación de los avisos de la ISS contra un paso real (paso 4) sigue pendie
   Más adelante, el 15 abr 2027: «Esta noche, la Luna junto a Júpiter (4°) y Marte (4°) · mejor hacia las 21:30 al SE».
 - `dotnet test` 396 tests; build Android 0 avisos (la app aún no usa los avisos de conjunción).
 
+### Paso 7 — Avisos de conjunción en la app (2026-10-05)
+
+- `PassAlertService` pasa a llamarse **`AlertService`**: planifica las conjunciones de los próximos 3 días y los pasos de la ISS, y guarda los dos tipos
+  en **una lista ordenada por hora**. Sigue habiendo una sola alarma de aviso (AlarmSteps sin cambios) más la de recálculo. Decisión 027.
+- `ScheduledAlert` gana `Kind` (`Pass` = 0, `Conjunction`) y, para las conjunciones, el planeta y el mejor momento de cada una (`NotifiedConjunction`),
+  que se apuntan como avisadas al publicarse y no se repiten. Los avisos guardados por la versión anterior, sin `Kind`, se leen como pasos.
+- **Sin órbita de la ISS (sin red), las conjunciones se planifican igual**: Diagnóstico y el resumen de AVISOS lo dicen, y el recálculo se adelanta a 3 h.
+  Sin ubicación no se puede planificar nada, como antes.
+- Android: canal **«Luna y planetas»** (`moon_planets`, importancia normal: suena, sin banner), icono de luna creciente `ic_stat_moon`,
+  la notificación se va sola al cerrarse la ventana, y al tocarla el HUD guía a la **Luna**. Ids de notificación de conjunciones negativos, para no chocar con los de los pasos.
+- AVISOS: si no hay nada en 3 días, «ni pasos visibles de la ISS ni la Luna junto a un planeta».
+- Diagnóstico (Debug): **«PROBAR CONJUNCIÓN (30 s)»** con la próxima conjunción real (busca hasta 60 días) y su texto de verdad.
+- Validado en el OPPO (Android 16), instalando sobre la versión anterior:
+
+  | Prueba | Resultado |
+  |---|---|
+  | Activar AVISOS | «Próximo aviso: lun 5 22:00 · Mañana temprano, la Luna junto a Júpiter (2°) · mejor hacia las 7:45 al E»: el mismo que da Core (paso 6) |
+  | `dumpsys alarm` | `ALERT` pedida a las 21:00 con ventana de 1 h (AlarmSteps: acaba a las 22:00), `exactAllowReason=permission`; recálculo al día siguiente |
+  | Preferencias | el aviso guardado con `Kind:1` y `Conjunctions:[{Planet:Jupiter, Best:…}]` |
+  | «PROBAR CONJUNCIÓN» con el proceso muerto (`am kill`) | la alarma arranca la app y publica a +3 s del objetivo (arranque en Debug); canal `moon_planets`, importancia 3, caduca al cerrarse la ventana (7:45 del día siguiente) |
+  | Tocarla con el HUD en Venus | el HUD pasa a la Luna; la notificación se borra |
+  | «PROBAR AVISO» (ISS) | sin cambios: canal `iss_passes`, importancia 4, al tocar → ISS |
+  | Canales | «Pasos de la ISS» (4) y «Luna y planetas» (3) |
+
+- ColorOS pinta el icono de la app en la notificación (`oplus_smallicon_use_app_icon`), no el monocromo, igual que con la ISS.
+- Capturas: `docs/images/conjuncion-notificacion.png`, `docs/images/conjuncion-diagnostico.png` y `docs/images/conjuncion-hud-luna.png`, recortadas sin el pie con la ubicación.
+- Sin probar en el móvil: el camino sin red (habría que borrar la caché del TLE y cortar la red), y el aviso real de esta noche a las 22:00, que queda armado.
+- Pendiente (no bloquea): contraste con Stellarium, que hará el usuario en la web.
+- `dotnet test` 396 tests; build Android 0 avisos.
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.

@@ -88,12 +88,15 @@
                 <Label Grid.Row="5" Text="Última alarma" Style="{StaticResource Key}" VerticalOptions="Start" />
                 <Label Grid.Row="5" Grid.Column="1" x:Name="AlertsLastWakeLabel" Text="–" Style="{StaticResource Value}" FontSize="14" />
             </Grid>
-            <!-- Debug builds only: posts the next alert through real alarms, to try it with the app closed. -->
+            <!-- Debug builds only: posts the next alert (ISS pass or conjunction) through real alarms, to try it with the app closed. -->
             <FlexLayout x:Name="TestAlertButtons" Wrap="Wrap" Margin="0,8,0,0" IsVisible="False">
                 <Button Text="PROBAR AVISO (30 s)" CommandParameter="30" Clicked="OnTestAlertClicked" Margin="0,0,8,8"
                         FontFamily="ChakraPetch" FontSize="12" TextColor="{DynamicResource HudTextSoft}" BackgroundColor="Transparent"
                         BorderColor="{DynamicResource HudTextDim}" BorderWidth="1" CornerRadius="6" Padding="12,6" />
                 <Button Text="(5 min)" CommandParameter="300" Clicked="OnTestAlertClicked" Margin="0,0,8,8"
+                        FontFamily="ChakraPetch" FontSize="12" TextColor="{DynamicResource HudTextSoft}" BackgroundColor="Transparent"
+                        BorderColor="{DynamicResource HudTextDim}" BorderWidth="1" CornerRadius="6" Padding="12,6" />
+                <Button Text="PROBAR CONJUNCIÓN (30 s)" CommandParameter="30" Clicked="OnTestConjunctionClicked" Margin="0,0,8,8"
                         FontFamily="ChakraPetch" FontSize="12" TextColor="{DynamicResource HudTextSoft}" BackgroundColor="Transparent"
                         BorderColor="{DynamicResource HudTextDim}" BorderWidth="1" CornerRadius="6" Padding="12,6" />
                 <Button Text="RECÁLCULO (30 s)" Clicked="OnTestRefreshClicked" Margin="0,0,8,8"

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Status bar icon for the Moon and the planets: a monochrome crescent (a disc of radius 9 with a bite of radius 7). Android tints it. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="#FFFFFFFF" android:pathData="M12,3A9,9 0 1,0 21,12A7,7 0 0,1 12,3Z" />
+</vector>
