@@ -1,4 +1,5 @@
 using System.Globalization;
+using CieloHud.App.Hud;
 using CieloHud.App.Services;
 using CieloHud.Core.Guidance;
 using CieloHud.Core.Sky;
@@ -18,6 +19,7 @@ public partial class DiagnosticsPage : ContentPage
     private readonly ILocationSource _location;
     private readonly ISolarSystemService _solarSystem;
     private readonly ISunService _sun;
+    private readonly NightMode _nightMode;
     private readonly GuidanceCalculator _guidance = new();
 
     private Observer? _observer;
@@ -27,13 +29,14 @@ public partial class DiagnosticsPage : ContentPage
     private DateTimeOffset _lastUiUpdate;
     private IDispatcherTimer? _skyTimer;
 
-    public DiagnosticsPage(IPointingSource pointing, ILocationSource location, ISolarSystemService solarSystem, ISunService sun)
+    public DiagnosticsPage(IPointingSource pointing, ILocationSource location, ISolarSystemService solarSystem, ISunService sun, NightMode nightMode)
     {
         InitializeComponent();
         _pointing = pointing;
         _location = location;
         _solarSystem = solarSystem;
         _sun = sun;
+        _nightMode = nightMode;
     }
 
     protected override async void OnAppearing()
@@ -113,7 +116,7 @@ public partial class DiagnosticsPage : ContentPage
                 PointingAccuracy.Unreliable => "NO FIABLE · haz un 8 con el móvil",
                 _ => "desconocida",
             };
-            AccuracyLabel2.TextColor = _pointing.Accuracy.NeedsCalibration() ? Color.FromArgb("#FF5C5C") : Color.FromArgb("#E8EEF4");
+            AccuracyLabel2.TextColor = _pointing.Accuracy.NeedsCalibration() ? _nightMode.Palette.Alert : _nightMode.Palette.Text;
             AzimuthLabel.Text = $"{reading.Pointing.AzimuthDegrees.ToString("F1", Culture)}°  {Cardinal(reading.Pointing.CardinalPoint())}";
             AltitudeLabel.Text = $"{reading.Pointing.AltitudeDegrees.ToString("F1", Culture)}°";
             RollLabel.Text = $"{reading.RollDegrees.ToString("F0", Culture)}°";

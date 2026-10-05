@@ -47,6 +47,8 @@ public static class MauiProgram
 
 		// HUD
 		builder.Services.AddSingleton<TargetCatalog>();
+		builder.Services.AddSingleton(Preferences.Default);
+		builder.Services.AddSingleton<NightMode>();
 		builder.Services.AddTransient<HudPage>();
 		builder.Services.AddTransient<DiagnosticsPage>();
 

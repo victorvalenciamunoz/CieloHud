@@ -23,6 +23,7 @@ public partial class HudPage : ContentPage
     private readonly TargetCatalog _catalog;
     private readonly IConstellationLocator _constellations;
     private readonly IConstellationFigureLocator _figures;
+    private readonly NightMode _nightMode;
     private readonly GuidanceCalculator _guidance = new();
     private readonly HudDrawable _drawable = new();
     private readonly Dictionary<SkyTarget, Button> _chips = new();
@@ -46,7 +47,7 @@ public partial class HudPage : ContentPage
     private IReadOnlyList<IReadOnlyList<HorizontalPosition>> _figure = [];
 
     public HudPage(IPointingSource pointing, ILocationSource location, TargetCatalog catalog,
-        IConstellationLocator constellations, IConstellationFigureLocator figures)
+        IConstellationLocator constellations, IConstellationFigureLocator figures, NightMode nightMode)
     {
         InitializeComponent();
         _pointing = pointing;
@@ -54,9 +55,11 @@ public partial class HudPage : ContentPage
         _catalog = catalog;
         _constellations = constellations;
         _figures = figures;
+        _nightMode = nightMode;
         _target = catalog.Targets[0];
         Canvas.Drawable = _drawable;
         BuildTargetBar();
+        ApplyPalette();
     }
 
     private void BuildTargetBar()
@@ -92,11 +95,26 @@ public partial class HudPage : ContentPage
             StyleChip(chip, target == _target);
     }
 
-    private static void StyleChip(Button chip, bool selected)
+    private void StyleChip(Button chip, bool selected)
     {
-        chip.BackgroundColor = selected ? Color.FromArgb("#1F6F4A") : Colors.Transparent;
-        chip.TextColor = selected ? Color.FromArgb("#7CFFB2") : Color.FromArgb("#8FA0B0");
-        chip.BorderColor = selected ? Color.FromArgb("#7CFFB2") : Color.FromArgb("#5A6A7A");
+        var p = _nightMode.Palette;
+        chip.BackgroundColor = selected ? p.LockedFill : Colors.Transparent;
+        chip.TextColor = selected ? p.Locked : p.TextMuted;
+        chip.BorderColor = selected ? p.Locked : p.TextDim;
+    }
+
+    /// <summary>Colors that are not <c>DynamicResource</c>s: the drawable, the chips and the night button.</summary>
+    private void ApplyPalette()
+    {
+        _drawable.Palette = _nightMode.Palette;
+        StyleChips();
+        StyleChip(NightButton, _nightMode.IsOn);
+    }
+
+    private void OnNightClicked(object? sender, EventArgs e)
+    {
+        _nightMode.Toggle();
+        ApplyPalette();
     }
 
     private async void SelectTarget(SkyTarget? target)
