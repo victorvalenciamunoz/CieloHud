@@ -8,6 +8,11 @@ internal static class AlertWords
 {
     public static readonly CultureInfo Culture = CultureInfo.InvariantCulture;
 
+    // Own short names: the text must not depend on the system culture (invariant on some devices, and in the CI).
+    public static readonly string[] Months = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+
+    public static readonly string[] Weekdays = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
+
     // Halves up, as people round (2.5 min is "3 min"), not to even.
     public static int Round(double value) => (int)Math.Round(value, MidpointRounding.AwayFromZero);
 

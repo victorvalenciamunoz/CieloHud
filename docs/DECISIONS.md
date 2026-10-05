@@ -228,3 +228,14 @@ Formato: contexto → decisión → alternativas descartadas.
   - **Texto**: «Mañana temprano, Marte junto a Júpiter (1°), lo más cerca en estas semanas · mejor hacia las 7:30 al S · juntos del 9 al 23 nov». El intervalo es para quien no pueda esa noche (nubes): se ven juntos muchas más. El más débil «junto al» más brillante, que es el que se busca.
   - **Al tocar, el planeta más brillante** (`ScheduledAlert.Guide`). Mismo canal, «Luna y planetas».
 - Alternativas: agrupar con la Luna como dos planetas a la vez (descartada: mezclaría «la Luna junto a…» con una pareja de planetas en un texto ilegible); repetir el aviso la primera y la última noche (descartada: el intervalo en el texto basta); canal propio para los planetas (descartado: es la misma clase de aviso, y son uno o dos al año).
+
+## 030 — Pantalla de próximos eventos: calculada al abrirla, con las reglas de los avisos
+- Contexto: los avisos dicen lo que hay cuando toca; el usuario quiere poder ver lo que viene («¿qué hay esta semana?»). Lo planificado para los avisos solo existe con AVISOS activado, cubre 3 días y quita lo ya avisado.
+- Decisión:
+  - **Se calcula al abrir la pantalla**, con los mismos buscadores, y funciona con los avisos apagados: conjunciones a 30 días (1-3 al mes, la lista no se llena) y pasos de la ISS a 3 días (más allá el TLE no es fiable; decisión 021).
+  - **La hora del aviso de cada evento sale de los mismos planificadores** (`UpcomingEvents.Build` en Core), con lo ya avisado. Lo que dice la lista y lo que hace el móvil no pueden divergir.
+  - **Textos absolutos** («≈7:45», «lun 2 nov»), no relativos al aviso («mañana temprano»), porque la lista se lee en cualquier momento. Días y meses con nombres propios, sin depender de la cultura del sistema.
+  - **Botón EVENTOS en el sitio de las coordenadas** del pie del HUD (opción elegida por el usuario). Las coordenadas ya estaban en Diagnóstico y así no salen en las capturas. El aviso de «sin ubicación», que iba en ese pie, pasa al HUD.
+  - **Al tocar un evento, el HUD guía a su objetivo**, por el mismo camino que al tocar un aviso (`LaunchRequests`).
+  - El muestreo de conjunciones pasa a **pasos fijos** (:00, :05… UTC): el resultado ya no depende del instante del cálculo.
+- Alternativas: mostrar los avisos pendientes (descartada: vacía con los avisos apagados y solo 3 días); cuarto botón en el pie (descartada: no cabe bien); entrar desde el diálogo de AVISOS (descartada: escondida); una lista más larga, de 60-90 días (pospuesto: 30 días bastan para planear y la búsqueda sigue siendo rápida).

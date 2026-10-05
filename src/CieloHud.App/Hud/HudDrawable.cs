@@ -292,7 +292,7 @@ public sealed class HudDrawable : IDrawable
 
     private string StatusText()
     {
-        if (!Frame.HasLocation) return "Buscando tu posición…";
+        if (!Frame.HasLocation) return Frame.LocationFailed ? "Sin ubicación · activa el GPS y da permiso" : "Buscando tu posición…";
         if (Frame.Pointing is null) return "Esperando sensores…";
         if (Frame.Target is null) return Frame.Unavailable ?? "Objetivo no disponible";
         return "";

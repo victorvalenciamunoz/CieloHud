@@ -601,6 +601,26 @@ Pasos: 8) buscador en Core y validación; 9) aviso, texto y app.
 - Capturas: `docs/images/planetas-notificacion.png` y `docs/images/planetas-hud-jupiter.png`, recortadas sin la ubicación.
 - `dotnet test` 426 tests; build Android 0 avisos.
 
+### Paso 10 — Pantalla de próximos eventos (2026-10-05)
+
+- Idea del usuario: ver lo que viene sin esperar al aviso. Botón **EVENTOS** en el pie del HUD, en el sitio de las coordenadas (están en Diagnóstico,
+  y así no salen en las capturas). Si no hay ubicación, ahora lo dice el propio HUD: «Sin ubicación · activa el GPS y da permiso». Decisión 030.
+- Core `Events/`: `SkyEvent` (clase, cuándo mirar, hasta cuándo, objetivo del HUD, hora, título, detalle y hora del aviso) y `UpcomingEvents`:
+  `Build` junta pasos visibles y conjunciones y les pone la hora de su aviso con **los mismos planificadores** que los avisos (así la lista y las
+  notificaciones no se contradicen); `DayLabel` («Hoy», «Mañana», «lun 2 nov») y `AlertLabel` («Aviso el dom 1 nov a las 22:00»). Textos absolutos,
+  no relativos al aviso: «≈7:45 · La Luna junto a Júpiter (2°) · al E»; para la ISS, «21:43 · Pasa la ISS · 5 min · aparece por el NO, máximo 67° al SE».
+- **Muestreo de conjunciones en pasos fijos** (:00, :05… UTC): antes empezaba en el instante del cálculo y la misma conjunción salía a las 7:44 o a las 7:45
+  según cuándo se calculara. Ahora el resultado no depende de eso. Test nuevo.
+- App: `AlertService.UpcomingAsync` calcula al abrir la pantalla, también con los avisos apagados: conjunciones a **30 días** y pasos de la ISS a **3**
+  (más allá el TLE no es fiable). `EventsPage`, agrupada por día, con la paleta del modo nocturno; al tocar un evento el HUD guía a su objetivo.
+  La línea del aviso solo aparece con AVISOS activado.
+- Tests: paso, conjunción con la Luna y pareja de planetas (hora, título, detalle, objetivo y aviso), orden, ya avisados sin aviso, paso en curso sí y acabado no,
+  sin órbita de la ISS, etiquetas de día (también con el cambio de hora) y de aviso.
+- Validado en el OPPO: lista de hoy («Mañana ≈7:45 · La Luna junto a Júpiter (2°) · al E · Aviso hoy a las 22:00», y el 2 y 3 nov la Luna con Marte y con Júpiter;
+  sin pasos de la ISS en 3 días, como en la Fase 2); tocar un evento con el HUD en Venus vuelve al HUD en la Luna; modo nocturno en rojo sin blancos.
+  Captura: `docs/images/eventos.png`.
+- `dotnet test` 442 tests; build Android 0 avisos.
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.

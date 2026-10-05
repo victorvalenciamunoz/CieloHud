@@ -40,9 +40,9 @@ public static class PassAlertText
     }
 
     // Whole minutes of visible time, at least one: a short pass is still worth going out for.
-    private static int Minutes(VisiblePass pass) => Math.Max(1, Round(pass.VisibleDuration.TotalMinutes));
+    internal static int Minutes(VisiblePass pass) => Math.Max(1, Round(pass.VisibleDuration.TotalMinutes));
 
-    private static string Where(VisiblePass pass)
+    internal static string Where(VisiblePass pass)
     {
         var start = pass.VisibleStart.Position;
         // Rising from the horizon you look low in that direction; emerging from shadow it lights up mid-sky.

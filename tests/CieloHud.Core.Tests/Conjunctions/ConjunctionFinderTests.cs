@@ -159,7 +159,19 @@ public class ConjunctionFinderTests
 
         var conjunction = Assert.Single(CreateFinder().FindWithMoon(Madrid, from, Noon.AddDays(1), Utc));
 
-        Assert.Equal(from, conjunction.Start.Instant);
+        Assert.Equal(At(21, 5), conjunction.Start.Instant); // the first whole step after "from"
+    }
+
+    [Fact]
+    public void SamplesOnWholeSteps_SameResultWhenSearchedAtAnyMinute()
+    {
+        _sky.Planet(CelestialBody.Jupiter, Approach(At(22, 2), 1));
+
+        var fromNoon = Assert.Single(CreateFinder().FindWithMoon(Madrid, Noon, Noon.AddDays(1), Utc));
+        var fromOdd = Assert.Single(CreateFinder().FindWithMoon(Madrid, Noon.AddMinutes(3).AddSeconds(17), Noon.AddDays(1), Utc));
+
+        Assert.Equal(fromNoon, fromOdd);
+        Assert.Equal(At(22), fromNoon.Best.Instant);
     }
 
     [Fact]
