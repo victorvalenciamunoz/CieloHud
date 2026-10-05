@@ -465,7 +465,17 @@ La validación de los avisos de la ISS contra un paso real (paso 4) sigue pendie
   Quedan como tests de integración (tolerancia 0,05°).
 - Frecuencia con este criterio (sondeo de 12 meses desde Humanes de Madrid, oct 2026-oct 2027): 16 conjunciones en 15 noches, unas 1,3 al mes;
   10 con Júpiter, 5 con Marte, 1 con Venus, ninguna con Saturno (este año la Luna pasa a 6-7° de él). Detalle en la decisión 025.
-- Pendiente: contraste con **Stellarium** (no está instalado en esta máquina) y verlo en el cielo: la madrugada del 6 oct, hacia las 7:30, Luna y Júpiter a 2° al E, a ~45°.
+- **Contraste con Stellarium Web** (2026-10-05, el usuario; ubicación Humanes de Madrid, atmósfera activada, reloj en pausa), 6 oct 7:45:
+
+  | | Stellarium | CieloHud | Diferencia |
+  |---|---|---|---|
+  | Luna (acimut / altura) | 109,655° / 45,003° | 109,656° / 45,001° | 0,001° / 0,002° |
+  | Júpiter (acimut / altura) | 108,722° / 43,130° | 108,720° / 43,124° | 0,002° / 0,006° |
+  | Separación | 1,990° | 1,994° | 0,004° |
+  | Distancia a la Luna | 369 624 km | 369 645 km | 0,006 % |
+
+  Separación calculada con los acimut y alturas que muestra Stellarium. Parte de la diferencia puede venir de la ubicación (Stellarium no muestra sus coordenadas exactas).
+  Pendiente opcional: 3 nov 3:30 (3,07°) y 23 ene 23:00 (1,58°); y verlo en el cielo la madrugada del 6 oct, hacia las 7:30, Luna y Júpiter a 2° al E, a ~45°.
 - `dotnet test` 349 tests; build Android 0 avisos (la app aún no usa `Conjunctions/`).
 
 ### Paso 6 — Cuándo avisar de una conjunción y con qué texto (2026-10-05)
@@ -529,7 +539,7 @@ La validación de los avisos de la ISS contra un paso real (paso 4) sigue pendie
 - ColorOS pinta el icono de la app en la notificación (`oplus_smallicon_use_app_icon`), no el monocromo, igual que con la ISS.
 - Capturas: `docs/images/conjuncion-notificacion.png`, `docs/images/conjuncion-diagnostico.png` y `docs/images/conjuncion-hud-luna.png`, recortadas sin el pie con la ubicación.
 - Sin probar en el móvil: el camino sin red (habría que borrar la caché del TLE y cortar la red), y el aviso real de esta noche a las 22:00, que queda armado.
-- Pendiente (no bloquea): contraste con Stellarium, que hará el usuario en la web.
+- Contrastado con Stellarium Web el 6 oct a las 7:45: separación 1,990° frente a 1,994° (tabla en el paso 5).
 - `dotnet test` 396 tests; build Android 0 avisos.
 
 ## Mejoras fuera de fase
