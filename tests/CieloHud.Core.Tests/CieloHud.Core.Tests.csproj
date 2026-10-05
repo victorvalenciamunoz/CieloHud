@@ -23,6 +23,7 @@
     <Using Include="CieloHud.Core.Guidance" />
     <Using Include="CieloHud.Core.Stars" />
     <Using Include="CieloHud.Core.Alerts" />
+    <Using Include="CieloHud.Core.Conjunctions" />
   </ItemGroup>
 
   <ItemGroup>

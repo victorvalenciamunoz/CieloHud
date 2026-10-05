@@ -427,6 +427,47 @@ Los «eventos destacados» quedan fuera de este primer paso.
 - Sin probar: el cambio de zona horaria (requiere cambiarla en el sistema) y el comportamiento tras reiniciar con la batería en «Modo inteligente», el valor por defecto de ColorOS.
 - `dotnet test` 318 tests; build Android 0 avisos.
 
+### Eventos destacados: conjunciones Luna–planeta
+
+Plan acordado (2026-10-05): un aviso cuando la Luna pase cerca de un planeta brillante, con los dos sobre el horizonte y de noche;
+al tocarlo, el HUD guía a la Luna. Mismo interruptor AVISOS, mismas horas de silencio y la misma alarma única que la ISS.
+Criterio: separación ≤ 5°, los dos a ≥ 10°, Sol ≤ -6°; Venus, Marte, Júpiter y Saturno (Mercurio fuera). Pasos:
+5) buscador en Core y validación; 6) cuándo avisar y texto en Core; 7) integración en la app y prueba en el móvil.
+La validación de los avisos de la ISS contra un paso real (paso 4) sigue pendiente, aparte.
+
+### Paso 5 — Buscador de conjunciones (2026-10-05)
+
+- Core `Conjunctions/`: `ConjunctionCriteria` (≤ 5°, ≥ 10°, cómodo a ≥ 20°, Sol ≤ -6°, muestreo 5 min, mismo acercamiento en < 1 día),
+  `ConjunctionPoint` (Luna, planeta y separación en un instante), `MoonPlanetConjunction` (planeta; inicio, mejor momento, máxima aproximación y fin de la ventana),
+  `IConjunctionFinder` y `ConjunctionFinder`. Decisión 025.
+  - Separación **topocéntrica** entre las posiciones aparentes (con refracción), las que ve el ojo: la paralaje de la Luna llega a 1°.
+  - **Mejor momento**: mínima separación entre las muestras con los dos a ≥ 20° (si no hay, entre todas), y dentro de la parte de la tarde
+    (antes de la medianoche local) si la ventana la tiene.
+  - Si el mismo planeta sale de madrugada y al anochecer del mismo día, se queda la de menor separación.
+- Consola: `--conjunctions <días>` (1-400) lista ventana, mejor momento y máxima aproximación en hora local. Solo formato.
+- Tests unitarios con un cielo falso: ventana y mejor momento, día y crepúsculo civil, separación o altura insuficientes, preferencia por altura cómoda,
+  preferencia por la tarde (en hora local, no UTC), ventana solo de madrugada, recorte en `desde` y ventana completa tras `hasta`, madrugada y tarde del mismo acercamiento,
+  dos planetas la misma noche, Mercurio fuera por defecto, criterios inválidos.
+- **Validación contra JPL Horizons** (Madrid, acimut/altura aparentes con refracción de la Luna y el planeta, Sol sin refracción, cada 5 min por toda la ventana ±30 min;
+  la separación se calcula igual a partir de los dos acimut/altura). Las 7 conjunciones del 5 oct 2026 al 2 feb 2027, en hora local:
+
+  | Noche | Planeta | Ventana CieloHud / Horizons | Mejor momento | Separación CieloHud / Horizons | Máx. aproximación (más bajo) | Máx. dif. en la ventana |
+  |---|---|---|---|---|---|---|
+  | 6 oct | Júpiter | 4:50-7:45 / igual | 7:45, Luna a 45° al E | 1,995° / 1,997° | 7:45 (43°) | 0,0016° |
+  | 2 nov | Marte | 4:50-7:15 / igual | 7:15, 66° al S | 4,092° / 4,093° | 7:15 (64°) | 0,0009° |
+  | 3 nov | Júpiter | 2:35-7:15 / igual | 3:30, 20° al E | 3,065° / 3,064° | 2:35, 2,60° (10°) | 0,0014° |
+  | 7 nov | Venus | 7:15-7:20 / igual | 7:20, 13° al SE | 1,982° / 1,987° | 7:20 (12°) | 0,0044° |
+  | 30 nov | Júpiter | 0:45-7:45 / igual | 7:45, 57° al SO | 1,862° / 1,863° | 7:45 (57°) | 0,0016° |
+  | 27 dic | Júpiter | 23:20-23:45 / igual | 23:20, 10° al E | 4,747° / 4,746° | 23:20 (10°) | 0,0012° |
+  | 23 ene | Júpiter | 20:55-8:00 / igual | 23:00, 33° al E | 1,579° / 1,580° | 23:00 (33°) | 0,0013° |
+
+  Ventanas, mejor momento y máxima aproximación coinciden al minuto aplicando el mismo criterio a los datos de Horizons; la separación, ≤ 0,0044° en todas las muestras.
+  Quedan como tests de integración (tolerancia 0,05°).
+- Frecuencia con este criterio (sondeo de 12 meses desde Humanes de Madrid, oct 2026-oct 2027): 16 conjunciones en 15 noches, unas 1,3 al mes;
+  10 con Júpiter, 5 con Marte, 1 con Venus, ninguna con Saturno (este año la Luna pasa a 6-7° de él). Detalle en la decisión 025.
+- Pendiente: contraste con **Stellarium** (no está instalado en esta máquina) y verlo en el cielo: la madrugada del 6 oct, hacia las 7:30, Luna y Júpiter a 2° al E, a ~45°.
+- `dotnet test` 349 tests; build Android 0 avisos (la app aún no usa `Conjunctions/`).
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.

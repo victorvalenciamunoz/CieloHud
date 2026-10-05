@@ -1,4 +1,5 @@
 using CieloHud.Console;
+using CieloHud.Core.Conjunctions;
 using CieloHud.Core.Passes;
 using CieloHud.Core.Satellites;
 using CieloHud.Core.SolarSystem;
@@ -28,6 +29,9 @@ var cacheDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialF
 using var http = new HttpClient();
 http.DefaultRequestHeaders.UserAgent.ParseAdd("CieloHud/0.1");
 var tleProvider = new CelesTrakTleProvider(http, cacheDirectory);
+
+if (options.ConjunctionsDays is { } conjunctionDays)
+    return PrintConjunctions(conjunctionDays);
 
 return options.PassesDays is { } days
     ? await PrintPassesAsync(days)
@@ -88,5 +92,18 @@ async Task<int> PrintPassesAsync(int days)
     System.Console.WriteLine(PassTableFormatter.Header(options.Observer, from, to, criteria));
     System.Console.WriteLine(PassTableFormatter.Table(passes));
     System.Console.WriteLine(SkyTableFormatter.TleInfo(tle, from));
+    return 0;
+}
+
+int PrintConjunctions(int days)
+{
+    var from = options.Instant;
+    var to = from.AddDays(days);
+    var finder = new ConjunctionFinder(new AstronomyEngineSolarSystemService(), new AstronomyEngineSunService());
+
+    var conjunctions = finder.Find(options.Observer, from, to, TimeZoneInfo.Local);
+
+    System.Console.WriteLine(ConjunctionTableFormatter.Header(options.Observer, from, to, finder.Criteria));
+    System.Console.WriteLine(ConjunctionTableFormatter.Table(conjunctions));
     return 0;
 }
