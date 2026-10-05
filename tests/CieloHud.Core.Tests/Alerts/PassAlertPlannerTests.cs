@@ -165,6 +165,32 @@ public class PassAlertPlannerTests
     }
 
     [Theory]
+    [InlineData(0, 24, 72)]   // no retry interval
+    [InlineData(6, 3, 72)]    // retry later than the daily refresh
+    [InlineData(3, 72, 72)]   // refresh as long as the horizon: a pass could enter it after its alert time
+    public void InvalidRefreshSettings_Throw(int retryHours, int refreshHours, int horizonHours)
+    {
+        var settings = new AlertSettings
+        {
+            RetryInterval = TimeSpan.FromHours(retryHours),
+            RefreshInterval = TimeSpan.FromHours(refreshHours),
+            Horizon = TimeSpan.FromHours(horizonHours),
+        };
+
+        Assert.ThrowsAny<ArgumentException>(() => new PassAlertPlanner(settings));
+    }
+
+    [Fact]
+    public void DefaultRefresh_DailyWithinTheThreeDayHorizon()
+    {
+        var settings = AlertSettings.Default;
+
+        Assert.Equal(TimeSpan.FromDays(1), settings.RefreshInterval);
+        Assert.Equal(TimeSpan.FromHours(3), settings.RetryInterval);
+        Assert.Equal(TimeSpan.FromDays(3), settings.Horizon);
+    }
+
+    [Theory]
     [InlineData("2026-10-14 23:59:59", false)]
     [InlineData("2026-10-15 00:00", true)]
     [InlineData("2026-10-15 06:59:59", true)]

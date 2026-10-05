@@ -8,6 +8,8 @@
 	<!-- Pass alerts (phase 4): post notifications; alarms at the exact minute if the user allows it in "Alarmas y recordatorios". -->
 	<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 	<uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+	<!-- Plan the alerts again after a reboot, which wipes the alarms. -->
+	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 	<uses-feature android:name="android.hardware.location.gps" android:required="false" />
 	<uses-feature android:name="android.hardware.sensor.compass" android:required="false" />
 	<uses-feature android:name="android.hardware.sensor.accelerometer" android:required="false" />

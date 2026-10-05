@@ -230,7 +230,7 @@ public partial class HudPage : ContentPage
             // For the alerts, planned in the background without reading the location.
             _observers.Save(f.Observer);
             if (_alerts.IsOn)
-                _ = Task.Run(_alerts.RescheduleAsync);
+                _ = Task.Run(() => _alerts.RescheduleAsync("nueva ubicación"));
             _pointing.DeclinationDegrees = MagneticDeclination.Degrees(f.Observer, DateTimeOffset.UtcNow);
             FooterLabel.Text = $"{f.Observer.LatitudeDegrees.ToString("F3", Culture)}, {f.Observer.LongitudeDegrees.ToString("F3", Culture)}  ·  decl {_pointing.DeclinationDegrees.ToString("+0.0;-0.0", Culture)}°";
         }

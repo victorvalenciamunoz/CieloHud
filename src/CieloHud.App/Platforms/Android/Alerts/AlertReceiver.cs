@@ -12,6 +12,7 @@ public sealed class AlertReceiver : BroadcastReceiver
 {
     public const string AlertAction = "com.cielohud.app.ALERT";
     public const string TestAction = "com.cielohud.app.TEST_ALERT";
+    public const string RefreshAction = "com.cielohud.app.REFRESH_ALERTS";
 
     private const string NotifyAtExtra = "notify_at";
     private const string VisibleStartExtra = "visible_start";
@@ -33,6 +34,8 @@ public sealed class AlertReceiver : BroadcastReceiver
                     alerts.OnTestAlarm(test);
                 else if (intent.Action == AlertAction)
                     await alerts.OnAlarmAsync();
+                else if (intent.Action == RefreshAction)
+                    await alerts.RescheduleAsync("recálculo diario");
             }
             catch (Exception ex)
             {

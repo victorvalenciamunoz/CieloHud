@@ -406,6 +406,27 @@ Los «eventos destacados» quedan fuera de este primer paso.
   Para la prueba se dejó CieloHud en «Permitir actividad en segundo plano» (ajustes de batería de ColorOS); no cambia la ventana de las alarmas.
 - `dotnet test` 314 tests; build Android 0 avisos.
 
+### Paso 3 — Avisos con la app cerrada: recálculo diario y eventos del sistema (2026-10-05)
+
+- Core `AlertSettings`: `RefreshInterval` (1 día) y `RetryInterval` (3 h), validados frente al horizonte. Tests.
+- App: alarma de recálculo inexacta 24 h después de cada planificación (3 h si falló). `SystemEventsReceiver`: `BOOT_COMPLETED`, `MY_PACKAGE_REPLACED`,
+  permiso de alarmas exactas concedido y cambio de zona horaria. Permiso `RECEIVE_BOOT_COMPLETED`. Historial de las últimas planificaciones con su motivo. Decisión 024.
+- Diagnóstico: «Calculado» muestra el historial (la más reciente arriba) y «Recálculo», la próxima planificación con la app cerrada. En Debug, «RECÁLCULO (30 s)».
+- Validado en el OPPO (Android 16), con CieloHud en «Permitir actividad en segundo plano» (ajustes de batería de ColorOS):
+
+  | Prueba | Resultado |
+  |---|---|
+  | Instalar la actualización con la app cerrada | `MY_PACKAGE_REPLACED` → «tras actualizar la app»; recálculo armado para el día siguiente |
+  | «RECÁLCULO (30 s)» y cerrar la app desde recientes | la alarma arranca el proceso → «recálculo diario» |
+  | «Cerrar» en recientes | proceso muerto, app no detenida, alarmas intactas |
+  | «Forzar detención» | alarmas borradas y app detenida; al abrirla, todo se vuelve a armar (y Android 15+ le envía `BOOT_COMPLETED`) |
+  | `adb reboot` y desbloquear | ColorOS entrega `BOOT_COMPLETED` ~1 min después del desbloqueo → «tras reiniciar»; recálculo armado |
+
+  Comprobado con `logcat` («Alerts planned again after …», «Start proc … for broadcast SystemEventsReceiver»), `dumpsys alarm` y las preferencias de la app (`run-as`).
+- Tiempos en Debug: 7 s para planificar tras actualizar; 33 s tras reiniciar, con el móvil recién arrancado (límite de Android: 60 s).
+- Sin probar: el cambio de zona horaria (requiere cambiarla en el sistema) y el comportamiento tras reiniciar con la batería en «Modo inteligente», el valor por defecto de ColorOS.
+- `dotnet test` 318 tests; build Android 0 avisos.
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.

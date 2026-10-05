@@ -30,7 +30,7 @@ public partial class App : Application
 			_nightMode.ApplyToWindow();
 			// Opening the app re-arms the alerts: a fresher TLE, maybe a new place, or the user back from the exact-alarm settings.
 			if (_alerts.IsOn)
-				_ = Task.Run(_alerts.RescheduleAsync);
+				_ = Task.Run(() => _alerts.RescheduleAsync("al abrir la app"));
 		};
 		return window;
 	}

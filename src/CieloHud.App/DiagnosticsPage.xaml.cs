@@ -157,8 +157,11 @@ public partial class DiagnosticsPage : ContentPage
         AlertsStateLabel.Text = _alerts.IsOn ? "activados" : "desactivados";
         var platform = _alerts.Platform;
         AlertsPermissionsLabel.Text = $"notificaciones {YesNo(platform.NotificationsAllowed)} · alarmas exactas {YesNo(platform.ExactAlarmsAllowed)}";
-        AlertsPlannedLabel.Text = _alerts.PlannedAt is { } planned
-            ? $"{LocalTime(planned)} · {_alerts.PlanningDays} días" + (_alerts.Problem is { } problem ? $"\n{problem}" : "")
+        // Newest first: shows that the plannings with the app closed (daily, after a reboot…) do happen.
+        var history = _alerts.History;
+        AlertsPlannedLabel.Text = history.Count > 0
+            ? string.Join("\n", history.Reverse().Select(h => $"{LocalTime(h.At, "ddd d HH:mm:ss")} · {h.Reason}"))
+              + $"\n{_alerts.PlanningDays} días por delante" + (_alerts.Problem is { } problem ? $"\n{problem}" : "")
             : "nunca";
 
         var pending = _alerts.IsOn ? _alerts.Pending : [];
@@ -166,6 +169,7 @@ public partial class DiagnosticsPage : ContentPage
         AlertsLaterLabel.Text = pending.Count > 1
             ? string.Join("\n", pending.Skip(1).Select(a => $"{LocalTime(a.NotifyAt)} · {a.Body}"))
             : "–";
+        AlertsRefreshLabel.Text = _alerts.IsOn && _alerts.NextRefresh is { } refresh ? $"{LocalTime(refresh, "ddd d HH:mm:ss")}, con la app cerrada" : "–";
         AlertsLastWakeLabel.Text = _alerts.LastWake is var (fired, target)
             ? $"{LocalTime(fired, "HH:mm:ss")} · objetivo {LocalTime(target, "HH:mm:ss")} ({(fired - target).TotalSeconds.ToString("+0;-0", Culture)} s)"
             : "–";
@@ -176,6 +180,12 @@ public partial class DiagnosticsPage : ContentPage
         var seconds = int.Parse((string)((Button)sender!).CommandParameter, Culture);
         _alerts.ArmTest(TimeSpan.FromSeconds(seconds));
         StatusLabel.Text = $"Aviso de prueba a las {LocalTime(DateTimeOffset.UtcNow.AddSeconds(seconds), "HH:mm:ss")}: puedes cerrar la app.";
+    }
+
+    private void OnTestRefreshClicked(object? sender, EventArgs e)
+    {
+        _alerts.ArmRefreshTest(TimeSpan.FromSeconds(30));
+        StatusLabel.Text = "Recálculo en 30 s: cierra la app y mira «Calculado» al volver.";
     }
 
     private static string YesNo(bool value) => value ? "sí" : "NO";
