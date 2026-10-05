@@ -145,4 +145,56 @@ public class ConjunctionAlertPlannerTests
     {
         Assert.Empty(Plan(Morning));
     }
+    // ---- Two planets
+
+    // Mars and Jupiter at dawn on 16 Nov 2026, together 9-23 Nov.
+    private static readonly Conjunction MarsJupiter = PlanetPair(CelestialBody.Jupiter, CelestialBody.Mars,
+        "2026-11-16 01:35", "2026-11-16 07:25", "2026-11-16 07:30", "2026-11-09 02:00", "2026-11-23 01:20");
+
+    [Fact]
+    public void PlanetPair_DawnWindow_EveningBefore()
+    {
+        var alert = Assert.Single(Plan(Local("2026-11-15 09:00"), MarsJupiter));
+
+        Assert.Equal(Local("2026-11-15 22:00"), alert.NotifyAt);
+        Assert.Equal(CelestialBody.Jupiter, alert.Guide);
+    }
+
+    [Fact]
+    public void PlanetPair_OverlappingAMoonConjunction_SeparateAlerts()
+    {
+        // Same hours as a Moon conjunction: different things to look at, two alerts.
+        var moon = Conjunction(CelestialBody.Venus, "2026-11-16 02:00", "2026-11-16 06:00", "2026-11-16 07:30");
+
+        var alerts = Plan(Local("2026-11-15 09:00"), MarsJupiter, moon);
+
+        Assert.Equal(2, alerts.Count);
+        Assert.All(alerts, a => Assert.Single(a.Conjunctions));
+    }
+
+    [Fact]
+    public void PlanetPair_AlreadyNotified_NotAgainInTheSameApproach()
+    {
+        // Announced for the 16th; planning elsewhere moved the closest night to the 17th: still the same approach.
+        var moved = MarsJupiter with { Best = MarsJupiter.Best with { Instant = Local("2026-11-17 07:25") } };
+        NotifiedConjunction[] notified = [NotifiedConjunction.From(MarsJupiter)];
+
+        Assert.Empty(_planner.Plan([moved], Local("2026-11-15 09:00"), Madrid, notified));
+    }
+
+    [Fact]
+    public void PlanetPair_NotBlockedByTheMoonWithTheSamePlanet()
+    {
+        // The Moon next to Mars was announced the day before; Mars with Jupiter is something else.
+        NotifiedConjunction[] notified = [new(CelestialBody.Mars, Local("2026-11-15 07:00"))];
+
+        Assert.Single(_planner.Plan([MarsJupiter], Local("2026-11-15 09:00"), Madrid, notified));
+    }
+
+    [Fact]
+    public void NotifiedFrom_PlanetPair_KeepsBothPlanets()
+    {
+        Assert.Equal(new NotifiedConjunction(CelestialBody.Mars, Local("2026-11-16 07:25"), CelestialBody.Jupiter),
+            NotifiedConjunction.From(MarsJupiter));
+    }
 }

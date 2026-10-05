@@ -574,6 +574,33 @@ Pasos: 8) buscador en Core y validación; 9) aviso, texto y app.
   Juntos a ≤ 3° del 9 al 23 de noviembre (15 noches), igual que en el sondeo previo. En dos años solo hay otra: Venus–Marte el 8 sep 2028 (2,26°, juntos del 5 al 12).
 - `dotnet test` 414 tests; build Android 0 avisos.
 
+### Paso 9 — Avisos de planetas juntos (2026-10-05)
+
+- Core: `ConjunctionAlertPlanner` planifica también las parejas de planetas, **siempre solas** (no se agrupan con las de la Luna aunque coincidan en hora),
+  30 min antes de que se abra la ventana de su noche más cercana, o a las 22:00 de la víspera si es de madrugada. Decisión 029.
+  No se repiten en todo el acercamiento: misma pareja con la noche más cercana a menos de 30 días (`AlertSettings.SamePlanetPairTolerance`), por si
+  al planificar desde otro sitio la noche más cercana cambia. `NotifiedConjunction` guarda también el guía (por defecto la Luna, para leer lo guardado antes).
+- `ConjunctionAlertText`: «Marte junto a Júpiter» y «Mañana temprano, Marte junto a Júpiter (1°), lo más cerca en estas semanas · mejor hacia las 7:30 al S · juntos del 9 al 23 nov».
+  Meses abreviados propios (sin depender de la cultura del sistema); «del 28 oct al 5 nov» si cambia el mes; sin intervalo si es una sola noche.
+- App: `AlertService` planifica las dos clases de conjunción; `ScheduledAlert.Guide` dice a qué objetivo lleva el toque («Luna» o «Júpiter»; lo guardado antes, sin él, a la Luna).
+  Mismo canal «Luna y planetas», con la descripción ampliada. Diagnóstico (Debug): «PROBAR LUNA (30 s)» y «PROBAR PLANETAS (30 s)», cada uno con la próxima conjunción real de su clase.
+- Consola: `--conjunctions` lista los avisos de las dos clases.
+- Tests: planificador (pareja de madrugada → víspera; sola aunque coincida con la Luna; ya avisada → no se repite aunque cambie de noche; la Luna con el mismo planeta no la bloquea),
+  texto (el acordado, meses distintos, una sola noche, «Ahora» pasado el mejor momento, nombres de los guías) e integración: en la temporada de Madrid aparece
+  «15/11 22:00 · Mañana temprano, Marte junto a Júpiter (1°), lo más cerca en estas semanas · mejor hacia las 7:30 al S · juntos del 9 al 23 nov».
+- Validado en el OPPO (Android 16), instalando sobre la versión del paso 7:
+
+  | Prueba | Resultado |
+  |---|---|
+  | Actualizar con el aviso de esta noche armado | `MY_PACKAGE_REPLACED` → «tras actualizar la app»; el aviso de las 22:00 sigue, ahora con `"Guide":"Luna"`; alarma intacta |
+  | «PROBAR PLANETAS» con el proceso muerto | la alarma arranca la app (+2,5 s, arranque en Debug); canal `moon_planets`; el texto calculado en el móvil con su ubicación es el mismo que en Madrid |
+  | Tocarla | el HUD pasa a **Júpiter** («Júpiter, en Leo»); la notificación se borra |
+  | «PROBAR LUNA» | sin cambios: «La Luna junto a Júpiter», al tocar → Luna |
+
+- Plegada, la notificación corta el texto tras «lo más cerca en estas semanas ·»; al desplegarla se lee entero (`BigTextStyle`).
+- Capturas: `docs/images/planetas-notificacion.png` y `docs/images/planetas-hud-jupiter.png`, recortadas sin la ubicación.
+- `dotnet test` 426 tests; build Android 0 avisos.
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.

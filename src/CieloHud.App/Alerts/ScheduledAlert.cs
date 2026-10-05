@@ -18,6 +18,8 @@ public enum AlertKind
 /// <param name="VisibleStart">Start of the visible pass, or of the conjunction window.</param>
 /// <param name="VisibleEnd">End of the visible pass, or of the conjunction window: the notification goes away then.</param>
 /// <param name="Conjunctions">For a conjunction, what to remember once announced so it is not announced again.</param>
+/// <param name="Guide">For a conjunction, the HUD target to guide to: "Luna", or the brighter of two planets ("Júpiter").
+/// Missing in conjunctions stored before two planets existed, which were all of the Moon.</param>
 public sealed record ScheduledAlert(
     DateTimeOffset NotifyAt,
     DateTimeOffset VisibleStart,
@@ -26,15 +28,16 @@ public sealed record ScheduledAlert(
     string Title,
     string Body,
     AlertKind Kind = AlertKind.Pass,
-    IReadOnlyList<NotifiedConjunction>? Conjunctions = null)
+    IReadOnlyList<NotifiedConjunction>? Conjunctions = null,
+    string? Guide = null)
 {
     /// <summary>Past this, posting it is pointless: a pass that has started, a conjunction that is over.</summary>
     [JsonIgnore]
     public DateTimeOffset WorthUntil => Kind == AlertKind.Pass ? VisibleStart : VisibleEnd;
 
-    /// <summary>What the HUD guides to when the alert is tapped: the ISS, or the Moon with the planet next to it.</summary>
+    /// <summary>What the HUD guides to when the alert is tapped: the ISS, the Moon, or the brighter of two planets.</summary>
     [JsonIgnore]
-    public string Target => Kind == AlertKind.Pass ? "ISS" : "Luna";
+    public string Target => Kind == AlertKind.Pass ? "ISS" : Guide ?? "Luna";
 
     public static ScheduledAlert From(PassAlert alert, TimeZoneInfo timeZone) => new(
         alert.NotifyAt,
@@ -52,7 +55,8 @@ public sealed record ScheduledAlert(
         ConjunctionAlertText.Title(alert),
         ConjunctionAlertText.Body(alert, timeZone),
         AlertKind.Conjunction,
-        alert.Conjunctions.Select(NotifiedConjunction.From).ToList());
+        alert.Conjunctions.Select(NotifiedConjunction.From).ToList(),
+        ConjunctionAlertText.GuideName(alert.Guide));
 }
 
 /// <summary>One planning of the alerts and why it ran.</summary>

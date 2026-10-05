@@ -19,4 +19,20 @@ internal static class AlertConjunctions
         var bestPoint = Point(best, moonAzimuth, separation);
         return new Conjunction(CelestialBody.Moon, planet, Point(start, 100, separation + 1), bestPoint, bestPoint, Point(end, 225, separation + 1));
     }
+
+    /// <summary>
+    /// <paramref name="companion"/> next to <paramref name="guide"/> on the closest night of an approach, the guide at 60° due south
+    /// at the best moment and in the SW when the window closes; together from <paramref name="firstNight"/> to <paramref name="lastNight"/> (window starts).
+    /// </summary>
+    public static Conjunction PlanetPair(
+        CelestialBody guide, CelestialBody companion, string start, string best, string end, string firstNight, string lastNight,
+        double separation = 1.2)
+    {
+        ConjunctionPoint Point(string local, double azimuth) =>
+            new(Local(local), new HorizontalPosition(azimuth, 60), new HorizontalPosition(azimuth, 60 + separation), separation);
+
+        var bestPoint = Point(best, 180);
+        return new Conjunction(guide, companion, Point(start, 100), bestPoint, bestPoint, Point(end, 215),
+            new ConjunctionNights(Local(firstNight), Local(lastNight)));
+    }
 }

@@ -159,15 +159,26 @@ public sealed class AlertService
             ? (Parse(fired), Parse(target))
             : null;
 
-    /// <summary>
-    /// Posts the next planned alert of that kind (or an example) in <paramref name="delay"/>, through real alarms, marked as a test.
-    /// For a conjunction it looks up to two months ahead, so there is always a real one to try. Slow: call off the main thread.
-    /// </summary>
-    public void ArmTest(TimeSpan delay, AlertKind kind = AlertKind.Pass)
+    /// <summary>Posts the next planned pass alert (or an example) in <paramref name="delay"/>, through real alarms, marked as a test.</summary>
+    public void ArmTest(TimeSpan delay)
     {
         var now = DateTimeOffset.UtcNow;
-        var sample = Pending.FirstOrDefault(a => a.Kind == kind)
-            ?? (kind == AlertKind.Pass ? ExamplePass(now) : NextConjunction(now) ?? ExampleConjunction(now));
+        ArmTest(now, delay, Pending.FirstOrDefault(a => a.Kind == AlertKind.Pass) ?? ExamplePass(now));
+    }
+
+    /// <summary>
+    /// Posts the next real conjunction of the Moon, or of two planets, in <paramref name="delay"/>, with the text its alert will
+    /// have, through real alarms, marked as a test. Looks up to two months ahead, so there is usually one to try; otherwise an
+    /// example. Slow: call off the main thread.
+    /// </summary>
+    public void ArmConjunctionTest(TimeSpan delay, bool planets)
+    {
+        var now = DateTimeOffset.UtcNow;
+        ArmTest(now, delay, NextConjunction(now, planets) ?? ExampleConjunction(now, planets));
+    }
+
+    private void ArmTest(DateTimeOffset now, TimeSpan delay, ScheduledAlert sample)
+    {
         var at = now + delay;
         // Real visible times keep the alert alive until they end; an example lives a quarter of an hour after posting.
         var visibleEnd = sample.VisibleEnd > at ? sample.VisibleEnd : at + TimeSpan.FromMinutes(15);
@@ -179,16 +190,22 @@ public sealed class AlertService
         new(now, now + TimeSpan.FromMinutes(10), now + TimeSpan.FromMinutes(15), false,
             "La ISS pasa en 10 min", "A las 21:43 pasa la ISS · 5 min · aparece por el NO, máximo 67° al SE");
 
-    private static ScheduledAlert ExampleConjunction(DateTimeOffset now) =>
-        new(now, now + TimeSpan.FromMinutes(30), now + TimeSpan.FromHours(3), false,
-            "La Luna junto a Júpiter", "Esta noche, la Luna junto a Júpiter (3°) · mejor hacia las 22:00 al SE", AlertKind.Conjunction);
+    private static ScheduledAlert ExampleConjunction(DateTimeOffset now, bool planets) => planets
+        ? new(now, now + TimeSpan.FromMinutes(30), now + TimeSpan.FromHours(3), false, "Marte junto a Júpiter",
+            "Esta noche, Marte junto a Júpiter (1°), lo más cerca en estas semanas · mejor hacia las 22:00 al SE · juntos del 9 al 23 nov",
+            AlertKind.Conjunction, Guide: "Júpiter")
+        : new(now, now + TimeSpan.FromMinutes(30), now + TimeSpan.FromHours(3), false, "La Luna junto a Júpiter",
+            "Esta noche, la Luna junto a Júpiter (3°) · mejor hacia las 22:00 al SE", AlertKind.Conjunction, Guide: "Luna");
 
-    // The first conjunction from here, with the text its real alert will have.
-    private ScheduledAlert? NextConjunction(DateTimeOffset now)
+    // The first conjunction of that kind from here, with the text its real alert will have.
+    private ScheduledAlert? NextConjunction(DateTimeOffset now, bool planets)
     {
         if (_observers.Last is not { } observer)
             return null;
-        var conjunctions = _conjunctionFinder.FindWithMoon(observer, now, now + TimeSpan.FromDays(60), TimeZoneInfo.Local);
+        var to = now + TimeSpan.FromDays(60);
+        var conjunctions = planets
+            ? _conjunctionFinder.FindPlanetPairs(observer, now, to, TimeZoneInfo.Local)
+            : _conjunctionFinder.FindWithMoon(observer, now, to, TimeZoneInfo.Local);
         return _conjunctionPlanner.Plan(conjunctions, now, TimeZoneInfo.Local).FirstOrDefault() is { } alert
             ? ScheduledAlert.From(alert, TimeZoneInfo.Local)
             : null;
@@ -238,8 +255,9 @@ public sealed class AlertService
         var timeZone = TimeZoneInfo.Local;
         var horizon = _planner.Settings.Horizon;
 
-        // Conjunctions need nothing but the ephemeris: they are planned even with no network.
-        var conjunctions = _conjunctionFinder.FindWithMoon(observer, now, now + horizon, timeZone);
+        // Conjunctions (the Moon with planets, two planets) need nothing but the ephemeris: they are planned even with no network.
+        var conjunctions = _conjunctionFinder.FindWithMoon(observer, now, now + horizon, timeZone)
+            .Concat(_conjunctionFinder.FindPlanetPairs(observer, now, now + horizon, timeZone));
         var notifiedConjunctions = Read(NotifiedConjunctionsKey, AlertJsonContext.Default.ListNotifiedConjunction);
         var alerts = _conjunctionPlanner.Plan(conjunctions, now, timeZone, notifiedConjunctions)
             .Select(a => ScheduledAlert.From(a, timeZone))

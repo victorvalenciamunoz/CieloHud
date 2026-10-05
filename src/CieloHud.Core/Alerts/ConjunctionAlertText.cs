@@ -5,39 +5,51 @@ using static CieloHud.Core.Alerts.AlertWords;
 namespace CieloHud.Core.Alerts;
 
 /// <summary>
-/// The words of a conjunction alert, in Spanish (decision 026):
-/// "Esta noche, la Luna junto a Júpiter (3°) · mejor hacia las 22:00 al SE".
-/// The time is rounded to the quarter hour (it lasts hours; "hacia" says it is approximate) and the direction is the Moon's,
-/// which the HUD guides to when the alert is tapped.
+/// The words of a conjunction alert, in Spanish (decisions 026 and 029):
+/// "Esta noche, la Luna junto a Júpiter (3°) · mejor hacia las 22:00 al SE";
+/// "Mañana temprano, Marte junto a Júpiter (1°), lo más cerca en estas semanas · mejor hacia las 7:30 al S · juntos del 9 al 23 nov".
+/// The time is rounded to the quarter hour (it lasts hours; "hacia" says it is approximate) and the direction is the guide's
+/// (the Moon or the brighter planet), which the HUD leads to when the alert is tapped.
 /// </summary>
 public static class ConjunctionAlertText
 {
     /// <summary>Quarter hours: the separation changes by about 0.1° in that time.</summary>
     private const int RoundingMinutes = 15;
 
-    /// <summary>Headline: "La Luna junto a Júpiter", "La Luna junto a Júpiter y Marte".</summary>
-    public static string Title(ConjunctionAlert alert) =>
-        $"La Luna junto a {JoinNames(alert.Conjunctions.Select(c => PlanetName(c.Companion)))}";
+    private static readonly string[] Months = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
 
-    /// <summary>When, how close and where to look.</summary>
+    /// <summary>Headline: "La Luna junto a Júpiter", "La Luna junto a Júpiter y Marte", "Marte junto a Júpiter".</summary>
+    public static string Title(ConjunctionAlert alert) => alert.Closest.IsWithMoon
+        ? $"La Luna junto a {JoinNames(alert.Conjunctions.Select(c => PlanetName(c.Companion)))}"
+        : $"{PlanetName(alert.Closest.Companion)} junto a {PlanetName(alert.Closest.Guide)}";
+
+    /// <summary>When, how close and where to look; for two planets, also the nights they are together.</summary>
     public static string Body(ConjunctionAlert alert, TimeZoneInfo timeZone)
     {
         ArgumentNullException.ThrowIfNull(timeZone);
         var notify = TimeZoneInfo.ConvertTime(alert.NotifyAt, timeZone);
-        var planets = JoinNames(alert.Conjunctions.Select(c => $"{PlanetName(c.Companion)} ({Separation(c.Best.SeparationDegrees)})"));
-        var best = alert.Closest.Best;
+        var closest = alert.Closest;
+        var what = closest.IsWithMoon
+            ? "la Luna junto a " + JoinNames(alert.Conjunctions.Select(c => $"{PlanetName(c.Companion)} ({Separation(c.Best.SeparationDegrees)})"))
+            : $"{PlanetName(closest.Companion)} junto a {PlanetName(closest.Guide)} ({Separation(closest.Best.SeparationDegrees)}), lo más cerca en estas semanas";
+        // A single night needs no range.
+        var nights = closest.Nights is { } n && Local(n.First, timeZone).Date != Local(n.Last, timeZone).Date
+            ? $" · juntos {Nights(n, timeZone)}"
+            : "";
+        var best = closest.Best;
 
         // Opened late, past the best moment: say where it is now-ish and until when.
         if (best.Instant < alert.NotifyAt)
-        {
-            var end = alert.Closest.End;
-            return $"Ahora, la Luna junto a {planets} · al {Cardinal(end.Guide.CardinalPoint)}, hasta {TheTime(Local(alert.WindowEnd, timeZone))}";
-        }
+            return $"Ahora, {what} · al {Cardinal(closest.End.Guide.CardinalPoint)}, hasta {TheTime(Local(alert.WindowEnd, timeZone))}{nights}";
 
         var bestLocal = TimeZoneInfo.ConvertTime(best.Instant, timeZone);
-        return $"{When(alert, notify, bestLocal)}, la Luna junto a {planets} · " +
-            $"mejor hacia {TheTime(Approximate(alert, bestLocal, timeZone))} al {Cardinal(best.Guide.CardinalPoint)}";
+        return $"{When(alert, notify, bestLocal)}, {what} · " +
+            $"mejor hacia {TheTime(Approximate(alert, bestLocal, timeZone))} al {Cardinal(best.Guide.CardinalPoint)}{nights}";
     }
+
+    /// <summary>What the HUD is called for the guide body: "Luna", "Júpiter"…</summary>
+    public static string GuideName(CelestialBody guide) => guide == CelestialBody.Moon ? "Luna" : PlanetName(guide);
+
 
     /// <summary>The planet's name in Spanish.</summary>
     public static string PlanetName(CelestialBody planet) => planet switch
@@ -64,6 +76,17 @@ public static class ConjunctionAlertText
             (1, _) => "Mañana por la noche",
             _ => $"El día {best.Day.ToString(Culture)}",
         };
+    }
+
+    // "del 9 al 23 nov", "del 28 oct al 5 nov": the local dates the windows start on.
+    private static string Nights(ConjunctionNights nights, TimeZoneInfo timeZone)
+    {
+        var first = Local(nights.First, timeZone);
+        var last = Local(nights.Last, timeZone);
+        var lastText = $"{last.Day.ToString(Culture)} {Months[last.Month - 1]}";
+        return first.Month == last.Month && first.Year == last.Year
+            ? $"del {first.Day.ToString(Culture)} al {lastText}"
+            : $"del {first.Day.ToString(Culture)} {Months[first.Month - 1]} al {lastText}";
     }
 
     // Whole degrees; under half a degree is still "less than one", not "0°".

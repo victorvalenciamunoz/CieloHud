@@ -218,3 +218,13 @@ Formato: contexto → decisión → alternativas descartadas.
   - Modelo común: `Conjunction` con guía y compañero; la Luna es un guía más. Sirven el mismo planificador, el mismo texto y la misma app.
 - Validación: JPL Horizons, Marte–Júpiter: la misma noche más cercana, la misma ventana y separación ≤ 0,0006° noche a noche (STATUS, paso 8).
 - Alternativas: un aviso cada noche que estén cerca (descartada: 15 avisos seguidos); avisar la primera noche (descartada: la más cercana es la que merece la pena, y el texto ya dice qué noches se ven juntos); 5° como con la Luna (descartada: no se ven «juntos»); conjunción geocéntrica en ascensión recta o longitud con las búsquedas de Astronomy Engine (descartada: puede caer de día; lo que importa es la noche visible); acercamientos de meses, como Júpiter–Saturno cada 20 años (fuera: harían falta más de 60 días de búsqueda; el próximo es en 2040).
+
+## 029 — Avisos de planetas juntos: solos, una vez por acercamiento, el toque al más brillante
+- Contexto: el buscador ya da la noche más cercana de cada acercamiento de dos planetas (decisión 028). Falta decidir cómo entra en los avisos de conjunción (decisión 026) y en la app (decisión 027).
+- Decisión:
+  - **Mismo horario que la Luna**: 30 min antes de que se abra la ventana de la noche más cercana; de madrugada, a las 22:00 de la víspera.
+  - **Siempre solos**: no se agrupan con una conjunción de la Luna que coincida en hora. Son cosas distintas que mirar, y el texto de cada una ya es largo.
+  - **Una vez por acercamiento**: no se repite la misma pareja a menos de 30 días del mejor momento ya avisado. Planificando desde otro sitio la noche más cercana podría cambiar, pero no deja de ser el mismo acercamiento.
+  - **Texto**: «Mañana temprano, Marte junto a Júpiter (1°), lo más cerca en estas semanas · mejor hacia las 7:30 al S · juntos del 9 al 23 nov». El intervalo es para quien no pueda esa noche (nubes): se ven juntos muchas más. El más débil «junto al» más brillante, que es el que se busca.
+  - **Al tocar, el planeta más brillante** (`ScheduledAlert.Guide`). Mismo canal, «Luna y planetas».
+- Alternativas: agrupar con la Luna como dos planetas a la vez (descartada: mezclaría «la Luna junto a…» con una pareja de planetas en un texto ilegible); repetir el aviso la primera y la última noche (descartada: el intervalo en el texto basta); canal propio para los planetas (descartado: es la misma clase de aviso, y son uno o dos al año).
