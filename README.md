@@ -14,6 +14,7 @@
   <img alt=".NET MAUI Android" src="https://img.shields.io/badge/MAUI-Android-3DDC84?logo=android&logoColor=white" />
   <img alt="Tests" src="https://img.shields.io/badge/tests-253%20en%20verde-7CFFB2" />
   <img alt="Sin backend" src="https://img.shields.io/badge/backend-ninguno-0B1218" />
+  <a href="LICENSE"><img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-4DD2FF" /></a>
 </p>
 
 ---
@@ -186,3 +187,7 @@ Se apoya en:
 - Fuentes [Chakra Petch](https://github.com/m4rc1e/Chakra-Petch) y [Open Sans](https://github.com/googlefonts/opensans) (SIL OFL 1.1).
 
 Las referencias de validación son [JPL Horizons](https://ssd.jpl.nasa.gov/horizons/), [Stellarium](https://stellarium.org) y [Heavens-Above](https://www.heavens-above.com). Las licencias de terceros están en [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md).
+
+## Licencia
+
+El código de CieloHud se publica bajo la [licencia MIT](LICENSE): puedes usarlo, modificarlo y redistribuirlo libremente, manteniendo el aviso de copyright. Los componentes, datos y fuentes de terceros conservan sus propias licencias, recogidas en [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md).
