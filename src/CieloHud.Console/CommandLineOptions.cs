@@ -19,7 +19,7 @@ public sealed record CommandLineOptions(Observer Observer, DateTimeOffset Instan
                     Without offset it is read as UTC.  Default: now
           --passes  Instead of the sky table, list visible ISS passes for this many days from --time (1-30).
           --conjunctions
-                    Instead of the sky table, list Moon-planet conjunctions for this many days from --time (1-400).
+                    Instead of the sky table, list conjunctions (Moon-planet, planet-planet) for this many days from --time (1-1100).
           --help    Show this text
 
         Numbers use a decimal point regardless of system locale.
@@ -49,7 +49,7 @@ public sealed record CommandLineOptions(Observer Observer, DateTimeOffset Instan
                 case "--alt": alt = ParseDouble(key, value); break;
                 case "--time": instant = ParseInstant(value); break;
                 case "--passes": passesDays = ParseDays(key, value, 30); break;
-                case "--conjunctions": conjunctionsDays = ParseDays(key, value, 400); break;
+                case "--conjunctions": conjunctionsDays = ParseDays(key, value, 1100); break;
                 default: throw new UsageException($"Unknown option {key}.");
             }
         }

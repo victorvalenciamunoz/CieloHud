@@ -542,6 +542,38 @@ La validación de los avisos de la ISS contra un paso real (paso 4) sigue pendie
 - Contrastado con Stellarium Web el 6 oct a las 7:45: separación 1,990° frente a 1,994° (tabla en el paso 5).
 - `dotnet test` 396 tests; build Android 0 avisos.
 
+### Paso 8 — Planetas juntos: buscador (2026-10-05)
+
+Plan acordado: avisar también cuando dos planetas se vean juntos. Criterio: ≤ 3°, los dos a ≥ 10°, Sol ≤ -6°; Venus, Marte, Júpiter y Saturno.
+Un solo aviso por acercamiento, en su noche más cercana, diciendo qué noches se ven juntos; al tocarlo, el HUD guía al más brillante.
+Pasos: 8) buscador en Core y validación; 9) aviso, texto y app.
+
+- Core `Conjunctions/` generalizado: `Conjunction` (antes `MoonPlanetConjunction`) tiene un cuerpo **guía** (la Luna o el planeta más brillante)
+  y un **compañero**; `ConjunctionPoint` guarda la posición de los dos. Los avisos con la Luna no cambian: sus tests siguen igual.
+- `IConjunctionFinder`: `FindWithMoon` (lo de antes) y `FindPlanetPairs`. Decisión 028.
+  - **Una conjunción por acercamiento**: las noches seguidas a ≤ 3° (`ConjunctionCriteria.MaxPlanetSeparationDegrees`) forman un acercamiento;
+    se devuelve su noche más cercana, con `Nights` (primera y última noche juntos). Para saber cuál es la más cercana se busca 60 días antes y después
+    (`PlanetApproachSearch`). Primero se mira la separación una vez al día y solo se muestrean las noches de los días a menos de 3° + 2°: un año en ~2 s en el PC.
+  - **Mejor momento: la mayor altura** del más bajo de los dos (con la misma preferencia por la tarde). Entre dos planetas la separación cambia
+    centésimas de grado por hora, así que la regla de la Luna (mínima separación) elegía casi al azar: las 2:30 a 21° en vez de las 7:25 a 63°.
+  - **Guía: el más brillante** por orden fijo (Venus, Júpiter, Marte, Saturno).
+- Consola: `--conjunctions` (ahora hasta 1100 días) añade la tabla «Planetas juntos». Los avisos de las parejas llegan en el paso 9.
+- Tests unitarios con el cielo falso: una conjunción en la noche más cercana y las noches juntos, mejor momento el más alto (tarde o madrugada),
+  noche más cercana ya pasada o fuera del rango, búsqueda durante la noche más cercana, dos acercamientos, nunca a 3°, el guía es el más brillante,
+  Luna y planetas por separado.
+- **Validación contra JPL Horizons** (Madrid, Marte 499 y Júpiter 599, acimut/altura aparentes con refracción; Sol sin refracción):
+
+  | | CieloHud | Horizons |
+  |---|---|---|
+  | Noche más cercana | 16 nov, 7:25: 1,195° | 16 nov, 7:25: 1,194° |
+  | Ventana del 16 nov | 1:35-7:30 | 1:35-7:30 |
+  | Mejor momento | 7:25 (el más alto) | 7:25 (el más alto) |
+  | Posiciones a las 7:25 | Júpiter 178,912° / 63,177°, Marte 177,938° / 64,291° | 178,909° / 63,178°, 177,937° / 64,292° |
+  | Separación noche a noche a las 7:25, del 5 al 27 nov | de 4,194° a 1,195° y vuelta a 4,137° | máx. diferencia 0,0006° |
+
+  Juntos a ≤ 3° del 9 al 23 de noviembre (15 noches), igual que en el sondeo previo. En dos años solo hay otra: Venus–Marte el 8 sep 2028 (2,26°, juntos del 5 al 12).
+- `dotnet test` 414 tests; build Android 0 avisos.
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.

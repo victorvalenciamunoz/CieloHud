@@ -10,13 +10,13 @@ internal static class AlertConjunctions
     /// with <paramref name="separation"/>, the Moon at 30° in the direction of <paramref name="moonAzimuth"/> (SE by default).
     /// The closest approach is the best moment, and the Moon is in the SW when the window closes.
     /// </summary>
-    public static MoonPlanetConjunction Conjunction(
+    public static Conjunction Conjunction(
         CelestialBody planet, string start, string best, string end, double separation = 3, double moonAzimuth = 135)
     {
         ConjunctionPoint Point(string local, double azimuth, double sep) =>
             new(Local(local), new HorizontalPosition(azimuth, 30), new HorizontalPosition(azimuth, 30 + sep), sep);
 
         var bestPoint = Point(best, moonAzimuth, separation);
-        return new MoonPlanetConjunction(planet, Point(start, 100, separation + 1), bestPoint, bestPoint, Point(end, 225, separation + 1));
+        return new Conjunction(CelestialBody.Moon, planet, Point(start, 100, separation + 1), bestPoint, bestPoint, Point(end, 225, separation + 1));
     }
 }

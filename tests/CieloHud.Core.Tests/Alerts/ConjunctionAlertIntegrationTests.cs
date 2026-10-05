@@ -14,7 +14,7 @@ public class ConjunctionAlertIntegrationTests
     private static readonly Lazy<IReadOnlyList<ConjunctionAlert>> Alerts = new(() =>
     {
         var finder = new ConjunctionFinder(new AstronomyEngineSolarSystemService(), new AstronomyEngineSunService());
-        var conjunctions = finder.Find(MadridCenter, Now, Now.AddDays(120), Madrid);
+        var conjunctions = finder.FindWithMoon(MadridCenter, Now, Now.AddDays(120), Madrid);
         return new ConjunctionAlertPlanner().Plan(conjunctions, Now, Madrid);
     });
 

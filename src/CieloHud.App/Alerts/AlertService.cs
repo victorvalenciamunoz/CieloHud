@@ -188,7 +188,7 @@ public sealed class AlertService
     {
         if (_observers.Last is not { } observer)
             return null;
-        var conjunctions = _conjunctionFinder.Find(observer, now, now + TimeSpan.FromDays(60), TimeZoneInfo.Local);
+        var conjunctions = _conjunctionFinder.FindWithMoon(observer, now, now + TimeSpan.FromDays(60), TimeZoneInfo.Local);
         return _conjunctionPlanner.Plan(conjunctions, now, TimeZoneInfo.Local).FirstOrDefault() is { } alert
             ? ScheduledAlert.From(alert, TimeZoneInfo.Local)
             : null;
@@ -239,7 +239,7 @@ public sealed class AlertService
         var horizon = _planner.Settings.Horizon;
 
         // Conjunctions need nothing but the ephemeris: they are planned even with no network.
-        var conjunctions = _conjunctionFinder.Find(observer, now, now + horizon, timeZone);
+        var conjunctions = _conjunctionFinder.FindWithMoon(observer, now, now + horizon, timeZone);
         var notifiedConjunctions = Read(NotifiedConjunctionsKey, AlertJsonContext.Default.ListNotifiedConjunction);
         var alerts = _conjunctionPlanner.Plan(conjunctions, now, timeZone, notifiedConjunctions)
             .Select(a => ScheduledAlert.From(a, timeZone))
