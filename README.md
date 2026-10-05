@@ -168,7 +168,7 @@ ISS        161.15° S   -37.26°  bajo el horizonte       8364 km
 
 - [x] **Fase 1** · Consola: dónde está cada cosa ahora, validado contra Horizons y Stellarium
 - [x] **Fase 2** · Próximos pasos visibles de la ISS, validado contra Heavens-Above
-- [ ] **Fase 3** · HUD en MAUI para Android: *hecho todo salvo la validación final bajo un cielo despejado*
+- [x] **Fase 3** · HUD en MAUI para Android, validado en el cielo guiando hasta la Luna
 - [ ] **Fase 4** · Avisos: «esta noche a las 21:43 pasa la ISS, 5 minutos, por el noroeste»
 - [ ] **Fase 5** · IA como guía: qué estás viendo, explicado para no expertos
 
