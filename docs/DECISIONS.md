@@ -97,3 +97,13 @@ Formato: contexto → decisión → alternativas descartadas.
 - Decisión: workflow `.github/workflows/ci.yml` que en cada PR a `main` (y en cada push a `main`) restaura, compila en Release y pasa `tests/CieloHud.Core.Tests` en `ubuntu-latest`, con el SDK de `global.json` (`actions/setup-dotnet@v6`, `actions/checkout@v7`, versiones comprobadas el 2026-10-05). La comprobación "Tests de Core" es obligatoria para fusionar.
 - La app MAUI **no** se compila en el CI: necesitaría el workload de Android (varios minutos y GB por ejecución) y no aportaría lo que importa, que es probarla en el móvil. Se compila y prueba a mano antes de fusionar, y la PR lo indica en su lista de comprobación.
 - Alternativas: compilar también la app en `windows-latest` con el workload MAUI (descartado por ahora: lento y caro para un proyecto personal; reconsiderar si la app gana lógica no cubierta por Core); runners propios (descartado: innecesario).
+
+## 020 — Fase 5: fichas escritas y datos calculados, sin IA en la app
+- Contexto: la Fase 5 era "IA como guía": un modelo de lenguaje explicando el objeto encontrado. Al llegar el momento de concretarla, choca con los principios del proyecto.
+- Decisión: la Fase 5 pasa a **fichas del objeto**: un texto breve por objeto, escrito y revisado, guardado en el repo como datos, más datos del momento calculados en local (fase de la Luna, lunas de Júpiter, anillos de Saturno, tiempo de luz de planetas y estrellas, altura y velocidad de la ISS). La IA puede ayudar a redactar los borradores durante el desarrollo, como un script generador más; lo que llega a la app está revisado y es fijo.
+- Por qué:
+  - **Sin backend** (decisión 001): un modelo en la nube necesita una clave de API, y en el APK de un repo público quedaría expuesta; esconderla exige un servidor propio. Un modelo en el móvil es pesado y, al tamaño que cabe, explica peor.
+  - **El cielo es el juez**: los datos calculados se contrastan con Horizons o Stellarium; un texto generado en el momento no se puede validar y puede inventar datos.
+  - **No hace falta**: el usuario no escribe nada y el universo es cerrado y pequeño (7 objetivos, 155 estrellas, 88 constelaciones). Es contenido que se escribe una vez.
+  - Se usa en el campo y de noche, a menudo sin cobertura, y cada consulta a un modelo costaría dinero.
+- Alternativas: LLM en la nube a través de un proxy propio (descartado: backend, coste y datos sin validar); modelo en el dispositivo (descartado: tamaño y calidad); quitar la fase (descartado: el "qué estás viendo" sigue siendo la recompensa al encontrar algo).
