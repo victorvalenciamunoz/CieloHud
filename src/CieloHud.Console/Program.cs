@@ -102,10 +102,11 @@ int PrintConjunctions(int days)
     var to = from.AddDays(days);
     var finder = new ConjunctionFinder(new AstronomyEngineSolarSystemService(), new AstronomyEngineSunService());
 
-    var conjunctions = finder.Find(options.Observer, from, to, TimeZoneInfo.Local);
+    var conjunctions = finder.FindWithMoon(options.Observer, from, to, TimeZoneInfo.Local);
 
     System.Console.WriteLine(ConjunctionTableFormatter.Header(options.Observer, from, to, finder.Criteria));
     System.Console.WriteLine(ConjunctionTableFormatter.Table(conjunctions));
+    System.Console.WriteLine(ConjunctionTableFormatter.PlanetPairs(finder.FindPlanetPairs(options.Observer, from, to, TimeZoneInfo.Local)));
 
     var alerts = new ConjunctionAlertPlanner().Plan(conjunctions, from, TimeZoneInfo.Local);
     System.Console.WriteLine(ConjunctionTableFormatter.Alerts(alerts, TimeZoneInfo.Local));

@@ -16,8 +16,8 @@ public class ConjunctionFinderTests
 
     private ConjunctionFinder CreateFinder(ConjunctionCriteria? criteria = null) => new(_sky, _sun, criteria);
 
-    private IReadOnlyList<MoonPlanetConjunction> FindNight(TimeZoneInfo? zone = null) =>
-        CreateFinder().Find(Madrid, Noon, Noon.AddDays(1), zone ?? Utc);
+    private IReadOnlyList<Conjunction> FindNight(TimeZoneInfo? zone = null) =>
+        CreateFinder().FindWithMoon(Madrid, Noon, Noon.AddDays(1), zone ?? Utc);
 
     private static DateTimeOffset At(int hour, int minute = 0, int day = 0) =>
         new DateTimeOffset(2026, 10, 5, hour, minute, 0, TimeSpan.Zero).AddDays(day);
@@ -33,13 +33,13 @@ public class ConjunctionFinderTests
 
         var conjunction = Assert.Single(FindNight());
 
-        Assert.Equal(CelestialBody.Jupiter, conjunction.Planet);
+        Assert.Equal(CelestialBody.Jupiter, conjunction.Companion);
         Assert.Equal(At(19), conjunction.Start.Instant);      // separation 2.6° at dusk: the window opens with the dark
         Assert.Equal(At(22), conjunction.Best.Instant);
         Assert.Equal(1.1, conjunction.Best.SeparationDegrees, 6);
         Assert.Equal(conjunction.Best, conjunction.Closest);
         Assert.Equal(At(5, 45, day: 1), conjunction.End.Instant); // 4.975° at 5:45, 5.017° at 5:50
-        Assert.Equal(40, conjunction.Best.Moon.AltitudeDegrees, 6);
+        Assert.Equal(40, conjunction.Best.Guide.AltitudeDegrees, 6);
     }
 
     [Fact]
@@ -157,7 +157,7 @@ public class ConjunctionFinderTests
         _sky.Planet(CelestialBody.Jupiter, Approach(At(22), 1));
         var from = At(21, 2);
 
-        var conjunction = Assert.Single(CreateFinder().Find(Madrid, from, Noon.AddDays(1), Utc));
+        var conjunction = Assert.Single(CreateFinder().FindWithMoon(Madrid, from, Noon.AddDays(1), Utc));
 
         Assert.Equal(from, conjunction.Start.Instant);
     }
@@ -167,7 +167,7 @@ public class ConjunctionFinderTests
     {
         _sky.Planet(CelestialBody.Jupiter, Approach(At(22), 1));
 
-        var conjunction = Assert.Single(CreateFinder().Find(Madrid, Noon, At(20), Utc));
+        var conjunction = Assert.Single(CreateFinder().FindWithMoon(Madrid, Noon, At(20), Utc));
 
         Assert.Equal(At(19), conjunction.Start.Instant);
         Assert.Equal(At(22), conjunction.Best.Instant);
@@ -179,7 +179,7 @@ public class ConjunctionFinderTests
     {
         _sky.Planet(CelestialBody.Jupiter, Approach(At(22), 1));
 
-        Assert.Empty(CreateFinder().Find(Madrid, Noon, At(18), Utc));
+        Assert.Empty(CreateFinder().FindWithMoon(Madrid, Noon, At(18), Utc));
     }
 
     [Fact]
@@ -187,7 +187,7 @@ public class ConjunctionFinderTests
     {
         // Closest at midday: 3.04° at the last dark sample of dawn (6:55), 3.0° at dusk (19:00) (the Moon moves 0.5° an hour).
         _sky.Planet(CelestialBody.Jupiter, Approach(At(13, day: 1), 0));
-        var conjunctions = CreateFinder().Find(Madrid, Noon, Noon.AddDays(2), Utc);
+        var conjunctions = CreateFinder().FindWithMoon(Madrid, Noon, Noon.AddDays(2), Utc);
 
         var conjunction = Assert.Single(conjunctions);
         Assert.Equal(At(19, day: 1), conjunction.Best.Instant);
@@ -202,7 +202,7 @@ public class ConjunctionFinderTests
 
         var conjunctions = FindNight();
 
-        Assert.Equal([CelestialBody.Jupiter, CelestialBody.Mars], conjunctions.Select(c => c.Planet));
+        Assert.Equal([CelestialBody.Jupiter, CelestialBody.Mars], conjunctions.Select(c => c.Companion));
     }
 
     [Fact]
@@ -212,7 +212,7 @@ public class ConjunctionFinderTests
 
         Assert.Empty(FindNight());
         Assert.Single(CreateFinder(new ConjunctionCriteria { Planets = [CelestialBody.Mercury] })
-            .Find(Madrid, Noon, Noon.AddDays(1), Utc));
+            .FindWithMoon(Madrid, Noon, Noon.AddDays(1), Utc));
     }
 
     [Fact]
@@ -220,7 +220,8 @@ public class ConjunctionFinderTests
     {
         var criteria = ConjunctionCriteria.Default;
 
-        Assert.Equal(5, criteria.MaxSeparationDegrees);
+        Assert.Equal(5, criteria.MaxMoonSeparationDegrees);
+        Assert.Equal(3, criteria.MaxPlanetSeparationDegrees);
         Assert.Equal(10, criteria.MinAltitudeDegrees);
         Assert.Equal(-6, criteria.MaxSunAltitudeDegrees);
         Assert.Equal([CelestialBody.Venus, CelestialBody.Mars, CelestialBody.Jupiter, CelestialBody.Saturn], criteria.Planets);
@@ -229,7 +230,9 @@ public class ConjunctionFinderTests
     [Fact]
     public void InvalidCriteria_Throw()
     {
-        Assert.ThrowsAny<ArgumentException>(() => CreateFinder(new ConjunctionCriteria { MaxSeparationDegrees = 0 }));
+        Assert.ThrowsAny<ArgumentException>(() => CreateFinder(new ConjunctionCriteria { MaxMoonSeparationDegrees = 0 }));
+        Assert.ThrowsAny<ArgumentException>(() => CreateFinder(new ConjunctionCriteria { MaxPlanetSeparationDegrees = 0 }));
+        Assert.ThrowsAny<ArgumentException>(() => CreateFinder(new ConjunctionCriteria { PlanetApproachSearch = TimeSpan.FromDays(-1) }));
         Assert.ThrowsAny<ArgumentException>(() => CreateFinder(new ConjunctionCriteria { ComfortableAltitudeDegrees = 5 }));
         Assert.ThrowsAny<ArgumentException>(() => CreateFinder(new ConjunctionCriteria { Step = TimeSpan.Zero }));
         Assert.ThrowsAny<ArgumentException>(() => CreateFinder(new ConjunctionCriteria { Planets = [CelestialBody.Moon] }));
@@ -238,10 +241,131 @@ public class ConjunctionFinderTests
     [Fact]
     public void NullTimeZone_Throws()
     {
-        Assert.Throws<ArgumentNullException>(() => CreateFinder().Find(Madrid, Noon, Noon.AddDays(1), null!));
+        Assert.Throws<ArgumentNullException>(() => CreateFinder().FindWithMoon(Madrid, Noon, Noon.AddDays(1), null!));
     }
 
-    /// <summary>The Moon due south; each planet straight above (or below) it by its separation, so the separation is exact.</summary>
+    // ---- Two planets. Jupiter sits on the Moon's spot (separation 0) and Mars above it, so their separation is Mars's.
+
+    /// <summary>Mars closing on Jupiter at 0.4° a day, like Mars and Jupiter in Nov 2026, down to 1° at 0:00 UTC on day 10.</summary>
+    private void MarsApproachesJupiter(params int[] closestDays)
+    {
+        _sky.Planet(CelestialBody.Jupiter, _ => 0);
+        _sky.Planet(CelestialBody.Mars, t => closestDays.Min(d => 1 + 0.4 / 24 * Math.Abs((t - At(0, day: d)).TotalHours)));
+    }
+
+    private IReadOnlyList<Conjunction> FindPairs(DateTimeOffset from, DateTimeOffset to) =>
+        CreateFinder().FindPlanetPairs(Madrid, from, to, Utc);
+
+    [Fact]
+    public void PlanetPair_ManyNights_OneConjunctionOnTheClosestNight()
+    {
+        MarsApproachesJupiter(10);
+
+        var conjunction = Assert.Single(FindPairs(Noon, Noon.AddDays(30)));
+
+        Assert.Equal(CelestialBody.Jupiter, conjunction.Guide); // the brighter one
+        Assert.Equal(CelestialBody.Mars, conjunction.Companion);
+        Assert.False(conjunction.IsWithMoon);
+        Assert.Equal(At(19, day: 9), conjunction.Best.Instant); // 1.08° that evening; 1.32° the next
+        // Within 3° from 0:00 on day 5 (120 h before: 3.00°; the evening of day 4 is still at 3.08°) to the evening of day 14 (2.92°).
+        Assert.Equal(new ConjunctionNights(At(0, day: 5), At(19, day: 14)), conjunction.Nights);
+    }
+
+    [Fact]
+    public void PlanetPair_BestMoment_HighestInTheEvening()
+    {
+        // Rising all night: 15° at 19:00 UTC, 5° more each hour (capped where the daily check looks at noon). The separation barely changes in a night.
+        _sky.MoonAltitude = t => Math.Min(80, 15 + 5 * ((t.UtcDateTime.TimeOfDay.TotalHours - 19 + 24) % 24));
+        MarsApproachesJupiter(10);
+
+        var conjunction = Assert.Single(FindPairs(Noon, Noon.AddDays(30)));
+
+        Assert.Equal(At(23, 55, day: 9), conjunction.Best.Instant);
+    }
+
+    [Fact]
+    public void PlanetPair_OnlyAfterMidnight_HighestBeforeDawn()
+    {
+        _sky.MoonAltitude = t => t.UtcDateTime.Hour >= 19 ? 5 : Math.Min(80, 20 + 5 * t.UtcDateTime.TimeOfDay.TotalHours);
+        MarsApproachesJupiter(10);
+
+        var conjunction = Assert.Single(FindPairs(Noon, Noon.AddDays(30)));
+
+        Assert.Equal(At(6, 55, day: 10), conjunction.Best.Instant); // 1.12°, the closest of the morning windows
+    }
+
+    [Fact]
+    public void PlanetPair_ClosestNightAlreadyPast_NotReturned()
+    {
+        MarsApproachesJupiter(10);
+
+        Assert.Empty(FindPairs(At(12, day: 11), At(12, day: 31)));
+    }
+
+    [Fact]
+    public void PlanetPair_ClosestNightBeyondTheRange_NotReturned()
+    {
+        // Nights 4 to 7 are already close, but the closest is still to come.
+        MarsApproachesJupiter(10);
+
+        Assert.Empty(FindPairs(Noon, At(12, day: 8)));
+    }
+
+    [Fact]
+    public void PlanetPair_SearchDuringTheClosestNight_StillReturnedWhole()
+    {
+        MarsApproachesJupiter(10);
+
+        var conjunction = Assert.Single(FindPairs(At(21, day: 9), At(21, day: 12)));
+
+        Assert.Equal(At(19, day: 9), conjunction.Start.Instant);
+    }
+
+    [Fact]
+    public void PlanetPair_TwoApproaches_TwoConjunctions()
+    {
+        MarsApproachesJupiter(10, 40);
+
+        var conjunctions = FindPairs(Noon, Noon.AddDays(60));
+
+        Assert.Equal([At(19, day: 9), At(19, day: 39)], conjunctions.Select(c => c.Best.Instant));
+    }
+
+    [Fact]
+    public void PlanetPair_NeverWithinThreeDegrees_NothingFound()
+    {
+        _sky.Planet(CelestialBody.Jupiter, _ => 0);
+        _sky.Planet(CelestialBody.Mars, _ => 3.2);
+
+        Assert.Empty(FindPairs(Noon, Noon.AddDays(30)));
+    }
+
+    [Fact]
+    public void PlanetPair_GuideIsTheBrighter()
+    {
+        _sky.Planet(CelestialBody.Saturn, _ => 0);
+        _sky.Planet(CelestialBody.Venus, t => 1 + 0.4 / 24 * Math.Abs((t - At(0, day: 10)).TotalHours));
+
+        var conjunction = Assert.Single(FindPairs(Noon, Noon.AddDays(30)));
+
+        Assert.Equal(CelestialBody.Venus, conjunction.Guide);
+        Assert.Equal(CelestialBody.Saturn, conjunction.Companion);
+    }
+
+    [Fact]
+    public void PlanetPair_AndMoon_SearchedSeparately()
+    {
+        // Jupiter on the Moon's spot is a Moon conjunction too; each search returns only its kind.
+        MarsApproachesJupiter(10);
+
+        Assert.All(FindPairs(Noon, Noon.AddDays(30)), c => Assert.False(c.IsWithMoon));
+        Assert.All(CreateFinder().FindWithMoon(Madrid, Noon, Noon.AddDays(3), Utc), c => Assert.True(c.IsWithMoon));
+    }
+
+    /// <summary>
+    /// The Moon due south; each planet straight above (or below) it by its separation, so the separation is exact while it stays
+    /// under 89° (far apart, where it does not matter, it is held there).
+    /// </summary>
     private sealed class FakeSky : ISolarSystemService
     {
         private readonly Dictionary<CelestialBody, Func<DateTimeOffset, double>> _planets = [];
@@ -255,7 +379,7 @@ public class ConjunctionFinderTests
             if (body == CelestialBody.Moon)
                 return new HorizontalPosition(180, MoonAltitude(instant));
             return _planets.TryGetValue(body, out var separation)
-                ? new HorizontalPosition(180, MoonAltitude(instant) + separation(instant))
+                ? new HorizontalPosition(180, Math.Min(89, MoonAltitude(instant) + separation(instant)))
                 : new HorizontalPosition(0, -30);
         }
     }

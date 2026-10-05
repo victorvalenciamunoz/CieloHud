@@ -5,10 +5,10 @@ namespace CieloHud.Core.Tests.Alerts;
 
 public class ConjunctionAlertTextTests
 {
-    private static ConjunctionAlert Alert(string notifyAt, bool eveningBefore, params MoonPlanetConjunction[] conjunctions) =>
+    private static ConjunctionAlert Alert(string notifyAt, bool eveningBefore, params Conjunction[] conjunctions) =>
         new(conjunctions, Local(notifyAt), eveningBefore);
 
-    private static readonly MoonPlanetConjunction EveningJupiter =
+    private static readonly Conjunction EveningJupiter =
         Conjunction(CelestialBody.Jupiter, "2026-10-14 20:15", "2026-10-14 22:00", "2026-10-15 01:00", separation: 3.2);
 
     [Fact]

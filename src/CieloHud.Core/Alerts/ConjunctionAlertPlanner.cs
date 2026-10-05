@@ -24,7 +24,7 @@ public sealed class ConjunctionAlertPlanner
 
     /// <summary>Alerts for the given conjunctions, ordered by <see cref="ConjunctionAlert.NotifyAt"/>. All instants in UTC.</summary>
     public IReadOnlyList<ConjunctionAlert> Plan(
-        IEnumerable<MoonPlanetConjunction> conjunctions,
+        IEnumerable<Conjunction> conjunctions,
         DateTimeOffset now,
         TimeZoneInfo timeZone,
         IEnumerable<NotifiedConjunction>? alreadyNotified = null)
@@ -37,7 +37,7 @@ public sealed class ConjunctionAlertPlanner
         {
             var start = group.Min(c => c.Start.Instant);
             var end = group.Max(c => c.End.Instant);
-            return new AlertCandidate<List<MoonPlanetConjunction>>(group, start - Settings.ConjunctionLeadTime, end);
+            return new AlertCandidate<List<Conjunction>>(group, start - Settings.ConjunctionLeadTime, end);
         });
 
         return _timing.Plan(candidates, now, timeZone)
@@ -45,14 +45,14 @@ public sealed class ConjunctionAlertPlanner
             .ToList();
     }
 
-    private bool WasNotified(MoonPlanetConjunction conjunction, List<NotifiedConjunction> notified) =>
-        notified.Any(n => n.Planet == conjunction.Planet
+    private bool WasNotified(Conjunction conjunction, List<NotifiedConjunction> notified) =>
+        notified.Any(n => n.Planet == conjunction.Companion
             && (n.Best - conjunction.Best.Instant).Duration() < Settings.SameConjunctionTolerance);
 
     // Windows that overlap in time, chained: each group seen together in the sky. Closest first within a group.
-    private static IEnumerable<List<MoonPlanetConjunction>> Overlapping(IEnumerable<MoonPlanetConjunction> conjunctions)
+    private static IEnumerable<List<Conjunction>> Overlapping(IEnumerable<Conjunction> conjunctions)
     {
-        var group = new List<MoonPlanetConjunction>();
+        var group = new List<Conjunction>();
         var groupEnd = DateTimeOffset.MinValue;
         foreach (var conjunction in conjunctions.OrderBy(c => c.Start.Instant))
         {
@@ -68,6 +68,6 @@ public sealed class ConjunctionAlertPlanner
             yield return Closest(group);
     }
 
-    private static List<MoonPlanetConjunction> Closest(List<MoonPlanetConjunction> group) =>
+    private static List<Conjunction> Closest(List<Conjunction> group) =>
         group.OrderBy(c => c.Best.SeparationDegrees).ToList();
 }

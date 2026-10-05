@@ -9,10 +9,10 @@ namespace CieloHud.Core.Alerts;
 /// <param name="Conjunctions">Closest first. Never empty.</param>
 /// <param name="NotifyAt">When the alert goes off (UTC). Equal to the planning instant when it is already due.</param>
 /// <param name="IsEveningBefore">True when it would be announced in the quiet hours and is moved to the evening before.</param>
-public sealed record ConjunctionAlert(IReadOnlyList<MoonPlanetConjunction> Conjunctions, DateTimeOffset NotifyAt, bool IsEveningBefore)
+public sealed record ConjunctionAlert(IReadOnlyList<Conjunction> Conjunctions, DateTimeOffset NotifyAt, bool IsEveningBefore)
 {
     /// <summary>The closest planet: its best moment is the one the alert recommends.</summary>
-    public MoonPlanetConjunction Closest => Conjunctions[0];
+    public Conjunction Closest => Conjunctions[0];
 
     /// <summary>When the first window opens.</summary>
     public DateTimeOffset WindowStart => Conjunctions.Min(c => c.Start.Instant);
@@ -24,5 +24,5 @@ public sealed record ConjunctionAlert(IReadOnlyList<MoonPlanetConjunction> Conju
 /// <summary>A conjunction already announced: its planet and best moment, enough to recognize it when planning again.</summary>
 public readonly record struct NotifiedConjunction(CelestialBody Planet, DateTimeOffset Best)
 {
-    public static NotifiedConjunction From(MoonPlanetConjunction conjunction) => new(conjunction.Planet, conjunction.Best.Instant);
+    public static NotifiedConjunction From(Conjunction conjunction) => new(conjunction.Companion, conjunction.Best.Instant);
 }

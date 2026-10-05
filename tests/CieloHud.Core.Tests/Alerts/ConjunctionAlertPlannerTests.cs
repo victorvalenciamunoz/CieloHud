@@ -9,7 +9,7 @@ public class ConjunctionAlertPlannerTests
 
     private readonly ConjunctionAlertPlanner _planner = new();
 
-    private IReadOnlyList<ConjunctionAlert> Plan(DateTimeOffset now, params MoonPlanetConjunction[] conjunctions) =>
+    private IReadOnlyList<ConjunctionAlert> Plan(DateTimeOffset now, params Conjunction[] conjunctions) =>
         _planner.Plan(conjunctions, now, Madrid);
 
     [Fact]
@@ -94,7 +94,7 @@ public class ConjunctionAlertPlannerTests
 
         var alert = Assert.Single(Plan(Morning, jupiter, mars));
 
-        Assert.Equal([CelestialBody.Mars, CelestialBody.Jupiter], alert.Conjunctions.Select(c => c.Planet));
+        Assert.Equal([CelestialBody.Mars, CelestialBody.Jupiter], alert.Conjunctions.Select(c => c.Companion));
         Assert.Equal(Local("2026-10-14 20:55"), alert.NotifyAt);
         Assert.Equal(Local("2026-10-15 04:10"), alert.WindowEnd);
     }
@@ -121,7 +121,7 @@ public class ConjunctionAlertPlannerTests
 
         var alerts = Plan(Morning, saturn, jupiter);
 
-        Assert.Equal([CelestialBody.Jupiter, CelestialBody.Saturn], alerts.Select(a => a.Closest.Planet));
+        Assert.Equal([CelestialBody.Jupiter, CelestialBody.Saturn], alerts.Select(a => a.Closest.Companion));
         Assert.Equal([Local("2026-10-14 19:45"), Local("2026-10-14 22:00")], alerts.Select(a => a.NotifyAt));
     }
 

@@ -17,26 +17,26 @@ public static class ConjunctionAlertText
 
     /// <summary>Headline: "La Luna junto a Júpiter", "La Luna junto a Júpiter y Marte".</summary>
     public static string Title(ConjunctionAlert alert) =>
-        $"La Luna junto a {JoinNames(alert.Conjunctions.Select(c => PlanetName(c.Planet)))}";
+        $"La Luna junto a {JoinNames(alert.Conjunctions.Select(c => PlanetName(c.Companion)))}";
 
     /// <summary>When, how close and where to look.</summary>
     public static string Body(ConjunctionAlert alert, TimeZoneInfo timeZone)
     {
         ArgumentNullException.ThrowIfNull(timeZone);
         var notify = TimeZoneInfo.ConvertTime(alert.NotifyAt, timeZone);
-        var planets = JoinNames(alert.Conjunctions.Select(c => $"{PlanetName(c.Planet)} ({Separation(c.Best.SeparationDegrees)})"));
+        var planets = JoinNames(alert.Conjunctions.Select(c => $"{PlanetName(c.Companion)} ({Separation(c.Best.SeparationDegrees)})"));
         var best = alert.Closest.Best;
 
         // Opened late, past the best moment: say where it is now-ish and until when.
         if (best.Instant < alert.NotifyAt)
         {
             var end = alert.Closest.End;
-            return $"Ahora, la Luna junto a {planets} · al {Cardinal(end.Moon.CardinalPoint)}, hasta {TheTime(Local(alert.WindowEnd, timeZone))}";
+            return $"Ahora, la Luna junto a {planets} · al {Cardinal(end.Guide.CardinalPoint)}, hasta {TheTime(Local(alert.WindowEnd, timeZone))}";
         }
 
         var bestLocal = TimeZoneInfo.ConvertTime(best.Instant, timeZone);
         return $"{When(alert, notify, bestLocal)}, la Luna junto a {planets} · " +
-            $"mejor hacia {TheTime(Approximate(alert, bestLocal, timeZone))} al {Cardinal(best.Moon.CardinalPoint)}";
+            $"mejor hacia {TheTime(Approximate(alert, bestLocal, timeZone))} al {Cardinal(best.Guide.CardinalPoint)}";
     }
 
     /// <summary>The planet's name in Spanish.</summary>

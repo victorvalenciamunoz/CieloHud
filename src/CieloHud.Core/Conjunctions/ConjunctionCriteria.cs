@@ -3,15 +3,28 @@ using CieloHud.Core.SolarSystem;
 namespace CieloHud.Core.Conjunctions;
 
 /// <summary>
-/// What counts as a Moon-planet conjunction worth going out for (decision 025): close together, both clear of buildings
-/// and haze, and a dark enough sky. Fixed by design, like the pass criteria.
+/// What counts as a conjunction worth going out for: the Moon next to a planet (decision 025) or two planets together
+/// (decision 028). Close together, both clear of buildings and haze, and a dark enough sky. Fixed by design, like the pass criteria.
 /// </summary>
 public sealed record ConjunctionCriteria
 {
     /// <summary>Largest Moon-planet separation, as seen from the observer: about three fingers at arm's length.</summary>
-    public double MaxSeparationDegrees { get; init; } = 5;
+    public double MaxMoonSeparationDegrees { get; init; } = 5;
 
-    /// <summary>Both the Moon and the planet must be at least this high.</summary>
+    /// <summary>
+    /// Largest separation between two planets: two points of light about two fingers apart. Stricter than for the Moon, which is
+    /// big and bright enough to look "next to" a planet five degrees away.
+    /// </summary>
+    public double MaxPlanetSeparationDegrees { get; init; } = 3;
+
+    /// <summary>
+    /// Two planets stay close for many nights (Mars and Jupiter in Nov 2026: 15 nights within 3°). To tell which night is the
+    /// closest, the search looks this far before and after the requested range. Longer approaches (Jupiter and Saturn, every 20 years)
+    /// would need more.
+    /// </summary>
+    public TimeSpan PlanetApproachSearch { get; init; } = TimeSpan.FromDays(60);
+
+    /// <summary>Both bodies must be at least this high.</summary>
     public double MinAltitudeDegrees { get; init; } = 10;
 
     /// <summary>
@@ -27,13 +40,14 @@ public sealed record ConjunctionCriteria
     public TimeSpan Step { get; init; } = TimeSpan.FromMinutes(5);
 
     /// <summary>
-    /// Two windows with the same planet closer than this are the same approach (the Moon moves 13° a day, so with a 5° limit
-    /// it can only be the dawn and the dusk of one day); only the closer one is kept.
+    /// Two windows of the Moon with the same planet closer than this are the same approach (the Moon moves 13° a day, so with a 5°
+    /// limit it can only be the dawn and the dusk of one day); only the closer one is kept. Two planets are grouped night by night instead.
     /// </summary>
     public TimeSpan SameApproachWithin { get; init; } = TimeSpan.FromDays(1);
 
     /// <summary>
-    /// Planets looked at. Mercury is left out: from a city it never meets these criteria (low, in twilight, faint).
+    /// Planets looked at, with the Moon and among themselves. Mercury is left out: from a city it never meets these criteria
+    /// (low, in twilight, faint).
     /// </summary>
     public IReadOnlyList<CelestialBody> Planets { get; init; } =
         [CelestialBody.Venus, CelestialBody.Mars, CelestialBody.Jupiter, CelestialBody.Saturn];
@@ -42,8 +56,10 @@ public sealed record ConjunctionCriteria
 
     internal void Validate()
     {
-        if (MaxSeparationDegrees <= 0)
-            throw new ArgumentOutOfRangeException(nameof(MaxSeparationDegrees), MaxSeparationDegrees, "Separation must be positive.");
+        if (MaxMoonSeparationDegrees <= 0 || MaxPlanetSeparationDegrees <= 0)
+            throw new ArgumentException("Separations must be positive.");
+        if (PlanetApproachSearch < TimeSpan.Zero)
+            throw new ArgumentOutOfRangeException(nameof(PlanetApproachSearch), PlanetApproachSearch, "Cannot be negative.");
         if (ComfortableAltitudeDegrees < MinAltitudeDegrees)
             throw new ArgumentException("Expected ComfortableAltitudeDegrees >= MinAltitudeDegrees.");
         if (Step <= TimeSpan.Zero)
