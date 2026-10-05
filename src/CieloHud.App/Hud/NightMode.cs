@@ -3,6 +3,7 @@ namespace CieloHud.App.Hud;
 /// <summary>
 /// Red night mode, remembered between sessions. Owns the active <see cref="HudPalette"/>: the drawable and chips read
 /// <see cref="Palette"/>, and XAML reads the same colors as <c>DynamicResource</c> keys that <see cref="Apply"/> refreshes.
+/// On Android it also hides the system bars and dims the window (see <c>NightWindow</c>).
 /// </summary>
 public sealed class NightMode
 {
@@ -43,5 +44,15 @@ public sealed class NightMode
         resources["HudLocked"] = p.Locked;
         resources["HudMarker"] = p.Marker;
         resources["HudAlert"] = p.Alert;
+
+        ApplyToWindow();
+    }
+
+    /// <summary>System bars and screen brightness. Needs the window, so it is also called each time the app comes to the front.</summary>
+    public void ApplyToWindow()
+    {
+#if ANDROID
+        Platforms.Android.NightWindow.Apply(IsOn);
+#endif
     }
 }
