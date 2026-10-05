@@ -21,7 +21,7 @@ public partial class DiagnosticsPage : ContentPage
     private readonly ISolarSystemService _solarSystem;
     private readonly ISunService _sun;
     private readonly NightMode _nightMode;
-    private readonly PassAlertService _alerts;
+    private readonly AlertService _alerts;
     private readonly GuidanceCalculator _guidance = new();
 
     private Observer? _observer;
@@ -32,7 +32,7 @@ public partial class DiagnosticsPage : ContentPage
     private IDispatcherTimer? _skyTimer;
 
     public DiagnosticsPage(IPointingSource pointing, ILocationSource location, ISolarSystemService solarSystem, ISunService sun, NightMode nightMode,
-        PassAlertService alerts)
+        AlertService alerts)
     {
         InitializeComponent();
         _pointing = pointing;
@@ -180,6 +180,16 @@ public partial class DiagnosticsPage : ContentPage
         var seconds = int.Parse((string)((Button)sender!).CommandParameter, Culture);
         _alerts.ArmTest(TimeSpan.FromSeconds(seconds));
         StatusLabel.Text = $"Aviso de prueba a las {LocalTime(DateTimeOffset.UtcNow.AddSeconds(seconds), "HH:mm:ss")}: puedes cerrar la app.";
+    }
+
+    /// <summary>The next real conjunction (searched up to two months ahead, which takes a moment) as a test alert.</summary>
+    private async void OnTestConjunctionClicked(object? sender, EventArgs e)
+    {
+        var seconds = int.Parse((string)((Button)sender!).CommandParameter, Culture);
+        var at = DateTimeOffset.UtcNow.AddSeconds(seconds);
+        StatusLabel.Text = "Buscando la próxima conjunción…";
+        await Task.Run(() => _alerts.ArmTest(TimeSpan.FromSeconds(seconds), AlertKind.Conjunction));
+        StatusLabel.Text = $"Aviso de conjunción de prueba a las {LocalTime(at, "HH:mm:ss")}: puedes cerrar la app. Al tocarlo, la Luna.";
     }
 
     private void OnTestRefreshClicked(object? sender, EventArgs e)

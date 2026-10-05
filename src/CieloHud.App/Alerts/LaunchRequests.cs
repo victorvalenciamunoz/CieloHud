@@ -6,7 +6,7 @@ namespace CieloHud.App.Alerts;
 /// </summary>
 public static class LaunchRequests
 {
-    /// <summary>Intent extra with the target name, e.g. "ISS".</summary>
+    /// <summary>Intent extra with the target name: "ISS" for a pass, "Luna" for a conjunction.</summary>
     public const string TargetExtra = "cielohud.target";
 
     private static string? _pending;

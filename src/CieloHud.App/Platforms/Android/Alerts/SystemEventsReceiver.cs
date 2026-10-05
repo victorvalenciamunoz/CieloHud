@@ -38,7 +38,7 @@ public sealed class SystemEventsReceiver : BroadcastReceiver
     {
         if (intent?.Action is not { } action || !Reasons.TryGetValue(action, out var reason))
             return;
-        if (IPlatformApplication.Current?.Services.GetService<PassAlertService>() is not { } alerts || !alerts.IsOn)
+        if (IPlatformApplication.Current?.Services.GetService<AlertService>() is not { } alerts || !alerts.IsOn)
             return;
 
         var pending = GoAsync();

@@ -465,7 +465,17 @@ La validación de los avisos de la ISS contra un paso real (paso 4) sigue pendie
   Quedan como tests de integración (tolerancia 0,05°).
 - Frecuencia con este criterio (sondeo de 12 meses desde Humanes de Madrid, oct 2026-oct 2027): 16 conjunciones en 15 noches, unas 1,3 al mes;
   10 con Júpiter, 5 con Marte, 1 con Venus, ninguna con Saturno (este año la Luna pasa a 6-7° de él). Detalle en la decisión 025.
-- Pendiente: contraste con **Stellarium** (no está instalado en esta máquina) y verlo en el cielo: la madrugada del 6 oct, hacia las 7:30, Luna y Júpiter a 2° al E, a ~45°.
+- **Contraste con Stellarium Web** (2026-10-05, el usuario; ubicación Humanes de Madrid, atmósfera activada, reloj en pausa), 6 oct 7:45:
+
+  | | Stellarium | CieloHud | Diferencia |
+  |---|---|---|---|
+  | Luna (acimut / altura) | 109,655° / 45,003° | 109,656° / 45,001° | 0,001° / 0,002° |
+  | Júpiter (acimut / altura) | 108,722° / 43,130° | 108,720° / 43,124° | 0,002° / 0,006° |
+  | Separación | 1,990° | 1,994° | 0,004° |
+  | Distancia a la Luna | 369 624 km | 369 645 km | 0,006 % |
+
+  Separación calculada con los acimut y alturas que muestra Stellarium. Parte de la diferencia puede venir de la ubicación (Stellarium no muestra sus coordenadas exactas).
+  Pendiente opcional: 3 nov 3:30 (3,07°) y 23 ene 23:00 (1,58°); y verlo en el cielo la madrugada del 6 oct, hacia las 7:30, Luna y Júpiter a 2° al E, a ~45°.
 - `dotnet test` 349 tests; build Android 0 avisos (la app aún no usa `Conjunctions/`).
 
 ### Paso 6 — Cuándo avisar de una conjunción y con qué texto (2026-10-05)
@@ -501,6 +511,36 @@ La validación de los avisos de la ISS contra un paso real (paso 4) sigue pendie
 
   Más adelante, el 15 abr 2027: «Esta noche, la Luna junto a Júpiter (4°) y Marte (4°) · mejor hacia las 21:30 al SE».
 - `dotnet test` 396 tests; build Android 0 avisos (la app aún no usa los avisos de conjunción).
+
+### Paso 7 — Avisos de conjunción en la app (2026-10-05)
+
+- `PassAlertService` pasa a llamarse **`AlertService`**: planifica las conjunciones de los próximos 3 días y los pasos de la ISS, y guarda los dos tipos
+  en **una lista ordenada por hora**. Sigue habiendo una sola alarma de aviso (AlarmSteps sin cambios) más la de recálculo. Decisión 027.
+- `ScheduledAlert` gana `Kind` (`Pass` = 0, `Conjunction`) y, para las conjunciones, el planeta y el mejor momento de cada una (`NotifiedConjunction`),
+  que se apuntan como avisadas al publicarse y no se repiten. Los avisos guardados por la versión anterior, sin `Kind`, se leen como pasos.
+- **Sin órbita de la ISS (sin red), las conjunciones se planifican igual**: Diagnóstico y el resumen de AVISOS lo dicen, y el recálculo se adelanta a 3 h.
+  Sin ubicación no se puede planificar nada, como antes.
+- Android: canal **«Luna y planetas»** (`moon_planets`, importancia normal: suena, sin banner), icono de luna creciente `ic_stat_moon`,
+  la notificación se va sola al cerrarse la ventana, y al tocarla el HUD guía a la **Luna**. Ids de notificación de conjunciones negativos, para no chocar con los de los pasos.
+- AVISOS: si no hay nada en 3 días, «ni pasos visibles de la ISS ni la Luna junto a un planeta».
+- Diagnóstico (Debug): **«PROBAR CONJUNCIÓN (30 s)»** con la próxima conjunción real (busca hasta 60 días) y su texto de verdad.
+- Validado en el OPPO (Android 16), instalando sobre la versión anterior:
+
+  | Prueba | Resultado |
+  |---|---|
+  | Activar AVISOS | «Próximo aviso: lun 5 22:00 · Mañana temprano, la Luna junto a Júpiter (2°) · mejor hacia las 7:45 al E»: el mismo que da Core (paso 6) |
+  | `dumpsys alarm` | `ALERT` pedida a las 21:00 con ventana de 1 h (AlarmSteps: acaba a las 22:00), `exactAllowReason=permission`; recálculo al día siguiente |
+  | Preferencias | el aviso guardado con `Kind:1` y `Conjunctions:[{Planet:Jupiter, Best:…}]` |
+  | «PROBAR CONJUNCIÓN» con el proceso muerto (`am kill`) | la alarma arranca la app y publica a +3 s del objetivo (arranque en Debug); canal `moon_planets`, importancia 3, caduca al cerrarse la ventana (7:45 del día siguiente) |
+  | Tocarla con el HUD en Venus | el HUD pasa a la Luna; la notificación se borra |
+  | «PROBAR AVISO» (ISS) | sin cambios: canal `iss_passes`, importancia 4, al tocar → ISS |
+  | Canales | «Pasos de la ISS» (4) y «Luna y planetas» (3) |
+
+- ColorOS pinta el icono de la app en la notificación (`oplus_smallicon_use_app_icon`), no el monocromo, igual que con la ISS.
+- Capturas: `docs/images/conjuncion-notificacion.png`, `docs/images/conjuncion-diagnostico.png` y `docs/images/conjuncion-hud-luna.png`, recortadas sin el pie con la ubicación.
+- Sin probar en el móvil: el camino sin red (habría que borrar la caché del TLE y cortar la red), y el aviso real de esta noche a las 22:00, que queda armado.
+- Contrastado con Stellarium Web el 6 oct a las 7:45: separación 1,990° frente a 1,994° (tabla en el paso 5).
+- `dotnet test` 396 tests; build Android 0 avisos.
 
 ## Mejoras fuera de fase
 

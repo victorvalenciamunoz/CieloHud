@@ -1,5 +1,6 @@
 using CieloHud.App.Alerts;
 using CieloHud.App.Hud;
+using CieloHud.Core.Conjunctions;
 using CieloHud.Core.Passes;
 using CieloHud.App.Services;
 using CieloHud.Core.Satellites;
@@ -45,6 +46,9 @@ public static class MauiProgram
 			sp.GetRequiredService<ISatelliteService>(),
 			sp.GetRequiredService<ISunService>(),
 			sp.GetRequiredService<ISatelliteIlluminationService>()));
+		builder.Services.AddSingleton<IConjunctionFinder>(sp => new ConjunctionFinder(
+			sp.GetRequiredService<ISolarSystemService>(),
+			sp.GetRequiredService<ISunService>()));
 
 		// Device
 #if ANDROID
@@ -59,7 +63,7 @@ public static class MauiProgram
 #if ANDROID
 		builder.Services.AddSingleton<IAlertPlatform, Platforms.Android.Alerts.AndroidAlertPlatform>();
 #endif
-		builder.Services.AddSingleton<PassAlertService>();
+		builder.Services.AddSingleton<AlertService>();
 
 		// HUD
 		builder.Services.AddSingleton<TargetCatalog>();

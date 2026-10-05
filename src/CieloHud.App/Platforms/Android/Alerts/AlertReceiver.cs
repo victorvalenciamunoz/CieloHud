@@ -19,10 +19,11 @@ public sealed class AlertReceiver : BroadcastReceiver
     private const string VisibleEndExtra = "visible_end";
     private const string TitleExtra = "title";
     private const string BodyExtra = "body";
+    private const string KindExtra = "kind";
 
     public override void OnReceive(Context? context, Intent? intent)
     {
-        if (IPlatformApplication.Current?.Services.GetService<PassAlertService>() is not { } alerts || intent is null)
+        if (IPlatformApplication.Current?.Services.GetService<AlertService>() is not { } alerts || intent is null)
             return;
 
         var pending = GoAsync();
@@ -54,7 +55,8 @@ public sealed class AlertReceiver : BroadcastReceiver
         .PutExtra(VisibleStartExtra, alert.VisibleStart.ToUnixTimeMilliseconds())
         .PutExtra(VisibleEndExtra, alert.VisibleEnd.ToUnixTimeMilliseconds())
         .PutExtra(TitleExtra, alert.Title)
-        .PutExtra(BodyExtra, alert.Body);
+        .PutExtra(BodyExtra, alert.Body)
+        .PutExtra(KindExtra, (int)alert.Kind);
 
     private static ScheduledAlert? ReadAlert(Intent intent) =>
         intent.GetStringExtra(TitleExtra) is { } title && intent.GetStringExtra(BodyExtra) is { } body
@@ -62,6 +64,6 @@ public sealed class AlertReceiver : BroadcastReceiver
                 DateTimeOffset.FromUnixTimeMilliseconds(intent.GetLongExtra(NotifyAtExtra, 0)),
                 DateTimeOffset.FromUnixTimeMilliseconds(intent.GetLongExtra(VisibleStartExtra, 0)),
                 DateTimeOffset.FromUnixTimeMilliseconds(intent.GetLongExtra(VisibleEndExtra, 0)),
-                false, title, body)
+                false, title, body, (AlertKind)intent.GetIntExtra(KindExtra, (int)AlertKind.Pass))
             : null;
 }
