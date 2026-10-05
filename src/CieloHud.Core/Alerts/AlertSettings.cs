@@ -33,6 +33,15 @@ public sealed record AlertSettings
     /// <summary>How far ahead the app looks for passes on each recalculation.</summary>
     public TimeSpan Horizon { get; init; } = TimeSpan.FromDays(3);
 
+    /// <summary>
+    /// How often the alerts are planned again with the app closed: a fresher TLE, and the passes that enter the horizon.
+    /// Shorter than the horizon, so a pass is always planned before its alert is due.
+    /// </summary>
+    public TimeSpan RefreshInterval { get; init; } = TimeSpan.FromDays(1);
+
+    /// <summary>When planning could not run (no location yet, no TLE and no network), the next try comes sooner.</summary>
+    public TimeSpan RetryInterval { get; init; } = TimeSpan.FromHours(3);
+
     public static AlertSettings Default { get; } = new();
 
     internal void Validate()
@@ -43,5 +52,7 @@ public sealed record AlertSettings
         // Quiet hours within one calendar day, evening reminder after them: the reminder is always the evening before.
         if (QuietStart < TimeSpan.Zero || QuietStart >= QuietEnd || QuietEnd > EveningReminder || EveningReminder >= day)
             throw new ArgumentException("Expected 0 <= QuietStart < QuietEnd <= EveningReminder < 24 h.");
+        if (RetryInterval <= TimeSpan.Zero || RefreshInterval < RetryInterval || RefreshInterval >= Horizon)
+            throw new ArgumentException("Expected 0 < RetryInterval <= RefreshInterval < Horizon.");
     }
 }

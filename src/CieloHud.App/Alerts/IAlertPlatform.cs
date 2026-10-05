@@ -21,6 +21,9 @@ public interface IAlertPlatform
     /// </summary>
     void ArmAlert(DateTimeOffset? at);
 
+    /// <summary>Arms the background planning alarm, inexact, replacing the previous one; null cancels it.</summary>
+    void ArmRefresh(DateTimeOffset? at);
+
     /// <summary>Arms the test alarm, which hands <paramref name="alert"/> back on waking. For trying the alerts without waiting for a pass.</summary>
     void ArmTest(DateTimeOffset wakeAt, ScheduledAlert alert);
 

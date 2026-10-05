@@ -16,6 +16,7 @@ public sealed class AndroidAlertPlatform : IAlertPlatform
     public const string ChannelId = "iss_passes";
     private const int AlertRequestCode = 1;
     private const int TestRequestCode = 2;
+    private const int RefreshRequestCode = 3;
 
     private static Context Context => global::Android.App.Application.Context;
 
@@ -50,6 +51,16 @@ public sealed class AndroidAlertPlatform : IAlertPlatform
         var operation = AlarmIntent(AlertReceiver.AlertAction, AlertRequestCode, null);
         if (at is { } time)
             Arm(time, operation);
+        else
+            Alarms.Cancel(operation);
+    }
+
+    // Planning does not need the exact minute (and ColorOS may add up to an hour anyway): always inexact.
+    public void ArmRefresh(DateTimeOffset? at)
+    {
+        var operation = AlarmIntent(AlertReceiver.RefreshAction, RefreshRequestCode, null);
+        if (at is { } time)
+            Alarms.SetAndAllowWhileIdle(AlarmType.RtcWakeup, time.ToUnixTimeMilliseconds(), operation);
         else
             Alarms.Cancel(operation);
     }

@@ -24,7 +24,11 @@ public sealed record ScheduledAlert(
         PassAlertText.Body(alert, timeZone));
 }
 
+/// <summary>One planning of the alerts and why it ran.</summary>
+public sealed record PlanningRecord(DateTimeOffset At, string Reason);
+
 // Source-generated: no reflection, safe with trimming in Release.
 [JsonSerializable(typeof(List<ScheduledAlert>))]
 [JsonSerializable(typeof(List<DateTimeOffset>))]
+[JsonSerializable(typeof(List<PlanningRecord>))]
 internal sealed partial class AlertJsonContext : JsonSerializerContext;

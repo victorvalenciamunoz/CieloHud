@@ -72,13 +72,15 @@
             </Grid>
 
             <Label Text="AVISOS" Style="{StaticResource Section}" />
-            <Grid ColumnDefinitions="110,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="4">
+            <Grid ColumnDefinitions="110,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="4">
                 <Label Grid.Row="0" Text="Estado" Style="{StaticResource Key}" />
                 <Label Grid.Row="0" Grid.Column="1" x:Name="AlertsStateLabel" Text="–" Style="{StaticResource Value}" />
                 <Label Grid.Row="1" Text="Permisos" Style="{StaticResource Key}" />
                 <Label Grid.Row="1" Grid.Column="1" x:Name="AlertsPermissionsLabel" Text="–" Style="{StaticResource Value}" FontSize="14" />
                 <Label Grid.Row="2" Text="Calculado" Style="{StaticResource Key}" />
                 <Label Grid.Row="2" Grid.Column="1" x:Name="AlertsPlannedLabel" Text="–" Style="{StaticResource Value}" FontSize="14" />
+                <Label Grid.Row="6" Text="Recálculo" Style="{StaticResource Key}" VerticalOptions="Start" />
+                <Label Grid.Row="6" Grid.Column="1" x:Name="AlertsRefreshLabel" Text="–" Style="{StaticResource Value}" FontSize="14" />
                 <Label Grid.Row="3" Text="Próximo" Style="{StaticResource Key}" VerticalOptions="Start" />
                 <Label Grid.Row="3" Grid.Column="1" x:Name="AlertsNextLabel" Text="–" Style="{StaticResource Value}" FontSize="14" TextColor="{DynamicResource HudMarker}" />
                 <Label Grid.Row="4" Text="Después" Style="{StaticResource Key}" VerticalOptions="Start" />
@@ -87,14 +89,17 @@
                 <Label Grid.Row="5" Grid.Column="1" x:Name="AlertsLastWakeLabel" Text="–" Style="{StaticResource Value}" FontSize="14" />
             </Grid>
             <!-- Debug builds only: posts the next alert through real alarms, to try it with the app closed. -->
-            <HorizontalStackLayout x:Name="TestAlertButtons" Spacing="8" Margin="0,8,0,0" IsVisible="False">
-                <Button Text="PROBAR AVISO (30 s)" CommandParameter="30" Clicked="OnTestAlertClicked"
+            <FlexLayout x:Name="TestAlertButtons" Wrap="Wrap" Margin="0,8,0,0" IsVisible="False">
+                <Button Text="PROBAR AVISO (30 s)" CommandParameter="30" Clicked="OnTestAlertClicked" Margin="0,0,8,8"
                         FontFamily="ChakraPetch" FontSize="12" TextColor="{DynamicResource HudTextSoft}" BackgroundColor="Transparent"
                         BorderColor="{DynamicResource HudTextDim}" BorderWidth="1" CornerRadius="6" Padding="12,6" />
-                <Button Text="(5 min)" CommandParameter="300" Clicked="OnTestAlertClicked"
+                <Button Text="(5 min)" CommandParameter="300" Clicked="OnTestAlertClicked" Margin="0,0,8,8"
                         FontFamily="ChakraPetch" FontSize="12" TextColor="{DynamicResource HudTextSoft}" BackgroundColor="Transparent"
                         BorderColor="{DynamicResource HudTextDim}" BorderWidth="1" CornerRadius="6" Padding="12,6" />
-            </HorizontalStackLayout>
+                <Button Text="RECÁLCULO (30 s)" Clicked="OnTestRefreshClicked" Margin="0,0,8,8"
+                        FontFamily="ChakraPetch" FontSize="12" TextColor="{DynamicResource HudTextSoft}" BackgroundColor="Transparent"
+                        BorderColor="{DynamicResource HudTextDim}" BorderWidth="1" CornerRadius="6" Padding="12,6" />
+            </FlexLayout>
 
             <Label x:Name="StatusLabel" Text="" Style="{StaticResource Key}" Margin="0,16,0,0" TextColor="{DynamicResource HudAlert}" />
         </VerticalStackLayout>

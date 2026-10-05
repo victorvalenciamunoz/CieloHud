@@ -18,9 +18,11 @@ public sealed class PassAlertService
     private const string OnKey = "alerts_on";
     private const string PendingKey = "alerts_pending";
     private const string NotifiedKey = "alerts_notified";
-    private const string PlannedAtKey = "alerts_planned_at";
+    private const string HistoryKey = "alerts_history";
+    private const int HistoryLength = 6;
     private const string ProblemKey = "alerts_problem";
     private const string LastWakeKey = "alerts_last_wake";
+    private const string NextRefreshKey = "alerts_next_refresh";
 
     /// <summary>The alarm may wake the app with no network; do not wait long for a fresh TLE, the cache will do.</summary>
     private static readonly TimeSpan TleTimeout = TimeSpan.FromSeconds(15);
@@ -52,9 +54,12 @@ public sealed class PassAlertService
     /// <summary>Planned alerts, in order. Empty when off or nothing visible in the next days.</summary>
     public IReadOnlyList<ScheduledAlert> Pending => Read(PendingKey, AlertJsonContext.Default.ListScheduledAlert);
 
-    /// <summary>When the alerts were last planned (UTC), if ever.</summary>
-    public DateTimeOffset? PlannedAt =>
-        _preferences.Get(PlannedAtKey, (string?)null) is { } s ? Parse(s) : null;
+    /// <summary>The last plannings, oldest first, with why they ran: shows that the background ones happen (reboot, daily…).</summary>
+    public IReadOnlyList<PlanningRecord> History => Read(HistoryKey, AlertJsonContext.Default.ListPlanningRecord);
+
+    /// <summary>When the alerts will be planned again with the app closed (UTC), if the alerts are on.</summary>
+    public DateTimeOffset? NextRefresh =>
+        _preferences.Get(NextRefreshKey, (string?)null) is { } s ? Parse(s) : null;
 
     /// <summary>Why the last planning could not run, in words; null when it went fine.</summary>
     public string? Problem => _preferences.Get(ProblemKey, (string?)null);
@@ -68,7 +73,7 @@ public sealed class PassAlertService
         if (!await _platform.RequestNotificationsAsync())
             return false;
         _preferences.Set(OnKey, true);
-        await RescheduleAsync();
+        await RescheduleAsync("al activar");
         return true;
     }
 
@@ -76,16 +81,18 @@ public sealed class PassAlertService
     {
         _preferences.Set(OnKey, false);
         _platform.ArmAlert(null);
+        ArmRefresh(null);
         _preferences.Remove(PendingKey);
     }
 
     /// <summary>Plans the alerts again and arms the alarm at the first one. Safe to call often and from any thread.</summary>
-    public async Task RescheduleAsync()
+    /// <param name="reason">Why, in words, for the history in diagnostics ("al abrir la app", "tras reiniciar"…).</param>
+    public async Task RescheduleAsync(string reason)
     {
         await _gate.WaitAsync().ConfigureAwait(false);
         try
         {
-            await RescheduleCoreAsync().ConfigureAwait(false);
+            await RescheduleCoreAsync(reason).ConfigureAwait(false);
         }
         finally
         {
@@ -124,7 +131,7 @@ public sealed class PassAlertService
                 notified.RemoveAll(n => n < now - TimeSpan.FromDays(1));
                 Write(NotifiedKey, notified, AlertJsonContext.Default.ListDateTimeOffset);
             }
-            await RescheduleCoreAsync().ConfigureAwait(false);
+            await RescheduleCoreAsync("tras un aviso").ConfigureAwait(false);
         }
         finally
         {
@@ -152,6 +159,9 @@ public sealed class PassAlertService
         _platform.ArmTest(AlarmSteps.NextWakeUp(now, at), test);
     }
 
+    /// <summary>Brings the background planning forward to <paramref name="delay"/> from now, to try it with the app closed.</summary>
+    public void ArmRefreshTest(TimeSpan delay) => ArmRefresh(DateTimeOffset.UtcNow + delay);
+
     /// <summary>The test alarm went off: the same steps as a real alert, without touching the planned ones.</summary>
     public void OnTestAlarm(ScheduledAlert test)
     {
@@ -170,20 +180,23 @@ public sealed class PassAlertService
 
     private static DateTimeOffset Parse(string instant) => DateTimeOffset.Parse(instant, System.Globalization.CultureInfo.InvariantCulture);
 
-    private async Task RescheduleCoreAsync()
+    private async Task RescheduleCoreAsync(string reason)
     {
         if (!IsOn)
         {
             _platform.ArmAlert(null);
+            ArmRefresh(null);
             return;
         }
 
         var now = DateTimeOffset.UtcNow;
-        _preferences.Set(PlannedAtKey, Format(now));
+        var history = Read(HistoryKey, AlertJsonContext.Default.ListPlanningRecord);
+        history.Add(new PlanningRecord(now, reason));
+        Write(HistoryKey, history.TakeLast(HistoryLength).ToList(), AlertJsonContext.Default.ListPlanningRecord);
 
         if (_observers.Last is not { } observer)
         {
-            Fail("sin ubicación: abre el HUD con el GPS activo");
+            Fail(now, "sin ubicación: abre el HUD con el GPS activo");
             return;
         }
 
@@ -195,7 +208,7 @@ public sealed class PassAlertService
         }
         catch (Exception ex) when (ex is TleUnavailableException or OperationCanceledException or IOException)
         {
-            Fail("sin órbita de la ISS (sin red)");
+            Fail(now, "sin órbita de la ISS (sin red)");
             return;
         }
 
@@ -209,13 +222,25 @@ public sealed class PassAlertService
         _preferences.Remove(ProblemKey);
         // Early enough that the system delivering it late still lands on the alert; an alert already due goes off now.
         _platform.ArmAlert(alerts.Count > 0 ? AlarmSteps.NextWakeUp(now, alerts[0].NotifyAt) : null);
+        ArmRefresh(now + _planner.Settings.RefreshInterval);
     }
 
-    private void Fail(string problem)
+    private void Fail(DateTimeOffset now, string problem)
     {
         _preferences.Set(ProblemKey, problem);
         _preferences.Remove(PendingKey);
         _platform.ArmAlert(null);
+        ArmRefresh(now + _planner.Settings.RetryInterval);
+    }
+
+    /// <summary>The daily planning with the app closed. Inexact: a few minutes, or the hour ColorOS may add, do not matter here.</summary>
+    private void ArmRefresh(DateTimeOffset? at)
+    {
+        _platform.ArmRefresh(at);
+        if (at is { } time)
+            _preferences.Set(NextRefreshKey, Format(time));
+        else
+            _preferences.Remove(NextRefreshKey);
     }
 
     private List<T> Read<T>(string key, System.Text.Json.Serialization.Metadata.JsonTypeInfo<List<T>> type)
