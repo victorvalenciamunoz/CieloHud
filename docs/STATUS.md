@@ -343,6 +343,41 @@ Solo orientación vertical.
 - Validado en tierra (punto de referencia, 2,6° tras calibrar) y en el cielo (la Luna).
 - 253 tests en verde, también en el CI de GitHub en cada PR.
 
+## Fase 4 — Avisos
+
+Plan acordado (2026-10-05): notificaciones locales antes de cada paso visible de la ISS, con la app cerrada; al tocarlas, el HUD con la ISS.
+Interruptor AVISOS desactivado por defecto. API nativa de Android (AlarmManager + NotificationCompat), sin paquetes nuevos.
+Pasos: 1) reglas y texto en Core; 2) programar y notificar en Android; 3) recálculo diario, tras reiniciar y frente a ColorOS; 4) validación contra Heavens-Above.
+Los «eventos destacados» quedan fuera de este primer paso.
+
+### Paso 1 — Reglas y texto de los avisos (2026-10-05)
+
+- Core `Alerts/`: `AlertSettings` (10 min de antelación, silencio 0:00-7:00, recordatorio a las 22:00 de la víspera, TLE de hasta 4 días, mismo paso a ±2 min, horizonte de 3 días),
+  `PassAlert` (paso + hora del aviso + si es de víspera), `PassAlertPlanner.Plan` y `PassAlertText` (título y cuerpo en español). Decisión 021.
+- Tests unitarios con pasos sintéticos: aviso a 10 min; madrugada → 22:00 de la víspera; límites de las horas de silencio por la hora del aviso (6:59:59 / 7:00, 23:59:59 / 0:00);
+  aviso tardío → ya; tardío en silencio → se omite; víspera perdida a las 23:30 → ya; paso empezado; TLE viejo; ya avisado con tolerancia; orden; cambio de hora del 25 oct
+  (víspera a las 20:00 UTC el sábado y a las 21:00 UTC el domingo); ajustes inválidos. Texto: el ejemplo del plan literal, salida de la sombra, encendido en el máximo,
+  «Mañana», minutos y grados redondeados, hora local tras el cambio de hora, los ocho puntos cardinales.
+- Tests de integración con el TLE fijo sobre los pasos de la tabla de Heavens-Above de la Fase 2 (16, 15 y 18 oct).
+- Avisos que saldrían del 12 al 22 oct (TLE del 1 oct, Humanes, hora local), coherentes con la tabla de Heavens-Above validada en la Fase 2:
+
+  | Aviso | Texto |
+  |---|---|
+  | 13/10 07:44 | A las 7:54 pasa la ISS · 11 min · aparece por el SO, máximo 37° al SE |
+  | 13/10 22:00 | Mañana a las 7:08 pasa la ISS · 9 min · aparece a 2° al S, máximo 22° al SE |
+  | 14/10 22:00 | Mañana a las 6:24 pasa la ISS · 6 min · aparece a 10° al SE, máximo 13° al SE |
+  | 15/10 07:47 | A las 7:57 pasa la ISS · 10 min · aparece a 2° al SO, máximo 71° al NO |
+  | 16/10 07:02 | A las 7:12 pasa la ISS · 8 min · aparece a 19° al SO, máximo 67° al SE |
+  | 16/10 22:00 | Mañana a las 6:28 pasa la ISS · 5 min · aparece a 37° al SE y va bajando |
+  | 17/10 22:00 | Mañana a las 5:43 pasa la ISS · 3 min · aparece a 11° al E y va bajando |
+  | 18/10 07:06 | A las 7:16 pasa la ISS · 7 min · aparece a 31° al O, máximo 42° al NO |
+  | 18/10 22:00 | Mañana a las 6:31 pasa la ISS · 4 min · aparece a 36° al NE y va bajando |
+  | 20/10 07:08 | A las 7:18 pasa la ISS · 6 min · aparece a 20° al NO, máximo 21° al N |
+  | 20/10 22:00 | Mañana a las 6:33 pasa la ISS · 4 min · aparece a 21° al N y va bajando |
+
+  El aviso del 14 oct a las 7:08 sale de víspera porque cae a las 6:58. Las 7:54 del 13 oct es el paso en el filo del corte de -6° que Heavens-Above también lista.
+- Validado con `dotnet test` (298 tests) y build Android sin avisos (la app aún no usa `Alerts/`).
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.

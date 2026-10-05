@@ -117,3 +117,15 @@ Formato: contexto → decisión → alternativas descartadas.
   - **No hace falta**: el usuario no escribe nada y el universo es cerrado y pequeño (7 objetivos, 155 estrellas, 88 constelaciones). Es contenido que se escribe una vez.
   - Se usa en el campo y de noche, a menudo sin cobertura, y cada consulta a un modelo costaría dinero.
 - Alternativas: LLM en la nube a través de un proxy propio (descartado: backend, coste y datos sin validar); modelo en el dispositivo (descartado: tamaño y calidad); quitar la fase (descartado: el "qué estás viendo" sigue siendo la recompensa al encontrar algo).
+
+## 021 — Avisos de pasos: qué y cuándo en Core, sin molestar de madrugada
+- Contexto: la Fase 4 avisa en el móvil antes de cada paso visible de la ISS, con la app cerrada. Qué pasos se avisan, a qué hora y con qué texto no depende de Android y debe poder probarse.
+- Decisión: `Core/Alerts`. `PassAlertPlanner.Plan(pasos, época del TLE, ahora, zona horaria, ya avisados)` devuelve los avisos ordenados; Android solo los programa y los muestra. Reglas fijas, sin ajustes para el usuario (`AlertSettings`):
+  - Aviso **10 min** antes del inicio visible: da tiempo a salir y calibrar la brújula.
+  - **Horas de silencio 0:00-7:00** (hora local del aviso, no del paso): el aviso pasa a las **22:00 de la víspera**, «Mañana a las 6:24 pasa la ISS…». En octubre casi todos los pasos son de madrugada.
+  - Si la hora del aviso ya pasó (app abierta tarde, recálculo) y el paso no ha empezado, avisa **ya**, salvo en horas de silencio, donde se omite.
+  - No se avisan pasos a más de **4 días** de la época del TLE (los reimpulsos de la ISS desplazan la órbita) ni pasos ya avisados: se identifican por su inicio visible con **±2 min**, porque un TLE nuevo mueve el mismo paso unos segundos.
+  - La zona horaria se pasa como parámetro (`TimeZoneInfo`); el cambio de hora del 25 oct 2026 tiene test.
+- **Primer texto en español en Core** (`PassAlertText`): hasta ahora los nombres en español eran cosa de la consola y la app. El texto del aviso es lógica que debe probarse sin Android, así que va a Core. Redondeo «a la mitad hacia arriba» (2,5 min = 3 min), no al par.
+  Formato: «A las 21:43 pasa la ISS · 5 min · aparece por el NO, máximo 67° al SE». Si sale de la sombra a media altura, «aparece a 19° al SO»; si se enciende ya en lo más alto, «aparece a 37° al SE y va bajando».
+- Alternativas: avisar a la hora que toque aunque sea de madrugada, respetando el «No molestar» del sistema (descartada por el usuario: no molestar de madrugada); antelación configurable (descartada: principio de cero entrada de datos); agrupar en una sola notificación los pasos de una misma madrugada (pospuesto: son raros y dos notificaciones a las 22:00 se entienden); textos en la app con Core devolviendo solo datos (descartado: el texto quedaría sin tests).
