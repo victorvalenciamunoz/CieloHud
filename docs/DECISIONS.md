@@ -164,3 +164,24 @@ Formato: contexto → decisión → alternativas descartadas.
   - Reinicio: ColorOS entrega `BOOT_COMPLETED` con **retraso**, alrededor de 1 min después de desbloquear. La planificación tardó 33 s con el móvil recién arrancado (Debug); el límite de Android para un receptor en segundo plano es de 60 s.
   - El botón de la escoba de recientes no cierra apps: abre el limpiador de almacenamiento.
 - Alternativas: WorkManager periódico para el recálculo (descartado: añade un paquete y, en ColorOS, sufre las mismas restricciones que una alarma; queda de reserva); recalcular solo al abrir la app (descartado: sin abrirla durante días, el TLE envejece y los pasos nuevos no se programan); `LOCKED_BOOT_COMPLETED` (descartado: las preferencias no se pueden leer antes de desbloquear).
+
+## 025 — Conjunciones Luna–planeta: criterio y búsqueda por muestreo topocéntrico
+- Contexto: la Fase 4 avisa también de «eventos destacados», empezando por la Luna junto a un planeta. Hay que decidir qué cuenta como conjunción, cómo encontrarla y qué hora recomendar, sin entrada manual.
+- Decisión: `Core/Conjunctions`, `ConjunctionFinder` con criterios fijos (`ConjunctionCriteria`):
+  - **Separación ≤ 5°** (unos tres dedos con el brazo estirado), **los dos a ≥ 10°** (el mismo mínimo que la ISS), **Sol ≤ -6°** (decisión 008).
+  - **Venus, Marte, Júpiter y Saturno.** Mercurio fuera: en un año, con este criterio, no sale nunca; relajándolo, solo a 6-7°, a 9° de altura, de magnitud 0,4-1,6 y en pleno crepúsculo.
+  - **Muestreo cada 5 min** de las horas oscuras, con la separación entre las posiciones **aparentes topocéntricas** (`ISolarSystemService`, con refracción): lo que ve el ojo. La paralaje de la Luna llega a 1°, comparable al umbral. La separación relativa cambia ~0,5° por hora: 5 min son 0,04°.
+  - **Ventana** = muestras seguidas que cumplen todo. **Mejor momento** = la menor separación entre las muestras con los dos a ≥ 20° (si no las hay, entre todas), y dentro de la tarde (antes de la medianoche local) si la ventana tiene parte de tarde: una hora a la que se está despierto. El mínimo de separación cae a menudo en un borde, con la Luna a 10° o al amanecer (20 feb 2027: mínimo a las 6:30 a 12°; mejor momento a las 23:55 a 62° con 3,8°). La máxima aproximación se conserva aparte.
+  - **Un acercamiento, una conjunción**: con ≤ 5° y la Luna avanzando 13° al día no puede haber dos tardes seguidas, pero sí la madrugada y la tarde del mismo día; se queda la de menor separación.
+- Frecuencia (12 meses desde Humanes, oct 2026-oct 2027, Sol ≤ -6°):
+
+  | Separación | ambos ≥ 10° | ambos ≥ 5° |
+  |---|---|---|
+  | ≤ 3° | 7 | 8 |
+  | ≤ 4° | 10 | 11 |
+  | ≤ 5° | 16 (1,3/mes) | 17 |
+  | ≤ 6° | 21 | 24 |
+
+  Con 3° se queda corto (7 al año); con 6° empieza a ser casualidad. Bajar la altura a 5° solo añade casos tras los edificios.
+- Validación: JPL Horizons, 7 conjunciones de oct 2026 a ene 2027, separación ≤ 0,0044° en todas las muestras de cada ventana y ventanas idénticas (STATUS, paso 5).
+- Alternativas: búsquedas de Astronomy Engine (descartadas: `SearchRelativeLongitude` es para planetas frente a la Tierra, y la conjunción en longitud geocéntrica no es la mínima separación vista desde el observador); separación geocéntrica (descartada: hasta 1° de error por la paralaje lunar); muestreo cada minuto o bisección (innecesario: la hora se redondea en el texto y 5 min son 0,04°); mejor momento = mínima separación sin más (descartada: a menudo a 10° de altura o de madrugada); mejor momento = mayor altura (descartada: elige horas de madrugada en ventanas largas y se aleja de la conjunción).
