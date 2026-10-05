@@ -1,6 +1,5 @@
-using System.Globalization;
 using CieloHud.Core.Passes;
-using CieloHud.Core.Sky;
+using static CieloHud.Core.Alerts.AlertWords;
 
 namespace CieloHud.Core.Alerts;
 
@@ -10,8 +9,6 @@ namespace CieloHud.Core.Alerts;
 /// </summary>
 public static class PassAlertText
 {
-    private static readonly CultureInfo Culture = CultureInfo.InvariantCulture;
-
     /// <summary>Short headline, relative to when the alert goes off: "La ISS pasa en 10 min" or "Mañana temprano pasa la ISS".</summary>
     public static string Title(PassAlert alert)
     {
@@ -33,12 +30,12 @@ public static class PassAlertText
     {
         var start = TimeZoneInfo.ConvertTime(alert.Pass.VisibleStart.Instant, timeZone);
         var notify = TimeZoneInfo.ConvertTime(alert.NotifyAt, timeZone);
-        var time = start.ToString("H:mm", Culture);
+        var time = TheTime(start);
         return (start.Date - notify.Date).Days switch
         {
-            0 => $"A las {time}",
-            1 => $"Mañana a las {time}",
-            _ => $"El día {start.Day.ToString(Culture)} a las {time}",
+            0 => $"A {time}",
+            1 => $"Mañana a {time}",
+            _ => $"El día {start.Day.ToString(Culture)} a {time}",
         };
     }
 
@@ -60,22 +57,4 @@ public static class PassAlertText
         var max = pass.VisibleMax.Position;
         return $"{appears}, máximo {Degrees(max.AltitudeDegrees)}° al {Cardinal(max.CardinalPoint)}";
     }
-
-    private static string Degrees(double degrees) => Round(degrees).ToString("F0", Culture);
-
-    // Halves up, as people round (2.5 min is "3 min"), not to even.
-    private static int Round(double value) => (int)Math.Round(value, MidpointRounding.AwayFromZero);
-
-    private static string Cardinal(CardinalPoint point) => point switch
-    {
-        CardinalPoint.N => "N",
-        CardinalPoint.NE => "NE",
-        CardinalPoint.E => "E",
-        CardinalPoint.SE => "SE",
-        CardinalPoint.S => "S",
-        CardinalPoint.SW => "SO",
-        CardinalPoint.W => "O",
-        CardinalPoint.NW => "NO",
-        _ => throw new ArgumentOutOfRangeException(nameof(point), point, null),
-    };
 }

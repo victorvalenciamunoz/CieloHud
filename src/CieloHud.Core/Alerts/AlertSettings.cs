@@ -1,13 +1,19 @@
 namespace CieloHud.Core.Alerts;
 
 /// <summary>
-/// When to announce a visible pass. Fixed by design (no user input): ten minutes ahead, never at night.
+/// When to announce visible passes and Moon-planet conjunctions. Fixed by design (no user input): ahead of time, never at night.
 /// Times of day are local to the observer's time zone.
 /// </summary>
 public sealed record AlertSettings
 {
     /// <summary>How long before the visible start the alert goes off: time to go outside and calibrate the compass.</summary>
     public TimeSpan LeadTime { get; init; } = TimeSpan.FromMinutes(10);
+
+    /// <summary>
+    /// How long before a conjunction window opens its alert goes off. It lasts hours, so this is a heads-up to plan the evening:
+    /// for an evening window, about sunset.
+    /// </summary>
+    public TimeSpan ConjunctionLeadTime { get; init; } = TimeSpan.FromMinutes(30);
 
     /// <summary>Start of the quiet hours (inclusive). No alert goes off in [<see cref="QuietStart"/>, <see cref="QuietEnd"/>).</summary>
     public TimeSpan QuietStart { get; init; } = TimeSpan.Zero;
@@ -30,7 +36,13 @@ public sealed record AlertSettings
     /// </summary>
     public TimeSpan SamePassTolerance { get; init; } = TimeSpan.FromMinutes(2);
 
-    /// <summary>How far ahead the app looks for passes on each recalculation.</summary>
+    /// <summary>
+    /// A conjunction with a planet whose best moment is closer than this to one already announced with the same planet is the same
+    /// approach (the dawn and the dusk of one day): it is not announced again.
+    /// </summary>
+    public TimeSpan SameConjunctionTolerance { get; init; } = TimeSpan.FromDays(1);
+
+    /// <summary>How far ahead the app looks for passes and conjunctions on each recalculation.</summary>
     public TimeSpan Horizon { get; init; } = TimeSpan.FromDays(3);
 
     /// <summary>
@@ -47,8 +59,8 @@ public sealed record AlertSettings
     internal void Validate()
     {
         var day = TimeSpan.FromDays(1);
-        if (LeadTime < TimeSpan.Zero)
-            throw new ArgumentOutOfRangeException(nameof(LeadTime), LeadTime, "Lead time cannot be negative.");
+        if (LeadTime < TimeSpan.Zero || ConjunctionLeadTime < TimeSpan.Zero)
+            throw new ArgumentException("Lead times cannot be negative.");
         // Quiet hours within one calendar day, evening reminder after them: the reminder is always the evening before.
         if (QuietStart < TimeSpan.Zero || QuietStart >= QuietEnd || QuietEnd > EveningReminder || EveningReminder >= day)
             throw new ArgumentException("Expected 0 <= QuietStart < QuietEnd <= EveningReminder < 24 h.");

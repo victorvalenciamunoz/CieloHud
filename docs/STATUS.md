@@ -432,7 +432,7 @@ Los «eventos destacados» quedan fuera de este primer paso.
 Plan acordado (2026-10-05): un aviso cuando la Luna pase cerca de un planeta brillante, con los dos sobre el horizonte y de noche;
 al tocarlo, el HUD guía a la Luna. Mismo interruptor AVISOS, mismas horas de silencio y la misma alarma única que la ISS.
 Criterio: separación ≤ 5°, los dos a ≥ 10°, Sol ≤ -6°; Venus, Marte, Júpiter y Saturno (Mercurio fuera). Pasos:
-5) buscador en Core y validación; 6) cuándo avisar y texto en Core; 7) integración en la app y prueba en el móvil.
+5) buscador en Core y validación; 6) cuándo avisar y texto en Core, con un planificador común para la ISS y las conjunciones; 7) integración en la app y prueba en el móvil.
 La validación de los avisos de la ISS contra un paso real (paso 4) sigue pendiente, aparte.
 
 ### Paso 5 — Buscador de conjunciones (2026-10-05)
@@ -467,6 +467,40 @@ La validación de los avisos de la ISS contra un paso real (paso 4) sigue pendie
   10 con Júpiter, 5 con Marte, 1 con Venus, ninguna con Saturno (este año la Luna pasa a 6-7° de él). Detalle en la decisión 025.
 - Pendiente: contraste con **Stellarium** (no está instalado en esta máquina) y verlo en el cielo: la madrugada del 6 oct, hacia las 7:30, Luna y Júpiter a 2° al E, a ~45°.
 - `dotnet test` 349 tests; build Android 0 avisos (la app aún no usa `Conjunctions/`).
+
+### Paso 6 — Cuándo avisar de una conjunción y con qué texto (2026-10-05)
+
+- **Un solo planificador de horarios** (idea del usuario: las reglas de la ISS y de las conjunciones son las mismas). Core `Alerts/AlertPlanner`
+  recibe «candidatos» (hora deseada y hasta cuándo merece la pena) y aplica silencio de 0:00 a 7:00 → 22:00 de la víspera, aviso tardío → ya
+  (salvo de madrugada) y orden. `PassAlertPlanner` se queda con lo suyo (TLE de ≤ 4 días, pasos ya avisados a ±2 min) y delega en él;
+  sus tests no cambian y siguen pasando. Decisión 026.
+- `ConjunctionAlertPlanner`: aviso **30 min antes de que se abra la ventana** (`AlertSettings.ConjunctionLeadTime`); merece la pena hasta que se cierra.
+  Las conjunciones con ventanas que se solapan (la Luna junto a dos planetas a la vez) van en **un solo aviso**, la más cercana primero.
+  No se repite una ya avisada con el mismo planeta a menos de 1 día (`SameConjunctionTolerance`; `NotifiedConjunction` guarda planeta y mejor momento).
+- `ConjunctionAlertText`: «Esta noche, la Luna junto a Júpiter (3°) · mejor hacia las 22:00 al SE». «Esta madrugada» (víspera, mejor momento antes de las 7),
+  «Mañana temprano» (víspera, después de las 7), «Ahora» (ventana ya abierta; si ya pasó el mejor momento: «al SO, hasta la 1:00»).
+  Hora al cuarto de hora, salvo que el redondeo caiga fuera de una ventana corta; separación en grados enteros («menos de 1°» por debajo de 0,5°);
+  dirección de la Luna, que es a donde guiará el HUD. Nombres de los planetas en español en Core.
+- Corregido de paso en la ISS: «Mañana a **la** 1:05», no «a las 1:05» (`AlertWords`, compartido por los dos textos).
+- Consola: `--conjunctions` lista también los avisos con su hora y texto.
+- Tests: planificador común (a su hora, víspera, tardío, tardío de madrugada, caducado, orden); conjunciones (30 min antes, madrugada → víspera, ventana abierta → ya,
+  ventana cerrada, ya avisada de madrugada → no se repite al anochecer, otro planeta u otro mes sí, solapes en cadena → un aviso, ventanas separadas → dos);
+  texto (ejemplo del plan, redondeo, ventana corta, separaciones, «Esta madrugada», «Mañana temprano», «Esta mañana», «Ahora», dos y tres planetas, cambio de hora);
+  integración con las efemérides reales de Madrid.
+- Avisos que saldrían planificando el 5 oct (Madrid, hora local), sobre las conjunciones validadas con Horizons en el paso 5:
+
+  | Aviso | Texto |
+  |---|---|
+  | 5/10 22:00 | Mañana temprano, la Luna junto a Júpiter (2°) · mejor hacia las 7:45 al E |
+  | 1/11 22:00 | Mañana temprano, la Luna junto a Marte (4°) · mejor hacia las 7:15 al S |
+  | 2/11 22:00 | Esta madrugada, la Luna junto a Júpiter (3°) · mejor hacia las 3:30 al E |
+  | 6/11 22:00 | Mañana temprano, la Luna junto a Venus (2°) · mejor hacia las 7:15 al SE |
+  | 29/11 22:00 | Mañana temprano, la Luna junto a Júpiter (2°) · mejor hacia las 7:45 al SO |
+  | 27/12 22:50 | Esta noche, la Luna junto a Júpiter (5°) · mejor hacia las 23:20 al E |
+  | 23/1 20:25 | Esta noche, la Luna junto a Júpiter (2°) · mejor hacia las 23:00 al E |
+
+  Más adelante, el 15 abr 2027: «Esta noche, la Luna junto a Júpiter (4°) y Marte (4°) · mejor hacia las 21:30 al SE».
+- `dotnet test` 396 tests; build Android 0 avisos (la app aún no usa los avisos de conjunción).
 
 ## Mejoras fuera de fase
 

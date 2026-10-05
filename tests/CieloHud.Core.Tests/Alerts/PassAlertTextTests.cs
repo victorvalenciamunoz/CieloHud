@@ -41,6 +41,17 @@ public class PassAlertTextTests
         Assert.StartsWith("Mañana a las 6:25 pasa la ISS · ", PassAlertText.Body(alert, Madrid));
     }
 
+    [Theory]
+    [InlineData("2026-10-15 01:05", "Mañana a la 1:05 pasa la ISS")]   // one o'clock is singular
+    [InlineData("2026-10-15 00:40", "Mañana a las 0:40 pasa la ISS")]
+    [InlineData("2026-10-15 02:10", "Mañana a las 2:10 pasa la ISS")]
+    public void OneOClock_SingularArticle(string visibleStart, string expected)
+    {
+        var alert = Alert(Pass(Local(visibleStart)), "2026-10-14 22:00", eveningBefore: true);
+
+        Assert.StartsWith(expected, PassAlertText.Body(alert, Madrid));
+    }
+
     [Fact]
     public void LateAlert_TitleCountsFromWhenItGoesOff()
     {

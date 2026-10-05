@@ -1,4 +1,5 @@
 using CieloHud.Console;
+using CieloHud.Core.Alerts;
 using CieloHud.Core.Conjunctions;
 using CieloHud.Core.Passes;
 using CieloHud.Core.Satellites;
@@ -105,5 +106,8 @@ int PrintConjunctions(int days)
 
     System.Console.WriteLine(ConjunctionTableFormatter.Header(options.Observer, from, to, finder.Criteria));
     System.Console.WriteLine(ConjunctionTableFormatter.Table(conjunctions));
+
+    var alerts = new ConjunctionAlertPlanner().Plan(conjunctions, from, TimeZoneInfo.Local);
+    System.Console.WriteLine(ConjunctionTableFormatter.Alerts(alerts, TimeZoneInfo.Local));
     return 0;
 }

@@ -1,12 +1,13 @@
 using System.Globalization;
 using System.Text;
+using CieloHud.Core.Alerts;
 using CieloHud.Core.Conjunctions;
 using CieloHud.Core.Sky;
 
 namespace CieloHud.Console;
 
 /// <summary>
-/// Moon-planet conjunctions as a table in local time: the window, the best moment and the closest approach.
+/// Moon-planet conjunctions as a table in local time (the window, the best moment and the closest approach), and their alerts.
 /// Spanish labels, decimal point, no calculations.
 /// </summary>
 public static class ConjunctionTableFormatter
@@ -37,6 +38,23 @@ public static class ConjunctionTableFormatter
         }
         if (!any)
             sb.AppendLine("(ninguna)");
+        return sb.ToString();
+    }
+
+    /// <summary>The alerts the app would post for these conjunctions, planned from the start of the listing.</summary>
+    public static string Alerts(IEnumerable<ConjunctionAlert> alerts, TimeZoneInfo timeZone)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("Avisos (planificados desde el inicio del listado):");
+        var any = false;
+        foreach (var alert in alerts)
+        {
+            any = true;
+            var at = TimeZoneInfo.ConvertTime(alert.NotifyAt, timeZone).ToString("yyyy-MM-dd HH:mm", Culture);
+            sb.AppendLine($"{at}  {ConjunctionAlertText.Title(alert)} · {ConjunctionAlertText.Body(alert, timeZone)}");
+        }
+        if (!any)
+            sb.AppendLine("(ninguno)");
         return sb.ToString();
     }
 
