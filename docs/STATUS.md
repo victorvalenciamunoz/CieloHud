@@ -399,7 +399,7 @@ Los «eventos destacados» quedan fuera de este primer paso.
   - `dumpsys notification`: canal `iss_passes`, importancia 4, se borra sola al acabar el paso (`timeout`), aparece como banner;
   - al tocarla, el HUD guía a la ISS («ISS, en Orión · acimut 258°, altura 1°») aunque estaba en «¿QUÉ ES?»; la notificación desaparece;
   - del 5 al 8 oct no hay pasos visibles (coincide con la Fase 2), así que todavía no hay un aviso real programado.
-  - sin comprobar todavía en el móvil: tocar el aviso con Diagnóstico abierto y el desplazamiento de la barra hasta el chip de la ISS (añadidos al final del paso).
+  - tocando el aviso con Diagnóstico abierto: vuelve al HUD, la barra se desplaza hasta el chip de la ISS y queda seleccionada.
 - Corregido durante el paso: un diálogo mostrado mientras se cierra el del permiso del sistema se cancelaba solo (equivalía a «Ahora no»); ahora espera a que la app vuelva al frente.
 - Capturas: `docs/images/avisos-diagnostico.png` y `docs/images/avisos-hud-iss.png`, recortadas sin el pie con la ubicación.
 - Pendiente (paso 3): recálculo diario, `BOOT_COMPLETED` y actualización de la app, y probar qué hace ColorOS con «Forzar detención» o la limpieza de recientes.
