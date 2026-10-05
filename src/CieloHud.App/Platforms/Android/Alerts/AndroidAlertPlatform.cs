@@ -138,7 +138,7 @@ public sealed class AndroidAlertPlatform : IAlertPlatform
         // Lasts hours and is announced ahead: it makes a sound, but no banner over what you are doing.
         manager.CreateNotificationChannel(new NotificationChannel(ConjunctionChannelId, "Luna y planetas", NotificationImportance.Default)
         {
-            Description = "Aviso cuando la Luna pasa junto a Venus, Marte, Júpiter o Saturno: al anochecer, o la víspera a las 22:00 si es de madrugada.",
+            Description = "Aviso cuando la Luna pasa junto a Venus, Marte, Júpiter o Saturno, o dos de ellos se ven juntos: al anochecer, o la víspera a las 22:00 si es de madrugada.",
         });
     }
 }

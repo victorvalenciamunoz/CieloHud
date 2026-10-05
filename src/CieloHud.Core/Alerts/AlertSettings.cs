@@ -42,6 +42,12 @@ public sealed record AlertSettings
     /// </summary>
     public TimeSpan SameConjunctionTolerance { get; init; } = TimeSpan.FromDays(1);
 
+    /// <summary>
+    /// Two planets are announced once per approach, on its closest night. If that night shifts when planning again (another
+    /// location, a few hundredths of a degree), it is still the same approach within this long.
+    /// </summary>
+    public TimeSpan SamePlanetPairTolerance { get; init; } = TimeSpan.FromDays(30);
+
     /// <summary>How far ahead the app looks for passes and conjunctions on each recalculation.</summary>
     public TimeSpan Horizon { get; init; } = TimeSpan.FromDays(3);
 

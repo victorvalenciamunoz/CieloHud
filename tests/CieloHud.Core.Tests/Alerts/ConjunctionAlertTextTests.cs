@@ -145,4 +145,53 @@ public class ConjunctionAlertTextTests
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => ConjunctionAlertText.PlanetName(CelestialBody.Moon));
     }
+    // ---- Two planets
+
+    private static Conjunction MarsJupiter(string firstNight = "2026-11-09 02:00", string lastNight = "2026-11-23 01:20") =>
+        PlanetPair(CelestialBody.Jupiter, CelestialBody.Mars,
+            "2026-11-16 01:35", "2026-11-16 07:25", "2026-11-16 07:30", firstNight, lastNight, separation: 1.19);
+
+    [Fact]
+    public void PlanetPair_AsAgreed()
+    {
+        var alert = Alert("2026-11-15 22:00", true, MarsJupiter());
+
+        Assert.Equal("Marte junto a Júpiter", ConjunctionAlertText.Title(alert));
+        Assert.Equal("Mañana temprano, Marte junto a Júpiter (1°), lo más cerca en estas semanas · mejor hacia las 7:30 al S · juntos del 9 al 23 nov",
+            ConjunctionAlertText.Body(alert, Madrid));
+    }
+
+    [Fact]
+    public void PlanetPair_NightsAcrossMonths()
+    {
+        var alert = Alert("2026-11-15 22:00", true, MarsJupiter("2026-10-28 02:00", "2026-11-05 01:20"));
+
+        Assert.EndsWith(" · juntos del 28 oct al 5 nov", ConjunctionAlertText.Body(alert, Madrid));
+    }
+
+    [Fact]
+    public void PlanetPair_SingleNight_NoRange()
+    {
+        var alert = Alert("2026-11-15 22:00", true, MarsJupiter("2026-11-16 01:35", "2026-11-16 01:35"));
+
+        Assert.EndsWith("mejor hacia las 7:30 al S", ConjunctionAlertText.Body(alert, Madrid));
+    }
+
+    [Fact]
+    public void PlanetPair_PastTheBestMoment_NowUntilTheEnd()
+    {
+        var alert = Alert("2026-11-16 07:27", false, MarsJupiter());
+
+        Assert.Equal("Ahora, Marte junto a Júpiter (1°), lo más cerca en estas semanas · al SO, hasta las 7:30 · juntos del 9 al 23 nov",
+            ConjunctionAlertText.Body(alert, Madrid));
+    }
+
+    [Theory]
+    [InlineData(CelestialBody.Moon, "Luna")]
+    [InlineData(CelestialBody.Jupiter, "Júpiter")]
+    [InlineData(CelestialBody.Venus, "Venus")]
+    public void GuideName_AsTheHudCallsIt(CelestialBody guide, string name)
+    {
+        Assert.Equal(name, ConjunctionAlertText.GuideName(guide));
+    }
 }

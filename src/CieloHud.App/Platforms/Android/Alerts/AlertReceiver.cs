@@ -20,6 +20,7 @@ public sealed class AlertReceiver : BroadcastReceiver
     private const string TitleExtra = "title";
     private const string BodyExtra = "body";
     private const string KindExtra = "kind";
+    private const string GuideExtra = "guide";
 
     public override void OnReceive(Context? context, Intent? intent)
     {
@@ -56,7 +57,8 @@ public sealed class AlertReceiver : BroadcastReceiver
         .PutExtra(VisibleEndExtra, alert.VisibleEnd.ToUnixTimeMilliseconds())
         .PutExtra(TitleExtra, alert.Title)
         .PutExtra(BodyExtra, alert.Body)
-        .PutExtra(KindExtra, (int)alert.Kind);
+        .PutExtra(KindExtra, (int)alert.Kind)
+        .PutExtra(GuideExtra, alert.Guide);
 
     private static ScheduledAlert? ReadAlert(Intent intent) =>
         intent.GetStringExtra(TitleExtra) is { } title && intent.GetStringExtra(BodyExtra) is { } body
@@ -64,6 +66,6 @@ public sealed class AlertReceiver : BroadcastReceiver
                 DateTimeOffset.FromUnixTimeMilliseconds(intent.GetLongExtra(NotifyAtExtra, 0)),
                 DateTimeOffset.FromUnixTimeMilliseconds(intent.GetLongExtra(VisibleStartExtra, 0)),
                 DateTimeOffset.FromUnixTimeMilliseconds(intent.GetLongExtra(VisibleEndExtra, 0)),
-                false, title, body, (AlertKind)intent.GetIntExtra(KindExtra, (int)AlertKind.Pass))
+                false, title, body, (AlertKind)intent.GetIntExtra(KindExtra, (int)AlertKind.Pass), Guide: intent.GetStringExtra(GuideExtra))
             : null;
 }

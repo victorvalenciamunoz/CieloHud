@@ -3,8 +3,8 @@ using static CieloHud.Core.Tests.Alerts.AlertPasses;
 namespace CieloHud.Core.Tests.Alerts;
 
 /// <summary>
-/// The conjunctions found with the real ephemeris from Madrid (validated against JPL Horizons in
-/// <see cref="Conjunctions.ConjunctionFinderIntegrationTests"/>) turned into alerts, planned on 5 Oct 2026.
+/// The conjunctions found with the real ephemeris from Madrid, the Moon with planets and Mars with Jupiter (validated against
+/// JPL Horizons in <see cref="Conjunctions.ConjunctionFinderIntegrationTests"/>), turned into alerts, planned on 5 Oct 2026.
 /// </summary>
 public class ConjunctionAlertIntegrationTests
 {
@@ -14,7 +14,8 @@ public class ConjunctionAlertIntegrationTests
     private static readonly Lazy<IReadOnlyList<ConjunctionAlert>> Alerts = new(() =>
     {
         var finder = new ConjunctionFinder(new AstronomyEngineSolarSystemService(), new AstronomyEngineSunService());
-        var conjunctions = finder.FindWithMoon(MadridCenter, Now, Now.AddDays(120), Madrid);
+        var conjunctions = finder.FindWithMoon(MadridCenter, Now, Now.AddDays(120), Madrid)
+            .Concat(finder.FindPlanetPairs(MadridCenter, Now, Now.AddDays(120), Madrid));
         return new ConjunctionAlertPlanner().Plan(conjunctions, Now, Madrid);
     });
 
@@ -27,6 +28,7 @@ public class ConjunctionAlertIntegrationTests
             "2026-11-01 22:00 | Mañana temprano, la Luna junto a Marte (4°) · mejor hacia las 7:15 al S",
             "2026-11-02 22:00 | Esta madrugada, la Luna junto a Júpiter (3°) · mejor hacia las 3:30 al E",
             "2026-11-06 22:00 | Mañana temprano, la Luna junto a Venus (2°) · mejor hacia las 7:15 al SE",
+            "2026-11-15 22:00 | Mañana temprano, Marte junto a Júpiter (1°), lo más cerca en estas semanas · mejor hacia las 7:30 al S · juntos del 9 al 23 nov",
             "2026-11-29 22:00 | Mañana temprano, la Luna junto a Júpiter (2°) · mejor hacia las 7:45 al SO",
             "2026-12-27 22:50 | Esta noche, la Luna junto a Júpiter (5°) · mejor hacia las 23:20 al E",
             "2027-01-23 20:25 | Esta noche, la Luna junto a Júpiter (2°) · mejor hacia las 23:00 al E",

@@ -170,7 +170,7 @@ public partial class HudPage : ContentPage
         var problem = _alerts.Problem is { } p ? $"\n\nAhora mismo: {p}." : "";
         if (_alerts.Pending.FirstOrDefault() is not { } next)
             return $"Avisos activados. Nada que avisar en los próximos {_alerts.PlanningDays} días: ni pasos visibles de la ISS " +
-                $"ni la Luna junto a un planeta. Se vuelve a mirar cada día y cada vez que abres la app.{problem}";
+                $"ni la Luna junto a un planeta, ni planetas juntos. Se vuelve a mirar cada día y cada vez que abres la app.{problem}";
         var at = TimeZoneInfo.ConvertTime(next.NotifyAt, TimeZoneInfo.Local);
         return $"Avisos activados. Próximo aviso: {at.ToString("ddd d HH:mm", SpanishCulture)}\n\n{next.Body}{problem}";
     }

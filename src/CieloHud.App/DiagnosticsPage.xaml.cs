@@ -182,14 +182,18 @@ public partial class DiagnosticsPage : ContentPage
         StatusLabel.Text = $"Aviso de prueba a las {LocalTime(DateTimeOffset.UtcNow.AddSeconds(seconds), "HH:mm:ss")}: puedes cerrar la app.";
     }
 
-    /// <summary>The next real conjunction (searched up to two months ahead, which takes a moment) as a test alert.</summary>
+    /// <summary>
+    /// The next real conjunction of the Moon ("luna") or of two planets ("planetas"), searched up to two months ahead, which takes
+    /// a moment, as a test alert in 30 s.
+    /// </summary>
     private async void OnTestConjunctionClicked(object? sender, EventArgs e)
     {
-        var seconds = int.Parse((string)((Button)sender!).CommandParameter, Culture);
-        var at = DateTimeOffset.UtcNow.AddSeconds(seconds);
+        var planets = (string)((Button)sender!).CommandParameter == "planetas";
+        var at = DateTimeOffset.UtcNow.AddSeconds(30);
         StatusLabel.Text = "Buscando la próxima conjunción…";
-        await Task.Run(() => _alerts.ArmTest(TimeSpan.FromSeconds(seconds), AlertKind.Conjunction));
-        StatusLabel.Text = $"Aviso de conjunción de prueba a las {LocalTime(at, "HH:mm:ss")}: puedes cerrar la app. Al tocarlo, la Luna.";
+        await Task.Run(() => _alerts.ArmConjunctionTest(TimeSpan.FromSeconds(30), planets));
+        StatusLabel.Text = $"Conjunción de prueba a las {LocalTime(at, "HH:mm:ss")}: puedes cerrar la app. "
+            + (planets ? "Al tocarla, el planeta más brillante." : "Al tocarla, la Luna.");
     }
 
     private void OnTestRefreshClicked(object? sender, EventArgs e)
