@@ -171,7 +171,7 @@ ISS        161.15° S   -37.26°  bajo el horizonte       8364 km
 - [x] **Fase 2** · Próximos pasos visibles de la ISS, validado contra Heavens-Above
 - [x] **Fase 3** · HUD en MAUI para Android, validado en el cielo guiando hasta la Luna
 - [ ] **Fase 4** · Avisos: «esta noche a las 21:43 pasa la ISS, 5 minutos, por el noroeste»
-- [ ] **Fase 5** · IA como guía: qué estás viendo, explicado para no expertos
+- [ ] **Fase 5** · Fichas del objeto: qué estás viendo, explicado para no expertos, con datos del momento («esta luz salió de Júpiter hace 49 minutos»)
 
 El detalle está en [`docs/`](docs): [visión](docs/VISION.md), [plan](docs/PLAN.md), [estado](docs/STATUS.md) y [decisiones](docs/DECISIONS.md). Ahí se explica, por ejemplo, por qué la altura del Sol se calcula sin refracción, o cómo se esquivó un bucle infinito de la librería de efemérides al apuntar al cénit.
 

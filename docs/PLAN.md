@@ -87,6 +87,15 @@ dotnet run --project src/CieloHud.Console -- [--lat 40.4168] [--lon -3.7038] [--
 
 - Notificaciones locales antes de pasos visibles de la ISS y eventos destacados.
 
-## Fase 5 — IA como guía
+## Fase 5 — Fichas del objeto
 
-- Explicación breve y a nivel no-experto del objeto encontrado, con datos del momento (distancia, fase, lunas visibles…).
+- Al llegar a AQUÍ, o al reconocer algo en "¿qué es?", una ficha breve: qué es, contado para no expertos, y datos del momento.
+- Datos del momento calculados en local y contrastables con Horizons o Stellarium:
+  - Luna: fase y fracción iluminada (Astronomy Engine MoonPhase, Illumination).
+  - Júpiter: lunas galileanas a cada lado (JupiterMoons).
+  - Saturno: inclinación de los anillos (Illumination, ing_tilt).
+  - Planetas: distancia y tiempo que tarda su luz en llegar.
+  - Estrellas: años que tarda su luz en llegar, desde la paralaje de SIMBAD (la misma fuente que el catálogo).
+  - ISS: altura y velocidad.
+- Textos: uno por objeto (7 objetivos, 155 estrellas, 88 constelaciones), en el repo como datos. Se pueden redactar con ayuda
+  de IA durante el desarrollo, pero se revisan uno a uno antes de subirlos. La app no usa IA ni red para esto. Decisión 020.

@@ -6,7 +6,8 @@ Levantas el móvil y un HUD te guía ("más a la izquierda, sube un poco…") ha
 Júpiter o la Luna. Entonces bajas el móvil y lo miras con tus propios ojos.
 
 La app te avisa cuando hay algo que merece la pena ("esta noche a las 21:43 pasa la ISS, 5 minutos, por el noroeste")
-y, cuando lo encuentras, una IA te explica lo que estás viendo a nivel de no-experto.
+y, cuando lo encuentras, te cuenta qué estás viendo a nivel de no-experto, con datos de ese momento:
+"esta luz salió de Júpiter hace 49 minutos; a su izquierda, tres de sus lunas".
 
 ## Por qué
 
@@ -23,6 +24,8 @@ y, cuando lo encuentras, una IA te explica lo que estás viendo a nivel de no-ex
   Pocos objetos que **buscar**, pero más cosas que se puedan **reconocer**: al apuntar, la app sabe en qué constelación
   miras y nombra las estrellas hasta magnitud 3 (las que se ven desde ciudad).
 - No es una red social ni guarda historial en un servidor.
+- No es un chat ni depende de un servicio de IA. Lo que cuenta de cada objeto está escrito y revisado de antemano,
+  y los datos del momento se calculan en el móvil y se pueden contrastar, como todo lo demás.
 
 ## Objetos objetivo (visibles desde Madrid con contaminación lumínica)
 
