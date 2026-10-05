@@ -1,4 +1,5 @@
 using System.Globalization;
+using CieloHud.App.Alerts;
 using CieloHud.App.Hud;
 using CieloHud.App.Services;
 using CieloHud.Core.Constellations;
@@ -24,6 +25,8 @@ public partial class HudPage : ContentPage
     private readonly IConstellationLocator _constellations;
     private readonly IConstellationFigureLocator _figures;
     private readonly NightMode _nightMode;
+    private readonly PassAlertService _alerts;
+    private readonly ObserverStore _observers;
     private readonly GuidanceCalculator _guidance = new();
     private readonly HudDrawable _drawable = new();
     private readonly Dictionary<SkyTarget, Button> _chips = new();
@@ -47,7 +50,8 @@ public partial class HudPage : ContentPage
     private IReadOnlyList<IReadOnlyList<HorizontalPosition>> _figure = [];
 
     public HudPage(IPointingSource pointing, ILocationSource location, TargetCatalog catalog,
-        IConstellationLocator constellations, IConstellationFigureLocator figures, NightMode nightMode)
+        IConstellationLocator constellations, IConstellationFigureLocator figures, NightMode nightMode,
+        PassAlertService alerts, ObserverStore observers)
     {
         InitializeComponent();
         _pointing = pointing;
@@ -56,9 +60,13 @@ public partial class HudPage : ContentPage
         _constellations = constellations;
         _figures = figures;
         _nightMode = nightMode;
+        _alerts = alerts;
+        _observers = observers;
         _target = catalog.Targets[0];
         Canvas.Drawable = _drawable;
         BuildTargetBar();
+        // In the constructor, not OnAppearing: a tap on an alert must reach the HUD also while diagnostics is on top.
+        LaunchRequests.Requested += OnLaunchRequested;
         ApplyPalette();
     }
 
@@ -109,12 +117,80 @@ public partial class HudPage : ContentPage
         _drawable.Palette = _nightMode.Palette;
         StyleChips();
         StyleChip(NightButton, _nightMode.IsOn);
+        StyleChip(AlertsButton, _alerts.IsOn);
     }
 
     private void OnNightClicked(object? sender, EventArgs e)
     {
         _nightMode.Toggle();
         ApplyPalette();
+    }
+
+    /// <summary>
+    /// Off by default (not invasive): the first tap asks for the notification permission and, if exact alarms are not
+    /// allowed, offers the system screen for them. Then it says what the next alert is.
+    /// </summary>
+    private async void OnAlertsClicked(object? sender, EventArgs e)
+    {
+        if (_alerts.IsOn)
+        {
+            _alerts.TurnOff();
+            ApplyPalette();
+            return;
+        }
+
+        var asksPermission = !_alerts.Platform.NotificationsAllowed;
+        if (!await _alerts.TurnOnAsync())
+        {
+            await DisplayAlertAsync("AVISOS", "Sin permiso de notificaciones no se puede avisar. Puedes darlo en los ajustes de la app.", "Vale");
+            return;
+        }
+        ApplyPalette();
+        // Seen on the OPPO: a dialog shown while the system permission dialog is still closing is cancelled at once,
+        // which reads as "Ahora no". Let the activity come back to the front first.
+        if (asksPermission)
+            await Task.Delay(TimeSpan.FromMilliseconds(600));
+
+        if (!_alerts.Platform.ExactAlarmsAllowed
+            && await DisplayAlertAsync("AVISOS", "Para avisar a la hora exacta, permite «Alarmas y recordatorios» para CieloHud. Sin ese permiso el aviso puede llegar unos minutos tarde.", "Abrir ajustes", "Ahora no"))
+        {
+            // Back from the settings, the window activation re-arms the alarm as exact.
+            _alerts.Platform.OpenExactAlarmSettings();
+            return;
+        }
+
+        await DisplayAlertAsync("AVISOS", AlertsSummary(), "Vale");
+    }
+
+    private string AlertsSummary()
+    {
+        if (_alerts.Problem is { } problem)
+            return $"Avisos activados, pero ahora mismo no se pueden calcular: {problem}.";
+        if (_alerts.Pending.FirstOrDefault() is not { } next)
+            return $"Avisos activados. La ISS no tiene pasos visibles en los próximos {_alerts.PlanningDays} días; se vuelve a mirar cada vez que abres la app.";
+        var at = TimeZoneInfo.ConvertTime(next.NotifyAt, TimeZoneInfo.Local);
+        return $"Avisos activados. Próximo aviso: {at.ToString("ddd d HH:mm", SpanishCulture)}\n\n{next.Body}";
+    }
+
+    private static readonly CultureInfo SpanishCulture = CultureInfo.GetCultureInfo("es-ES");
+
+    /// <summary>An alert was tapped: guide to what it announced.</summary>
+    private void OnLaunchRequested(object? sender, EventArgs e) => MainThread.BeginInvokeOnMainThread(async () =>
+    {
+        // From another page (diagnostics), back to the HUD first; its OnAppearing takes the request.
+        if (Navigation.NavigationStack.Count > 1)
+            await Navigation.PopToRootAsync(false);
+        else
+            TakeLaunchRequest();
+    });
+
+    private async void TakeLaunchRequest()
+    {
+        if (LaunchRequests.Take() is not { } name || _catalog.Targets.FirstOrDefault(t => t.Name == name) is not { } target)
+            return;
+        SelectTarget(target);
+        // The ISS chip is the last one, off screen on most phones: show which target the HUD is guiding to.
+        await TargetScroll.ScrollToAsync(_chips[target], ScrollToPosition.MakeVisible, false);
     }
 
     private async void SelectTarget(SkyTarget? target)
@@ -139,6 +215,7 @@ public partial class HudPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        TakeLaunchRequest();
         _pointing.Start();
 
         _frameTimer = Dispatcher.CreateTimer();
@@ -150,6 +227,10 @@ public partial class HudPage : ContentPage
         if (fix is { } f)
         {
             _observer = f.Observer;
+            // For the alerts, planned in the background without reading the location.
+            _observers.Save(f.Observer);
+            if (_alerts.IsOn)
+                _ = Task.Run(_alerts.RescheduleAsync);
             _pointing.DeclinationDegrees = MagneticDeclination.Degrees(f.Observer, DateTimeOffset.UtcNow);
             FooterLabel.Text = $"{f.Observer.LatitudeDegrees.ToString("F3", Culture)}, {f.Observer.LongitudeDegrees.ToString("F3", Culture)}  ·  decl {_pointing.DeclinationDegrees.ToString("+0.0;-0.0", Culture)}°";
         }

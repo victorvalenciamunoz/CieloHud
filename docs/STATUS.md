@@ -378,6 +378,34 @@ Los «eventos destacados» quedan fuera de este primer paso.
   El aviso del 14 oct a las 7:08 sale de víspera porque cae a las 6:58. Las 7:54 del 13 oct es el paso en el filo del corte de -6° que Heavens-Above también lista.
 - Validado con `dotnet test` (298 tests) y build Android sin avisos (la app aún no usa `Alerts/`).
 
+### Paso 2 — Programar y notificar en Android (2026-10-05)
+
+- App `Alerts/`: `PassAlertService` (activar/desactivar, planificar con Core desde la última ubicación y el TLE de la caché, guardar los avisos con su texto en `Preferences`,
+  armar la alarma y, al saltar, publicar lo que toca y apuntarlo como avisado), `IAlertPlatform`, `ScheduledAlert` (JSON con generación de código), `LaunchRequests`.
+  `Services/ObserverStore`: el HUD guarda la última posición para los cálculos en segundo plano. Decisión 022.
+- Android `Platforms/Android/Alerts/`: `AndroidAlertPlatform` (AlarmManager, canal «Pasos de la ISS» de importancia alta, `NotificationCompat`, permisos)
+  y `AlertReceiver` (`goAsync`). Icono monocromo `ic_stat_iss`. Manifiesto: `POST_NOTIFICATIONS` y `SCHEDULE_EXACT_ALARM`. Sin paquetes nuevos.
+- HUD: botón **AVISOS** en el pie, desactivado por defecto. El primer toque pide el permiso de notificaciones, ofrece abrir «Alarmas y recordatorios»
+  y dice cuál es el próximo aviso. Al tocar un aviso se abre el HUD con la ISS seleccionada; si estaba en Diagnóstico vuelve al HUD, y la barra se desplaza hasta el chip de la ISS.
+  Se vuelve a planificar al abrir la app, al obtener ubicación y cada vez que salta la alarma.
+- Diagnóstico: sección AVISOS (estado, permisos, cuándo se calculó, próximo aviso, los siguientes y la última alarma con hora real frente a objetivo).
+  En Debug, «PROBAR AVISO» a 30 s y a 5 min, que pasa por alarmas reales y se marca «[PRUEBA]».
+- **Hallazgo en el OPPO**: ColorOS trata las alarmas exactas como inexactas, con una ventana del 75 % del retraso (máximo 1 h), aunque `SCHEDULE_EXACT_ALARM`
+  esté concedido. Solución: `Core/Alerts/AlarmSteps`, que arma la alarma por pasos para que el final de la ventana caiga en la hora del aviso. 16 tests. Decisión 023.
+- Validado en el OPPO (Android 16):
+  - permiso de notificaciones con el diálogo del sistema; «Alarmas y recordatorios» se abre directamente en CieloHud y, al volver, Diagnóstico dice «alarmas exactas sí»;
+  - `dumpsys alarm`: alarma `RTC_WAKEUP` de `com.cielohud.app.AlertReceiver`; con los pasos, el final de la ventana coincide con el objetivo;
+  - prueba a 5 min **con la app cerrada desde recientes**: saltó a la hora objetivo (+0 s); prueba a 30 s: +0 s. Antes de los pasos, la misma prueba a 30 s llegó a +22,5 s;
+  - `dumpsys notification`: canal `iss_passes`, importancia 4, se borra sola al acabar el paso (`timeout`), aparece como banner;
+  - al tocarla, el HUD guía a la ISS («ISS, en Orión · acimut 258°, altura 1°») aunque estaba en «¿QUÉ ES?»; la notificación desaparece;
+  - del 5 al 8 oct no hay pasos visibles (coincide con la Fase 2), así que todavía no hay un aviso real programado.
+  - sin comprobar todavía en el móvil: tocar el aviso con Diagnóstico abierto y el desplazamiento de la barra hasta el chip de la ISS (añadidos al final del paso).
+- Corregido durante el paso: un diálogo mostrado mientras se cierra el del permiso del sistema se cancelaba solo (equivalía a «Ahora no»); ahora espera a que la app vuelva al frente.
+- Capturas: `docs/images/avisos-diagnostico.png` y `docs/images/avisos-hud-iss.png`, recortadas sin el pie con la ubicación.
+- Pendiente (paso 3): recálculo diario, `BOOT_COMPLETED` y actualización de la app, y probar qué hace ColorOS con «Forzar detención» o la limpieza de recientes.
+  Para la prueba se dejó CieloHud en «Permitir actividad en segundo plano» (ajustes de batería de ColorOS); no cambia la ventana de las alarmas.
+- `dotnet test` 314 tests; build Android 0 avisos.
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.

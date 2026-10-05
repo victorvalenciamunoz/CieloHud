@@ -1,4 +1,6 @@
+using CieloHud.App.Alerts;
 using CieloHud.App.Hud;
+using CieloHud.Core.Passes;
 using CieloHud.App.Services;
 using CieloHud.Core.Satellites;
 using CieloHud.Core.SolarSystem;
@@ -36,6 +38,13 @@ public static class MauiProgram
 		});
 		builder.Services.AddSingleton<ITleProvider>(sp =>
 			new CelesTrakTleProvider(sp.GetRequiredService<HttpClient>(), Path.Combine(FileSystem.AppDataDirectory, "tle")));
+		builder.Services.AddSingleton<ISatellitePassPredictor, Sgp4SatellitePassPredictor>();
+		builder.Services.AddSingleton<ISatelliteIlluminationService, Sgp4SatelliteIlluminationService>();
+		builder.Services.AddSingleton<IVisiblePassFinder>(sp => new VisiblePassFinder(
+			sp.GetRequiredService<ISatellitePassPredictor>(),
+			sp.GetRequiredService<ISatelliteService>(),
+			sp.GetRequiredService<ISunService>(),
+			sp.GetRequiredService<ISatelliteIlluminationService>()));
 
 		// Device
 #if ANDROID
@@ -44,6 +53,13 @@ public static class MauiProgram
 		builder.Services.AddSingleton<IPointingSource, OrientationSensorPointingSource>();
 #endif
 		builder.Services.AddSingleton<ILocationSource, GeolocationSource>();
+		builder.Services.AddSingleton<ObserverStore>();
+
+		// Alerts (phase 4)
+#if ANDROID
+		builder.Services.AddSingleton<IAlertPlatform, Platforms.Android.Alerts.AndroidAlertPlatform>();
+#endif
+		builder.Services.AddSingleton<PassAlertService>();
 
 		// HUD
 		builder.Services.AddSingleton<TargetCatalog>();
