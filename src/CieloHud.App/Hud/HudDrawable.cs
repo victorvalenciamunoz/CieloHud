@@ -35,6 +35,7 @@ public sealed class HudDrawable : IDrawable
             DrawHorizonAndCompass(canvas, r, pointing);
             DrawConstellationFigure(canvas, r, pointing);
             DrawReferences(canvas, r, pointing);
+            DrawAltitudeLabels(canvas, r, pointing);
         }
 
         var locked = Frame.IdentifyMode ? Frame.Identified?.IsMatch == true : Frame.Guidance?.IsOnTarget == true;
@@ -82,15 +83,10 @@ public sealed class HudDrawable : IDrawable
         var faint = Muted.WithAlpha(0.25f);
         ScreenPoint? At(double az, double alt) => HudProjection.ToScreen(pointing, az, alt, r.Width, r.Height);
 
-        // Altitude ladder along the vertical through the reticle.
-        canvas.StrokeSize = 1;
-        canvas.FontSize = 11;
-        canvas.Font = new Microsoft.Maui.Graphics.Font(FontRegular);
-        for (var alt = -80; alt <= 90; alt += 10)
+        // Altitude ladder along the vertical through the reticle: lines here, labels later (DrawAltitudeLabels) so
+        // star names never cover them.
+        foreach (var (alt, y) in AltitudeLadder(pointing, r))
         {
-            if (At(pointing.AzimuthDegrees, alt) is not { } p || p.Y < r.Top + 10 || p.Y > r.Bottom - 10)
-                continue;
-            var y = (float)p.Y;
             var isHorizon = alt == 0;
             canvas.StrokeColor = isHorizon ? Muted.WithAlpha(0.8f) : faint;
             canvas.StrokeSize = isHorizon ? 1.5f : 1;
@@ -98,13 +94,12 @@ public sealed class HudDrawable : IDrawable
                 DrawHorizonLine(canvas, pointing, r);
             else
                 canvas.DrawLine(r.Left + 12, y, r.Left + 32, y);
-            canvas.FontColor = isHorizon ? Muted : dim;
-            canvas.DrawString(isHorizon ? "HORIZONTE" : $"{alt}°", r.Left + 36, y - 8, 90, 16, HorizontalAlignment.Left, VerticalAlignment.Center);
         }
 
-        // Compass along the horizon (or pinned near the bottom when the horizon is off screen).
+        // Compass along the horizon; pinned near an edge when the horizon is off screen, and kept above the bottom
+        // text panel so the cardinal letters are not hidden behind it.
         var horizonY = At(pointing.AzimuthDegrees, 0)?.Y ?? (pointing.AltitudeDegrees > 0 ? r.Bottom + 1000 : r.Top - 1000);
-        var compassY = (float)Math.Clamp(horizonY, r.Top + 60, r.Bottom - 60);
+        var compassY = (float)Math.Clamp(horizonY, r.Top + 60, Math.Min(r.Bottom - 60, TextPanelTop(r) - 12));
         var pinned = Math.Abs(compassY - horizonY) > 0.5;
         for (var az = 0; az < 360; az += 10)
         {
@@ -127,6 +122,37 @@ public sealed class HudDrawable : IDrawable
             }
         }
     }
+
+    /// <summary>Every 10° altitude mark that falls on screen, with its pixel row.</summary>
+    private static IEnumerable<(int Altitude, float Y)> AltitudeLadder(PointingDirection pointing, RectF r)
+    {
+        for (var alt = -80; alt <= 90; alt += 10)
+        {
+            if (HudProjection.ToScreen(pointing, pointing.AzimuthDegrees, alt, r.Width, r.Height) is { } p
+                && p.Y >= r.Top + 10 && p.Y <= r.Bottom - 10)
+                yield return (alt, (float)p.Y);
+        }
+    }
+
+    /// <summary>Ladder labels on a dark backing, drawn after stars and planets so their names cannot cover them.</summary>
+    private static void DrawAltitudeLabels(ICanvas canvas, RectF r, PointingDirection pointing)
+    {
+        canvas.FontSize = 11;
+        canvas.Font = new Microsoft.Maui.Graphics.Font(FontRegular);
+        foreach (var (alt, y) in AltitudeLadder(pointing, r))
+        {
+            var isHorizon = alt == 0;
+            var label = isHorizon ? "HORIZONTE" : $"{alt}°";
+            var width = isHorizon ? 74f : 34f;
+            canvas.FillColor = Color.FromArgb("#0B1218").WithAlpha(0.8f);
+            canvas.FillRoundedRectangle(r.Left + 34, y - 8, width, 16, 3);
+            canvas.FontColor = isHorizon ? Muted : Muted.WithAlpha(0.55f);
+            canvas.DrawString(label, r.Left + 36, y - 8, 90, 16, HorizontalAlignment.Left, VerticalAlignment.Center);
+        }
+    }
+
+    /// <summary>Top of the dark panel behind the bottom text (see <see cref="DrawTextPanel"/>).</summary>
+    private static float TextPanelTop(RectF r) => r.Bottom - 150 - 14;
 
     /// <summary>The horizon is a great circle: under a gnomonic projection, a straight line through two of its points.</summary>
     private static void DrawHorizonLine(ICanvas canvas, PointingDirection pointing, RectF r)
