@@ -8,6 +8,17 @@ namespace CieloHud.App.Hud;
 public sealed class NightMode
 {
     private const string PreferenceKey = "night_mode";
+    private const string BrightnessKey = "night_brightness";
+
+    /// <summary>
+    /// Window brightness in night mode by default (decision 019). 0.01, the bottom of the range, could not be read in a dark
+    /// room on the OPPO: about the same as auto-brightness there (20 against 12 of its 2047), and red gives the eye little
+    /// light. The user read it well at 0.10 (204 of 2047).
+    /// </summary>
+    public const float DefaultBrightness = 0.10f;
+
+    /// <summary>The brightness choices offered in night mode: eyes, presbyopia and phones differ.</summary>
+    public static IReadOnlyList<float> BrightnessChoices { get; } = [0.03f, 0.06f, 0.10f, 0.20f];
 
     private readonly IPreferences _preferences;
 
@@ -20,6 +31,16 @@ public sealed class NightMode
     public bool IsOn { get; private set; }
 
     public HudPalette Palette => IsOn ? HudPalette.Night : HudPalette.Normal;
+
+    /// <summary>Brightness of this window in night mode, 0-1: the user's choice, remembered, or the default.</summary>
+    public float Brightness => _preferences.Get(BrightnessKey, DefaultBrightness);
+
+    /// <summary>Sets the night brightness (one of <see cref="BrightnessChoices"/>) and applies it at once.</summary>
+    public void SetBrightness(float brightness)
+    {
+        _preferences.Set(BrightnessKey, brightness);
+        ApplyToWindow();
+    }
 
     public void Toggle()
     {
@@ -52,7 +73,7 @@ public sealed class NightMode
     public void ApplyToWindow()
     {
 #if ANDROID
-        Platforms.Android.NightWindow.Apply(IsOn);
+        Platforms.Android.NightWindow.Apply(IsOn, Brightness);
 #endif
     }
 }

@@ -239,3 +239,11 @@ Formato: contexto → decisión → alternativas descartadas.
   - **Al tocar un evento, el HUD guía a su objetivo**, por el mismo camino que al tocar un aviso (`LaunchRequests`).
   - El muestreo de conjunciones pasa a **pasos fijos** (:00, :05… UTC): el resultado ya no depende del instante del cálculo.
 - Alternativas: mostrar los avisos pendientes (descartada: vacía con los avisos apagados y solo 3 días); cuarto botón en el pie (descartada: no cabe bien); entrar desde el diálogo de AVISOS (descartada: escondida); una lista más larga, de 60-90 días (pospuesto: 30 días bastan para planear y la búsqueda sigue siendo rápida).
+
+## 031 — Modo nocturno: rojos casi plenos y brillo del 10 %, ajustable (corrige 019)
+- Contexto: con la paleta y el brillo de la decisión 019 el HUD no se leía en una habitación a oscuras. Medido en el OPPO: el brillo automático a oscuras es 12 de 2047 y el 1 % forzado ~20, casi igual; el problema era el color: el rojo da ~1/5 de la luz del blanco, y los botones usaban rojos del 31-63 %. Además, sin `KeepScreenOn` la pantalla se apaga a los 30 s mientras se apunta al cielo sin tocar el móvil.
+- Decisión:
+  - Textos y botones en rojo casi pleno (`#FF3020`, `#E62A1A`), lo decorativo en rojos medios. La oscuridad la ponen el fondo negro y el brillo bajo, no unos rojos casi negros.
+  - Brillo de ventana por defecto **10 %** (el que el usuario lee bien) y **ajustable** a 3, 6, 10 o 20 %: ojos, presbicia y pantallas son distintos. Con el modo noche activado, NOCHE abre un panel propio en la paleta (un diálogo del sistema sería blanco); otro toque o «Salir del modo noche» lo cierran.
+  - `KeepScreenOn` mientras el HUD está delante.
+- Alternativas: no forzar el brillo (descartada: a oscuras el automático da 12, menos que el 1 % que ya no se leía); un deslizador (descartada: impreciso a oscuras y con guantes); mantener pulsado NOCHE (descartada: escondido); botones +/− en el pie (no caben); teclas de volumen (inesperado).

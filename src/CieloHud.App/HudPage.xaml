@@ -14,6 +14,23 @@
 
         <GraphicsView Grid.Row="1" x:Name="Canvas" />
 
+        <!-- Night options, opened by NOCHE when night mode is on: brightness and leaving it. Our own panel in the palette,
+             not a system dialog, which would be white. Buttons are styled in code, like the chips. -->
+        <Border Grid.Row="1" x:Name="NightPanel" IsVisible="False" VerticalOptions="End" Margin="16,0,16,4" Padding="14,12"
+                StrokeThickness="1" BackgroundColor="{DynamicResource HudBackground}" Stroke="{DynamicResource HudTextDim}">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="8" />
+            </Border.StrokeShape>
+            <VerticalStackLayout Spacing="10">
+                <Label Text="BRILLO EN MODO NOCHE" FontFamily="ChakraPetchBold" FontSize="12" CharacterSpacing="1"
+                       TextColor="{DynamicResource HudTextSoft}" />
+                <HorizontalStackLayout x:Name="BrightnessBar" Spacing="8" />
+                <Button x:Name="LeaveNightButton" Text="SALIR DEL MODO NOCHE" HorizontalOptions="Start"
+                        FontFamily="ChakraPetch" FontSize="11" BorderWidth="1" CornerRadius="6" Padding="10,4"
+                        Clicked="OnLeaveNightClicked" />
+            </VerticalStackLayout>
+        </Border>
+
         <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="8" Padding="16,8,16,20">
             <!-- What is coming up. The coordinates that were here are in diagnostics. -->
             <Button Text="EVENTOS" HorizontalOptions="Start"
