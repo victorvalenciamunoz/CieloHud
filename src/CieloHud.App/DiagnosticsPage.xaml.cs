@@ -1,4 +1,5 @@
 using System.Globalization;
+using CieloHud.App.Alerts;
 using CieloHud.App.Hud;
 using CieloHud.App.Services;
 using CieloHud.Core.Guidance;
@@ -20,6 +21,7 @@ public partial class DiagnosticsPage : ContentPage
     private readonly ISolarSystemService _solarSystem;
     private readonly ISunService _sun;
     private readonly NightMode _nightMode;
+    private readonly PassAlertService _alerts;
     private readonly GuidanceCalculator _guidance = new();
 
     private Observer? _observer;
@@ -29,7 +31,8 @@ public partial class DiagnosticsPage : ContentPage
     private DateTimeOffset _lastUiUpdate;
     private IDispatcherTimer? _skyTimer;
 
-    public DiagnosticsPage(IPointingSource pointing, ILocationSource location, ISolarSystemService solarSystem, ISunService sun, NightMode nightMode)
+    public DiagnosticsPage(IPointingSource pointing, ILocationSource location, ISolarSystemService solarSystem, ISunService sun, NightMode nightMode,
+        PassAlertService alerts)
     {
         InitializeComponent();
         _pointing = pointing;
@@ -37,6 +40,10 @@ public partial class DiagnosticsPage : ContentPage
         _solarSystem = solarSystem;
         _sun = sun;
         _nightMode = nightMode;
+        _alerts = alerts;
+#if DEBUG
+        TestAlertButtons.IsVisible = true;
+#endif
     }
 
     protected override async void OnAppearing()
@@ -50,9 +57,14 @@ public partial class DiagnosticsPage : ContentPage
 
         _skyTimer = Dispatcher.CreateTimer();
         _skyTimer.Interval = TimeSpan.FromSeconds(1);
-        _skyTimer.Tick += (_, _) => UpdateSky();
+        _skyTimer.Tick += (_, _) =>
+        {
+            UpdateSky();
+            UpdateAlerts();
+        };
         _skyTimer.Start();
 
+        UpdateAlerts();
         await RefreshLocationAsync();
     }
 
@@ -138,6 +150,40 @@ public partial class DiagnosticsPage : ContentPage
         _onMoon = moon.IsOnTarget;
         MoonGuidanceLabel.Text = Hint(moon);
     }
+
+    /// <summary>What is armed, so it can be checked without waiting for a pass (and compared with Heavens-Above).</summary>
+    private void UpdateAlerts()
+    {
+        AlertsStateLabel.Text = _alerts.IsOn ? "activados" : "desactivados";
+        var platform = _alerts.Platform;
+        AlertsPermissionsLabel.Text = $"notificaciones {YesNo(platform.NotificationsAllowed)} · alarmas exactas {YesNo(platform.ExactAlarmsAllowed)}";
+        AlertsPlannedLabel.Text = _alerts.PlannedAt is { } planned
+            ? $"{LocalTime(planned)} · {_alerts.PlanningDays} días" + (_alerts.Problem is { } problem ? $"\n{problem}" : "")
+            : "nunca";
+
+        var pending = _alerts.IsOn ? _alerts.Pending : [];
+        AlertsNextLabel.Text = pending.FirstOrDefault() is { } next ? $"{LocalTime(next.NotifyAt)}\n{next.Title}\n{next.Body}" : "–";
+        AlertsLaterLabel.Text = pending.Count > 1
+            ? string.Join("\n", pending.Skip(1).Select(a => $"{LocalTime(a.NotifyAt)} · {a.Body}"))
+            : "–";
+        AlertsLastWakeLabel.Text = _alerts.LastWake is var (fired, target)
+            ? $"{LocalTime(fired, "HH:mm:ss")} · objetivo {LocalTime(target, "HH:mm:ss")} ({(fired - target).TotalSeconds.ToString("+0;-0", Culture)} s)"
+            : "–";
+    }
+
+    private void OnTestAlertClicked(object? sender, EventArgs e)
+    {
+        var seconds = int.Parse((string)((Button)sender!).CommandParameter, Culture);
+        _alerts.ArmTest(TimeSpan.FromSeconds(seconds));
+        StatusLabel.Text = $"Aviso de prueba a las {LocalTime(DateTimeOffset.UtcNow.AddSeconds(seconds), "HH:mm:ss")}: puedes cerrar la app.";
+    }
+
+    private static string YesNo(bool value) => value ? "sí" : "NO";
+
+    private static readonly CultureInfo Spanish = CultureInfo.GetCultureInfo("es-ES");
+
+    private static string LocalTime(DateTimeOffset instant, string format = "ddd d HH:mm") =>
+        TimeZoneInfo.ConvertTime(instant, TimeZoneInfo.Local).ToString(format, Spanish);
 
     private static string Position(HorizontalPosition p) =>
         $"{p.AzimuthDegrees.ToString("F1", Culture)}° {Cardinal(p.CardinalPoint)}  alt {p.AltitudeDegrees.ToString("F1", Culture)}°";

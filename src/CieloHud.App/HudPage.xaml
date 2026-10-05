@@ -8,23 +8,27 @@
     <Grid RowDefinitions="Auto,*,Auto">
 
         <!-- Target chips -->
-        <ScrollView Grid.Row="0" Orientation="Horizontal" HorizontalScrollBarVisibility="Never" Margin="0,44,0,0">
+        <ScrollView Grid.Row="0" x:Name="TargetScroll" Orientation="Horizontal" HorizontalScrollBarVisibility="Never" Margin="0,44,0,0">
             <HorizontalStackLayout x:Name="TargetBar" Padding="12,8" Spacing="8" />
         </ScrollView>
 
         <GraphicsView Grid.Row="1" x:Name="Canvas" />
 
-        <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" Padding="16,8,16,20">
+        <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="8" Padding="16,8,16,20">
             <Label x:Name="FooterLabel"
                    FontFamily="ChakraPetch" FontSize="12"
                    TextColor="{DynamicResource HudTextDim}"
                    VerticalOptions="Center" />
-            <!-- Colors set from the palette in code: filled when night mode is on. -->
-            <Button Grid.Column="1" x:Name="NightButton" Text="NOCHE"
+            <!-- Colors set from the palette in code: filled when on. -->
+            <Button Grid.Column="1" x:Name="AlertsButton" Text="AVISOS"
+                    FontFamily="ChakraPetch" FontSize="11"
+                    BorderWidth="1" CornerRadius="6" Padding="10,4"
+                    Clicked="OnAlertsClicked" />
+            <Button Grid.Column="2" x:Name="NightButton" Text="NOCHE"
                     FontFamily="ChakraPetch" FontSize="11"
                     BorderWidth="1" CornerRadius="6" Padding="10,4"
                     Clicked="OnNightClicked" />
-            <Button Grid.Column="2" Text="DIAGNÓSTICO"
+            <Button Grid.Column="3" Text="DIAGNÓSTICO"
                     FontFamily="ChakraPetch" FontSize="11"
                     TextColor="{DynamicResource HudTextSoft}"
                     BackgroundColor="Transparent"
