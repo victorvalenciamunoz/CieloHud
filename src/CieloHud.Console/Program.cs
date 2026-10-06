@@ -141,7 +141,7 @@ int PrintCard(CelestialBody body)
     var facts = new AstronomyEngineSolarSystemFactsService();
     System.Console.WriteLine(SkyTableFormatter.Header(options.Observer, options.Instant));
     System.Console.WriteLine(body == CelestialBody.Moon
-        ? CardFormatter.Moon(facts.Moon(options.Observer, options.Instant), options.Instant, TimeZoneInfo.Local)
-        : CardFormatter.Planet(SkyTableFormatter.Name(body), facts.Planet(body, options.Observer, options.Instant)));
+        ? CardFormatter.Moon(facts.Moon(options.Observer, options.Instant), CardTexts.Find(CardKey.Body(body)), options.Instant, TimeZoneInfo.Local)
+        : CardFormatter.Planet(SkyTableFormatter.Name(body), facts.Planet(body, options.Observer, options.Instant), CardTexts.Find(CardKey.Body(body))));
     return 0;
 }
