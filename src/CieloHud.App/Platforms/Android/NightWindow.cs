@@ -9,13 +9,8 @@ namespace CieloHud.App.Platforms.Android;
 /// </summary>
 internal static class NightWindow
 {
-    /// <summary>
-    /// The bottom of the brightness range, not a fixed percentage: whatever the user has set (or auto-brightness picks
-    /// in the dark), this is never brighter. 0 is avoided because some devices read it as "screen off".
-    /// </summary>
-    private const float NightBrightness = 0.01f;
-
-    public static void Apply(bool night)
+    /// <param name="brightness">Window brightness in night mode, 0-1 (a fraction of the panel range, applied to this window only).</param>
+    public static void Apply(bool night, float brightness)
     {
         if (Microsoft.Maui.ApplicationModel.Platform.CurrentActivity?.Window is not { } window)
             return;
@@ -35,7 +30,7 @@ internal static class NightWindow
         }
 
         var attributes = window.Attributes!;
-        attributes.ScreenBrightness = night ? NightBrightness : WindowManagerLayoutParams.BrightnessOverrideNone;
+        attributes.ScreenBrightness = night ? brightness : WindowManagerLayoutParams.BrightnessOverrideNone;
         window.Attributes = attributes;
     }
 }

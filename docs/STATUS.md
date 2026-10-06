@@ -647,3 +647,17 @@ Priorizadas por el usuario aunque la fase actual sea la 4.
 - Pendiente: probarlo de noche de verdad (si los rojos más tenues, como figuras y estrellas débiles, se ven con el brillo al mínimo, y si el brillo es cómodo).
   Sin comprobar en pantalla: el estado "en objetivo" y el aviso de calibración en rojo (no se pueden forzar desde adb); usan los mismos colores de rol que se ven en las capturas.
 - Sin comprobar: el efecto de pulsación de los botones de Android (ripple), que no usa la paleta y podría verse claro un instante.
+
+### Modo nocturno legible a oscuras (2026-10-05)
+
+- Problema (el usuario, en una habitación a oscuras): al pulsar NOCHE el rojo se veía un momento y se fundía a negro; no se leían los botones.
+- Medido en el OPPO con `dumpsys display` (escala del panel 0-2047): el brillo automático a oscuras es **12**; el 1 % forzado daba ~20, casi lo mismo.
+  Lo que fallaba era la paleta: un rojo puro da ~1/5 de la luz del blanco, y los botones usaban rojos al 63 % y 31 %. El «fundido» es Android bajando
+  el brillo hasta el forzado en ~1,2 s (977 → 204 medido con la habitación iluminada).
+- Cambios (decisión 031):
+  - Paleta nocturna con **rojos casi plenos** para textos y botones (`#FF3020`) y medios para lo decorativo; sigue sin verde ni azul.
+  - Brillo de la ventana en modo noche: **10 % por defecto** (204 de 2047; el usuario lee bien así), **ajustable**: con el modo noche activado,
+    NOCHE abre un panel propio en rojo con 3 % · 6 % · 10 % · 20 % y «Salir del modo noche». Se guarda en `Preferences`.
+  - El HUD **mantiene la pantalla encendida** mientras está delante (`KeepScreenOn`): se sostiene sin tocar y el móvil la apagaba a los 30 s.
+- Probado en el OPPO: con 10 % el usuario lee el HUD a oscuras; brillo medido 204 estable tras la transición; captura con el HUD en rojo pintado.
+  Pendiente: probar el panel de brillo en el móvil (la instalación quedó a medias por desconexión; instalado después a las 18:06).

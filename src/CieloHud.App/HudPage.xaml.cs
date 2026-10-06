@@ -30,6 +30,7 @@ public partial class HudPage : ContentPage
     private readonly GuidanceCalculator _guidance = new();
     private readonly HudDrawable _drawable = new();
     private readonly Dictionary<SkyTarget, Button> _chips = new();
+    private readonly Dictionary<float, Button> _brightnessChips = new();
     private Button _identifyChip = null!;
 
     /// <summary>Selected target; null means identify mode.</summary>
@@ -67,6 +68,7 @@ public partial class HudPage : ContentPage
         _target = catalog.Targets[0];
         Canvas.Drawable = _drawable;
         BuildTargetBar();
+        BuildBrightnessBar();
         // In the constructor, not OnAppearing: a tap on an alert must reach the HUD also while diagnostics is on top.
         LaunchRequests.Requested += OnLaunchRequested;
         ApplyPalette();
@@ -120,10 +122,45 @@ public partial class HudPage : ContentPage
         StyleChips();
         StyleChip(NightButton, _nightMode.IsOn);
         StyleChip(AlertsButton, _alerts.IsOn);
+        StyleChip(LeaveNightButton, false);
+        foreach (var (brightness, chip) in _brightnessChips)
+            StyleChip(chip, Math.Abs(brightness - _nightMode.Brightness) < 0.001f);
     }
 
+    private void BuildBrightnessBar()
+    {
+        foreach (var brightness in NightMode.BrightnessChoices)
+        {
+            var chip = CreateChip($"{(brightness * 100).ToString("0", Culture)} %");
+            chip.Clicked += (_, _) =>
+            {
+                _nightMode.SetBrightness(brightness);
+                ApplyPalette();
+            };
+            _brightnessChips[brightness] = chip;
+            BrightnessBar.Children.Add(chip);
+        }
+    }
+
+    /// <summary>
+    /// Off: turns night mode on. On: opens or closes the night panel (brightness, leave), so the brightness can be set in the
+    /// dark without a system dialog.
+    /// </summary>
     private void OnNightClicked(object? sender, EventArgs e)
     {
+        if (!_nightMode.IsOn)
+        {
+            _nightMode.Toggle();
+            ApplyPalette();
+            return;
+        }
+        NightPanel.IsVisible = !NightPanel.IsVisible;
+        ApplyPalette();
+    }
+
+    private void OnLeaveNightClicked(object? sender, EventArgs e)
+    {
+        NightPanel.IsVisible = false;
         _nightMode.Toggle();
         ApplyPalette();
     }
@@ -220,6 +257,9 @@ public partial class HudPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        // The HUD is held up to the sky, untouched: without this the screen dims and turns off after the system timeout
+        // (30 s on the OPPO), which in night mode looked like the screen going dark.
+        DeviceDisplay.Current.KeepScreenOn = true;
         TakeLaunchRequest();
         _pointing.Start();
 
@@ -249,6 +289,7 @@ public partial class HudPage : ContentPage
 
     protected override void OnDisappearing()
     {
+        DeviceDisplay.Current.KeepScreenOn = false;
         _frameTimer?.Stop();
         _pointing.Stop();
         base.OnDisappearing();

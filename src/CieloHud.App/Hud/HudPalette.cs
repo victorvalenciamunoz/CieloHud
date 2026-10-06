@@ -33,18 +33,22 @@ public sealed record HudPalette(
         Alert: Color.FromArgb("#FF5C5C"),
         Star: Color.FromArgb("#E8EEF4"));
 
-    /// <summary>Pure black (an OLED pixel switched off) and four or five levels of red with almost no green or blue.</summary>
+    /// <summary>
+    /// Pure black (an OLED pixel switched off) and levels of red with almost no green or blue. Red gives the eye about a fifth
+    /// of the light of white, so text and buttons use nearly full red: the first, dimmer palette (down to 31 %) could not be
+    /// read in a dark room (decision 019). The darkness comes from the black background and the low window brightness.
+    /// </summary>
     public static HudPalette Night { get; } = new(
         Background: Color.FromArgb("#000000"),
-        Text: Color.FromArgb("#C02818"),
-        TextSoft: Color.FromArgb("#A02014"),
-        TextMuted: Color.FromArgb("#801A10"),
-        TextDim: Color.FromArgb("#50100A"),
-        Locked: Color.FromArgb("#E8301C"),
-        LockedFill: Color.FromArgb("#300806"),
-        Guide: Color.FromArgb("#901C12"),
-        Marker: Color.FromArgb("#B02416"),
-        MarkerCore: Color.FromArgb("#E8301C"),
-        Alert: Color.FromArgb("#E8301C"),
-        Star: Color.FromArgb("#B02416"));
+        Text: Color.FromArgb("#FF3020"),
+        TextSoft: Color.FromArgb("#E62A1A"),
+        TextMuted: Color.FromArgb("#C02418"),
+        TextDim: Color.FromArgb("#8C1A10"),
+        Locked: Color.FromArgb("#FF4A30"),
+        LockedFill: Color.FromArgb("#4A0E08"),
+        Guide: Color.FromArgb("#D02818"),
+        Marker: Color.FromArgb("#F03020"),
+        MarkerCore: Color.FromArgb("#FF5038"),
+        Alert: Color.FromArgb("#FF4A30"),
+        Star: Color.FromArgb("#D82A1C"));
 }
