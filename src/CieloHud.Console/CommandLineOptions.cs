@@ -4,13 +4,13 @@ using CieloHud.Core.Sky;
 namespace CieloHud.Console;
 
 /// <summary>
-/// Parsed command line: observer, instant and an optional listing (visible passes or conjunctions) for some days. Defaults to Madrid, now.
+/// Parsed command line: observer, instant and an optional listing (visible passes, conjunctions or Mercury) for some days. Defaults to Madrid, now.
 /// </summary>
-public sealed record CommandLineOptions(Observer Observer, DateTimeOffset Instant, int? PassesDays, int? ConjunctionsDays = null)
+public sealed record CommandLineOptions(Observer Observer, DateTimeOffset Instant, int? PassesDays, int? ConjunctionsDays = null, int? MercuryDays = null)
 {
     public const string Usage = """
         Usage: CieloHud.Console [--lat <degrees>] [--lon <degrees>] [--alt <meters>] [--time <ISO-8601>]
-                                [--passes <days> | --conjunctions <days>]
+                                [--passes <days> | --conjunctions <days> | --mercury <days>]
 
           --lat     Latitude, positive north.  Default 40.4168 (Madrid)
           --lon     Longitude, positive east.  Default -3.7038 (Madrid)
@@ -20,6 +20,8 @@ public sealed record CommandLineOptions(Observer Observer, DateTimeOffset Instan
           --passes  Instead of the sky table, list visible ISS passes for this many days from --time (1-30).
           --conjunctions
                     Instead of the sky table, list conjunctions (Moon-planet, planet-planet) for this many days from --time (1-1100).
+          --mercury Instead of the sky table, list the seasons when Mercury can be seen, and each of their days,
+                    for this many days from --time (1-1100).
           --help    Show this text
 
         Numbers use a decimal point regardless of system locale.
@@ -31,7 +33,7 @@ public sealed record CommandLineOptions(Observer Observer, DateTimeOffset Instan
     {
         double lat = Madrid.LatitudeDegrees, lon = Madrid.LongitudeDegrees, alt = Madrid.AltitudeMeters;
         DateTimeOffset instant = DateTimeOffset.UtcNow;
-        int? passesDays = null, conjunctionsDays = null;
+        int? passesDays = null, conjunctionsDays = null, mercuryDays = null;
 
         for (var i = 0; i < args.Length; i++)
         {
@@ -50,15 +52,16 @@ public sealed record CommandLineOptions(Observer Observer, DateTimeOffset Instan
                 case "--time": instant = ParseInstant(value); break;
                 case "--passes": passesDays = ParseDays(key, value, 30); break;
                 case "--conjunctions": conjunctionsDays = ParseDays(key, value, 1100); break;
+                case "--mercury": mercuryDays = ParseDays(key, value, 1100); break;
                 default: throw new UsageException($"Unknown option {key}.");
             }
         }
 
         try
         {
-            if (passesDays is not null && conjunctionsDays is not null)
-                throw new UsageException("Use either --passes or --conjunctions, not both.");
-            return new CommandLineOptions(new Observer(lat, lon, alt), instant, passesDays, conjunctionsDays);
+            if (new[] { passesDays, conjunctionsDays, mercuryDays }.Count(d => d is not null) > 1)
+                throw new UsageException("Use only one of --passes, --conjunctions and --mercury.");
+            return new CommandLineOptions(new Observer(lat, lon, alt), instant, passesDays, conjunctionsDays, mercuryDays);
         }
         catch (ArgumentOutOfRangeException ex)
         {

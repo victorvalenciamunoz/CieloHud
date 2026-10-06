@@ -256,3 +256,26 @@ Formato: contexto → decisión → alternativas descartadas.
   - **Versiones**: `ApplicationDisplayVersion` = la del README/fase (0.4.0); `ApplicationVersion` = mayor×10000 + menor×100 + parche, siempre creciente.
   - **Acerca de** en el pie en lugar de DIAGNÓSTICO: qué es, privacidad (todo en el móvil; solo se descarga la órbita de la ISS), enlace al código, datos y licencias, y desde ahí Diagnóstico. Los textos de licencia van como recursos de la app (la BSD de d3-celestial y la OFL de las fuentes piden acompañar al binario) y se muestran bajo demanda.
 - Alternativas: GitHub Actions al crear una etiqueta (pospuesto: necesita el workload de MAUI en el runner, ~10 min, y la clave en los secretos; merece la pena si se publica a menudo); Google Play (descartado por ahora: cuenta de pago, revisión y política de permisos de alarmas); firmar con la clave de depuración (descartado: es pública y cambia entre máquinas); ocultar Diagnóstico solo en Release (descartado: dos pies distintos que mantener).
+
+## 033 — Mercurio: temporadas con el criterio de siempre y magnitud ≤ 0,5
+- Contexto: Mercurio estaba fuera de las conjunciones (decisión 025) y VISION lo cita «como extra». Hay que decidir con datos si merece un aviso propio. La elongación no basta: lo que cuenta es su altura con el cielo ya oscuro, y eso depende de lo inclinada que esté la eclíptica sobre el horizonte.
+- Sondeo de dos años (oct 2026-sep 2028, Humanes de Madrid, cada minuto del crepúsculo):
+
+  | Criterio | Temporadas | Días |
+  |---|---|---|
+  | ≥ 10° con el Sol ≤ -6° | 6 | 82 |
+  | ídem y magnitud ≤ 1 | 6 | 75 |
+  | **ídem y magnitud ≤ 0,5** | **6** | **68** |
+  | ≥ 10° con el Sol ≤ -4° | 7 | 132 |
+  | ≥ 8° con el Sol ≤ -4° | 10 | 211 |
+  | ≥ 5° con el Sol ≤ -6° | 10 | 251 |
+
+  Las elongaciones mayores no son las mejores: 12 oct 2026 al anochecer, 25°, Mercurio a 3,4° con el Sol a -6°; 17 mar 2027 al amanecer, 28°, a 5,7°; 25 sep 2027 al anochecer, 26°, a 3,2°.
+  En cambio, 21 nov 2026 al amanecer, 20°, a 12,3°, y 24 may 2027 al anochecer, 23°, a 13,4°. Buenas: las tardes de primavera y de enero-febrero y las madrugadas de otoño.
+- Decisión:
+  - **Merece la pena**: unas 3 temporadas al año de 5 a 15 días, con Mercurio a 10-14° y de magnitud -0,6 a 0,1 en su mejor día. Mucha gente no lo ha visto nunca.
+  - **Criterio**: Mercurio a **≥ 10°** con el **Sol ≤ -6°**, el mismo que la ISS y las conjunciones (decisión 008), y **magnitud ≤ 0,5**. A 10° la luz atraviesa unas cinco veces más aire que en el cénit, y desde ciudad, en el crepúsculo, un Mercurio más débil cuesta. El tope recorta la cola de las temporadas de primavera, cuando se apaga deprisa (mayo de 2027: 14 días en vez de 18); el mejor día no cambia.
+  - **Ventana** de cada día: los minutos que cumplen (de 1 a 21). **Mejor momento**: Mercurio más alto, que resulta ser cuando el Sol llega a -6°: en el crepúsculo, el cielo se oscurece más deprisa de lo que Mercurio pierde por bajar.
+  - **Temporada**: días seguidos con ventana, al anochecer o al amanecer; **mejor día**, el de Mercurio más alto.
+  - La magnitud es la de Astronomy Engine. Frente a JPL Horizons, que usa un modelo más reciente, sale hasta 0,13 más brillante, y en mayo de 2027 eso añade un día al final (0,44 frente a 0,51). Se acepta: el tope es una regla práctica; la posición coincide en milésimas de grado (STATUS, paso 11).
+- Alternativas: Sol a -4° (descartada: cielo mucho más claro; solo añade julio de 2027 al amanecer, a 9° con el Sol a -6°); 8° o 5° de altura (descartadas: Mercurio tras los edificios y la bruma, y el doble de días, casi todos malos); sin tope de magnitud o con 1 (descartadas: días al final de la temporada con Mercurio de magnitud 1-1,8, difícil a esa altura); avisar por la máxima elongación (descartada: la de octubre de 2026 no se ve); la magnitud de Mallama y Hilton (2018), la de Horizons, programada aparte (pospuesto: una fórmula más que mantener para mover un día en el borde de una temporada).

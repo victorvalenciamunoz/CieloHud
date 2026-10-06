@@ -12,16 +12,5 @@ namespace CieloHud.Core.SolarSystem;
 public sealed class AstronomyEngineSolarSystemService : ISolarSystemService
 {
     public HorizontalPosition Locate(CelestialBody body, Observer observer, DateTimeOffset instant) =>
-        AstronomyEngineLocator.Locate(ToAeBody(body), observer, instant, Refraction.Normal);
-
-    private static Body ToAeBody(CelestialBody body) => body switch
-    {
-        CelestialBody.Moon => Body.Moon,
-        CelestialBody.Mercury => Body.Mercury,
-        CelestialBody.Venus => Body.Venus,
-        CelestialBody.Mars => Body.Mars,
-        CelestialBody.Jupiter => Body.Jupiter,
-        CelestialBody.Saturn => Body.Saturn,
-        _ => throw new ArgumentOutOfRangeException(nameof(body), body, "Unsupported celestial body."),
-    };
+        AstronomyEngineLocator.Locate(AstronomyEngineLocator.ToBody(body), observer, instant, Refraction.Normal);
 }

@@ -147,7 +147,7 @@ public sealed class ConjunctionFinder : IConjunctionFinder
 
         // On whole steps (:00, :05… UTC), so the result does not depend on when it is computed: the same best moment
         // and window every time. Past "to", keep sampling only to finish the windows already open.
-        for (var t = AlignUp(from.ToUniversalTime(), Criteria.Step); t < to || runs.Values.Any(r => r.Count > 0); t += Criteria.Step)
+        for (var t = TimeGrid.AlignUp(from.ToUniversalTime(), Criteria.Step); t < to || runs.Values.Any(r => r.Count > 0); t += Criteria.Step)
         {
             var dark = _sun.Locate(observer, t).AltitudeDegrees <= Criteria.MaxSunAltitudeDegrees;
             var positions = new Dictionary<CelestialBody, HorizontalPosition>();
@@ -194,12 +194,6 @@ public sealed class ConjunctionFinder : IConjunctionFinder
             : candidates.MinBy(p => p.SeparationDegrees);
         var closest = run.MinBy(p => p.SeparationDegrees);
         return new Conjunction(pair.Guide, pair.Companion, run[0], best, closest, run[^1]);
-    }
-
-    private static DateTimeOffset AlignUp(DateTimeOffset instant, TimeSpan step)
-    {
-        var remainder = instant.UtcTicks % step.Ticks;
-        return remainder == 0 ? instant : instant.AddTicks(step.Ticks - remainder);
     }
 
     private static double Separation(HorizontalPosition a, HorizontalPosition b) =>
