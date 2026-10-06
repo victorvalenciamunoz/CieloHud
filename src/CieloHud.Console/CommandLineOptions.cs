@@ -1,16 +1,19 @@
 using System.Globalization;
 using CieloHud.Core.Sky;
+using CieloHud.Core.SolarSystem;
 
 namespace CieloHud.Console;
 
 /// <summary>
-/// Parsed command line: observer, instant and an optional listing (visible passes, conjunctions or Mercury) for some days. Defaults to Madrid, now.
+/// Parsed command line: observer, instant and an optional listing (visible passes, conjunctions or Mercury) for some days,
+/// or the facts of an object's card. Defaults to Madrid, now.
 /// </summary>
-public sealed record CommandLineOptions(Observer Observer, DateTimeOffset Instant, int? PassesDays, int? ConjunctionsDays = null, int? MercuryDays = null)
+public sealed record CommandLineOptions(
+    Observer Observer, DateTimeOffset Instant, int? PassesDays, int? ConjunctionsDays = null, int? MercuryDays = null, CelestialBody? CardBody = null)
 {
     public const string Usage = """
         Usage: CieloHud.Console [--lat <degrees>] [--lon <degrees>] [--alt <meters>] [--time <ISO-8601>]
-                                [--passes <days> | --conjunctions <days> | --mercury <days>]
+                                [--passes <days> | --conjunctions <days> | --mercury <days> | --card <object>]
 
           --lat     Latitude, positive north.  Default 40.4168 (Madrid)
           --lon     Longitude, positive east.  Default -3.7038 (Madrid)
@@ -22,6 +25,8 @@ public sealed record CommandLineOptions(Observer Observer, DateTimeOffset Instan
                     Instead of the sky table, list conjunctions (Moon-planet, planet-planet) for this many days from --time (1-1100).
           --mercury Instead of the sky table, list the seasons when Mercury can be seen, and each of their days,
                     for this many days from --time (1-1100).
+          --card    Instead of the sky table, the facts of the moment on an object's card at --time:
+                    moon, mercury, venus, mars, jupiter or saturn.
           --help    Show this text
 
         Numbers use a decimal point regardless of system locale.
@@ -34,6 +39,7 @@ public sealed record CommandLineOptions(Observer Observer, DateTimeOffset Instan
         double lat = Madrid.LatitudeDegrees, lon = Madrid.LongitudeDegrees, alt = Madrid.AltitudeMeters;
         DateTimeOffset instant = DateTimeOffset.UtcNow;
         int? passesDays = null, conjunctionsDays = null, mercuryDays = null;
+        CelestialBody? cardBody = null;
 
         for (var i = 0; i < args.Length; i++)
         {
@@ -53,15 +59,16 @@ public sealed record CommandLineOptions(Observer Observer, DateTimeOffset Instan
                 case "--passes": passesDays = ParseDays(key, value, 30); break;
                 case "--conjunctions": conjunctionsDays = ParseDays(key, value, 1100); break;
                 case "--mercury": mercuryDays = ParseDays(key, value, 1100); break;
+                case "--card": cardBody = ParseBody(value); break;
                 default: throw new UsageException($"Unknown option {key}.");
             }
         }
 
         try
         {
-            if (new[] { passesDays, conjunctionsDays, mercuryDays }.Count(d => d is not null) > 1)
-                throw new UsageException("Use only one of --passes, --conjunctions and --mercury.");
-            return new CommandLineOptions(new Observer(lat, lon, alt), instant, passesDays, conjunctionsDays, mercuryDays);
+            if (new[] { passesDays, conjunctionsDays, mercuryDays }.Count(d => d is not null) + (cardBody is null ? 0 : 1) > 1)
+                throw new UsageException("Use only one of --passes, --conjunctions, --mercury and --card.");
+            return new CommandLineOptions(new Observer(lat, lon, alt), instant, passesDays, conjunctionsDays, mercuryDays, cardBody);
         }
         catch (ArgumentOutOfRangeException ex)
         {
@@ -78,6 +85,11 @@ public sealed record CommandLineOptions(Observer Observer, DateTimeOffset Instan
         int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var days) && days >= 1 && days <= max
             ? days
             : throw new UsageException($"{key} expects a whole number of days from 1 to {max}, got '{value}'.");
+
+    private static CelestialBody ParseBody(string value) =>
+        Enum.TryParse<CelestialBody>(value, ignoreCase: true, out var body) && Enum.IsDefined(body) && !int.TryParse(value, out _)
+            ? body
+            : throw new UsageException($"--card expects moon, mercury, venus, mars, jupiter or saturn, got '{value}'.");
 
     private static DateTimeOffset ParseInstant(string value) =>
         DateTimeOffset.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var result)
