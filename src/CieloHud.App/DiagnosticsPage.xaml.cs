@@ -196,6 +196,15 @@ public partial class DiagnosticsPage : ContentPage
             + (planets ? "Al tocarla, el planeta más brillante." : "Al tocarla, la Luna.");
     }
 
+    /// <summary>The next real season of Mercury, searched up to about six months ahead, as a test alert in 30 s.</summary>
+    private async void OnTestMercuryClicked(object? sender, EventArgs e)
+    {
+        var at = DateTimeOffset.UtcNow.AddSeconds(30);
+        StatusLabel.Text = "Buscando la próxima temporada de Mercurio…";
+        await Task.Run(() => _alerts.ArmMercuryTest(TimeSpan.FromSeconds(30)));
+        StatusLabel.Text = $"Mercurio de prueba a las {LocalTime(at, "HH:mm:ss")}: puedes cerrar la app. Al tocarlo, Mercurio.";
+    }
+
     private void OnTestRefreshClicked(object? sender, EventArgs e)
     {
         _alerts.ArmRefreshTest(TimeSpan.FromSeconds(30));

@@ -694,6 +694,30 @@ Plan acordado: 11) buscador de temporadas en Core y validación; 12) aviso, text
   las conjunciones) e integración con las efemérides reales (los tres avisos del año, antes de su ventana y fuera de las horas de silencio).
 - `dotnet test` 509 tests; build Android 0 avisos (la app aún no usa los avisos de Mercurio).
 
+### Paso 13 — Mercurio en la app (2026-10-06)
+
+- `AlertService` planifica también las temporadas de Mercurio cuyo mejor día cae en los próximos 3 días (sin red también: solo necesita las efemérides),
+  en la misma lista y con la misma alarma única. `ScheduledAlert` gana `Kind = Mercury` (2) y `Mercury` (`NotifiedMercury`), que al publicarse se guarda
+  en `alerts_notified_mercury` y se poda a los 30 días. Al tocarlo, el HUD guía a **Mercurio**. Mismo canal, «Luna y planetas», con la descripción ampliada.
+- EVENTOS calcula las temporadas a 30 días con las ya avisadas (`UpcomingEvents.Build`, paso 12). El resumen de AVISOS sin nada que avisar lo menciona.
+- Diagnóstico (Debug): **«PROBAR MERCURIO (30 s)»** con la próxima temporada real (busca hasta 200 días: las de anochecer pueden estar a seis meses) y su texto de verdad.
+- `MauiProgram`: `IMagnitudeService` e `IMercuryApparitionFinder`.
+- **Fallo encontrado y corregido: al tocar un aviso, a veces el HUD no cambiaba de objetivo** (también con la Luna o Júpiter; no era de Mercurio).
+  Al salir con «Atrás» la actividad se cierra pero el proceso sigue, y al volver se crea otra con un HUD nuevo. El HUD viejo seguía suscrito al evento
+  estático `LaunchRequests.Requested` y se quedaba la petición antes que el visible. Ahora (decisión 035): un solo oyente, el último HUD creado;
+  una actividad nueva (`OnCreate`) solo guarda la petición, que el HUD nuevo recoge al aparecer, y solo `OnNewIntent` avisa al HUD abierto.
+  Además, en una actividad nueva la barra de objetivos aún no está maquetada: el desplazamiento hasta el chip espera a que tenga tamaño.
+- Validado en el OPPO (Android 16), build de Debug:
+
+  | Prueba | Resultado |
+  |---|---|
+  | «PROBAR MERCURIO», salir con «Atrás», tocar | notificación en `moon_planets`, a la hora; al tocar se crea una actividad nueva y el HUD guía a Mercurio (antes de la corrección, se quedaba en la Luna) |
+  | El mismo `Intent` por `adb` tras «Atrás» / con la app abierta / con el proceso muerto (`am kill`) | Mercurio / Saturno / Júpiter e ISS, con su chip resaltado y a la vista |
+  | Preferencias | la prueba no se apunta como avisada; nada pendiente en 3 días (el mejor día de noviembre es el 20) |
+
+- Sin probar en el móvil: Mercurio en EVENTOS (la lista mira 30 días; aparecerá desde el 21 oct) y el aviso real (víspera del 20 nov, a las 22:00).
+- `dotnet test` 509 tests; build Android 0 avisos.
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.

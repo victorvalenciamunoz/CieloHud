@@ -289,3 +289,11 @@ Formato: contexto → decisión → alternativas descartadas.
   - **EVENTOS**: una entrada en el mejor día, «≈7:35 · Mercurio al amanecer (12°) · al SE · se ve del 14 al 28 nov», con la hora de su aviso calculada por el mismo planificador.
   - **Al tocar**, el HUD guía a Mercurio (paso 13).
 - Alternativas: avisar al empezar la temporada (descartada: el primer día Mercurio apenas pasa de 10° durante 1-5 minutos, y el mejor día se quedaría sin recordatorio); los dos avisos (descartada: el doble de avisos para lo mismo); hora al cuarto de hora, como las conjunciones (descartada: cae fuera de ventanas de 6-14 minutos); minuto exacto (descartada: aparenta una precisión que el cielo no pide; «hacia» ya dice que es aproximado).
+
+## 035 — Objetivo al tocar un aviso: un solo oyente, y la actividad nueva solo guarda la petición
+- Contexto: al tocar un aviso, `MainActivity` pasa el objetivo («Mercurio», «Luna»…) al HUD por `LaunchRequests`. Cada HUD se suscribía a un evento estático y no se desuscribía. Al salir con «Atrás» la actividad se cierra pero el proceso sigue; al volver, o al tocar un aviso, se crea otra actividad con un HUD nuevo, y el viejo, invisible, se quedaba la petición: el HUD visible seguía en la Luna. Encontrado probando Mercurio en el OPPO; pasaba con cualquier aviso.
+- Decisión:
+  - **Un solo oyente**: el último HUD creado (`LaunchRequests.Listen`), que es el de la actividad viva.
+  - **La actividad nueva solo guarda la petición** (`Keep`, desde `OnCreate`): su HUD aún no existe y la recoge al aparecer. Solo `OnNewIntent`, con la actividad viva (quizá con Diagnóstico encima), avisa al HUD abierto (`Request`).
+  - El chip del objetivo se muestra cuando la barra ya tiene tamaño: en una actividad nueva aún no está maquetada al aparecer el HUD.
+- Alternativas: desuscribirse al desaparecer (descartada: con Diagnóstico encima el HUD desaparece y el toque no volvería a él); desuscribirse cuando se destruye la ventana (descartada: depende del orden en que MAUI destruye y crea, que no controlamos); que el HUD sea único (descartada: MAUI crea una ventana y su página por actividad).

@@ -70,7 +70,7 @@ public partial class HudPage : ContentPage
         BuildTargetBar();
         BuildBrightnessBar();
         // In the constructor, not OnAppearing: a tap on an alert must reach the HUD also while diagnostics is on top.
-        LaunchRequests.Requested += OnLaunchRequested;
+        LaunchRequests.Listen(OnLaunchRequested);
         ApplyPalette();
     }
 
@@ -209,7 +209,7 @@ public partial class HudPage : ContentPage
         var problem = _alerts.Problem is { } p ? $"\n\nAhora mismo: {p}." : "";
         if (_alerts.Pending.FirstOrDefault() is not { } next)
             return $"Avisos activados. Nada que avisar en los próximos {_alerts.PlanningDays} días: ni pasos visibles de la ISS " +
-                $"ni la Luna junto a un planeta, ni planetas juntos. Se vuelve a mirar cada día y cada vez que abres la app.{problem}";
+                $"ni la Luna junto a un planeta, ni planetas juntos, ni un buen día para ver Mercurio. Se vuelve a mirar cada día y cada vez que abres la app.{problem}";
         var at = TimeZoneInfo.ConvertTime(next.NotifyAt, TimeZoneInfo.Local);
         return $"Avisos activados. Próximo aviso: {at.ToString("ddd d HH:mm", SpanishCulture)}\n\n{next.Body}{problem}";
     }
@@ -217,7 +217,7 @@ public partial class HudPage : ContentPage
     private static readonly CultureInfo SpanishCulture = CultureInfo.GetCultureInfo("es-ES");
 
     /// <summary>An alert was tapped: guide to what it announced.</summary>
-    private void OnLaunchRequested(object? sender, EventArgs e) => MainThread.BeginInvokeOnMainThread(async () =>
+    private void OnLaunchRequested() => MainThread.BeginInvokeOnMainThread(async () =>
     {
         // From another page (diagnostics), back to the HUD first; its OnAppearing takes the request.
         if (Navigation.NavigationStack.Count > 1)
@@ -232,7 +232,19 @@ public partial class HudPage : ContentPage
             return;
         SelectTarget(target);
         // The chip may be off screen (the ISS is the last one on most phones): show which target the HUD is guiding to.
-        await TargetScroll.ScrollToAsync(_chips[target], ScrollToPosition.MakeVisible, false);
+        // On a new activity the bar is not laid out yet when the HUD appears: scroll once the chip has its size.
+        var chip = _chips[target];
+        if (chip.Width > 0)
+        {
+            await TargetScroll.ScrollToAsync(chip, ScrollToPosition.MakeVisible, false);
+            return;
+        }
+        void OnSized(object? sender, EventArgs e)
+        {
+            chip.SizeChanged -= OnSized;
+            _ = TargetScroll.ScrollToAsync(chip, ScrollToPosition.MakeVisible, false);
+        }
+        chip.SizeChanged += OnSized;
     }
 
     private async void SelectTarget(SkyTarget? target)
