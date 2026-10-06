@@ -538,7 +538,7 @@ La validación de los avisos de la ISS contra un paso real (paso 4) sigue pendie
 
 - ColorOS pinta el icono de la app en la notificación (`oplus_smallicon_use_app_icon`), no el monocromo, igual que con la ISS.
 - Capturas: `docs/images/conjuncion-notificacion.png`, `docs/images/conjuncion-diagnostico.png` y `docs/images/conjuncion-hud-luna.png`, recortadas sin el pie con la ubicación.
-- Sin probar en el móvil: el camino sin red (habría que borrar la caché del TLE y cortar la red), y el aviso real de esta noche a las 22:00, que queda armado.
+- Sin probar en el móvil: el aviso real de esta noche a las 22:00, que queda armado. El camino sin red se probó en el paso 13 de Mercurio.
 - Contrastado con Stellarium Web el 6 oct a las 7:45: separación 1,990° frente a 1,994° (tabla en el paso 5).
 - `dotnet test` 396 tests; build Android 0 avisos.
 
@@ -714,6 +714,18 @@ Plan acordado: 11) buscador de temporadas en Core y validación; 12) aviso, text
   | «PROBAR MERCURIO», salir con «Atrás», tocar | notificación en `moon_planets`, a la hora; al tocar se crea una actividad nueva y el HUD guía a Mercurio (antes de la corrección, se quedaba en la Luna) |
   | El mismo `Intent` por `adb` tras «Atrás» / con la app abierta / con el proceso muerto (`am kill`) | Mercurio / Saturno / Júpiter e ISS, con su chip resaltado y a la vista |
   | Preferencias | la prueba no se apunta como avisada; nada pendiente en 3 días (el mejor día de noviembre es el 20) |
+  | Tocar «La Luna junto a Marte» en EVENTOS | el HUD pasa a la Luna, con su chip resaltado (camino `Request` con la actividad viva) |
+
+- **Camino sin red** (pendiente desde el paso 7), con la caché del TLE apartada (`run-as mv`) y wifi y datos cortados (`svc wifi/data disable`); la app, al fondo y de nuevo delante:
+
+  | Prueba | Resultado |
+  |---|---|
+  | Planificación «al abrir la app» | `alerts_problem` = «sin órbita de la ISS (sin red): solo avisos de la Luna y los planetas»; sin errores en logcat |
+  | Recálculo | adelantado a 3 h: `REFRESH_ALERTS` a las 19:16 (`dumpsys alarm`), en vez de las 16:15 del día siguiente |
+  | EVENTOS | la Luna con Marte (2 nov) y con Júpiter (3 nov), con la hora de su aviso, y «Ahora mismo: sin órbita de la ISS (sin red): solo la Luna y los planetas» |
+  | Red y caché devueltas, app de nuevo delante | el problema desaparece y el recálculo vuelve a 24 h |
+
+  No había avisos pendientes en 3 días (ni conjunciones ni Mercurio), así que no se pudo ver uno programado sin red; los planificadores son los mismos que con red.
 
 - Sin probar en el móvil: Mercurio en EVENTOS (la lista mira 30 días; aparecerá desde el 21 oct) y el aviso real (víspera del 20 nov, a las 22:00).
 - `dotnet test` 509 tests; build Android 0 avisos.
