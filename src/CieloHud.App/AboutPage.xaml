@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="CieloHud.App.AboutPage"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{DynamicResource HudBackground}">
+
+    <ContentPage.Resources>
+        <Style TargetType="Label" x:Key="Section">
+            <Setter Property="FontFamily" Value="ChakraPetchBold" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="CharacterSpacing" Value="1.5" />
+            <Setter Property="TextColor" Value="{DynamicResource HudLocked}" />
+            <Setter Property="Margin" Value="0,18,0,2" />
+        </Style>
+        <Style TargetType="Label" x:Key="Body">
+            <Setter Property="FontFamily" Value="OpenSansRegular" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="TextColor" Value="{DynamicResource HudTextSoft}" />
+        </Style>
+        <Style TargetType="Button" x:Key="Link">
+            <Setter Property="FontFamily" Value="ChakraPetch" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="TextColor" Value="{DynamicResource HudTextSoft}" />
+            <Setter Property="BackgroundColor" Value="Transparent" />
+            <Setter Property="BorderColor" Value="{DynamicResource HudTextDim}" />
+            <Setter Property="BorderWidth" Value="1" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Padding" Value="12,6" />
+            <Setter Property="HorizontalOptions" Value="Start" />
+            <Setter Property="Margin" Value="0,6,0,0" />
+        </Style>
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20,48,20,24" Spacing="6">
+            <Label Text="CIELOHUD" FontFamily="ChakraPetchBold" FontSize="28" CharacterSpacing="2"
+                   TextColor="{DynamicResource HudLocked}" />
+            <Label x:Name="VersionLabel" FontFamily="ChakraPetch" FontSize="13" TextColor="{DynamicResource HudTextDim}" />
+            <Label Style="{StaticResource Body}" Margin="0,8,0,0"
+                   Text="Te guía con el móvil hasta la ISS, la Luna y los planetas para que los veas a simple vista, y te avisa cuando hay algo que merece la pena. Apunta, sigue la flecha y, cuando diga AQUÍ, baja el móvil y mira." />
+
+            <Label Text="PRIVACIDAD" Style="{StaticResource Section}" />
+            <Label Style="{StaticResource Body}"
+                   Text="Todo se calcula en el móvil: no hay cuentas, ni servidores, ni anuncios. Tu ubicación no sale del teléfono. Solo se conecta a internet para descargar la órbita de la ISS desde CelesTrak, una vez al día." />
+
+            <Label Text="CÓDIGO" Style="{StaticResource Section}" />
+            <Label Style="{StaticResource Body}" Text="Software libre, con licencia MIT. El código, las decisiones y cómo se ha validado cada cálculo están en el repositorio." />
+            <Button Text="ABRIR EL REPOSITORIO" Style="{StaticResource Link}" Clicked="OnRepositoryClicked" />
+
+            <Label Text="DATOS Y LICENCIAS" Style="{StaticResource Section}" />
+            <Label Style="{StaticResource Body}"
+                   Text="Posiciones de la Luna y los planetas: Astronomy Engine (MIT). Órbita de la ISS: SGP.NET (MIT) con elementos de CelesTrak. Estrellas: base de datos SIMBAD (CDS, Estrasburgo) y nombres del Grupo de Trabajo de Nombres de Estrellas de la IAU. Figuras de las constelaciones: d3-celestial, de Olaf Frohn (BSD). Fuentes Chakra Petch y Open Sans (SIL Open Font License)." />
+            <Button x:Name="LicensesButton" Text="VER LOS TEXTOS DE LAS LICENCIAS" Style="{StaticResource Link}" Clicked="OnLicensesClicked" />
+            <Label x:Name="LicensesLabel" IsVisible="False" FontFamily="OpenSansRegular" FontSize="11"
+                   TextColor="{DynamicResource HudTextMuted}" Margin="0,8,0,0" />
+
+            <Label Text="SI ALGO FALLA" Style="{StaticResource Section}" />
+            <Label Style="{StaticResource Body}" Text="Diagnóstico muestra el GPS, la brújula, los permisos y los avisos programados. Una captura de esa pantalla ayuda a encontrar el problema." />
+            <Button Text="DIAGNÓSTICO" Style="{StaticResource Link}" Clicked="OnDiagnosticsClicked" />
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

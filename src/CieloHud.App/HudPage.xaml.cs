@@ -397,8 +397,9 @@ public partial class HudPage : ContentPage
         await Shell.Current.GoToAsync(nameof(EventsPage));
     }
 
-    private async void OnDiagnosticsClicked(object? sender, EventArgs e)
+    // Diagnostics is reached from there: it is for finding problems, not for everyday use.
+    private async void OnAboutClicked(object? sender, EventArgs e)
     {
-        await Shell.Current.GoToAsync(nameof(DiagnosticsPage));
+        await Shell.Current.GoToAsync(nameof(AboutPage));
     }
 }

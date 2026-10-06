@@ -661,3 +661,17 @@ Priorizadas por el usuario aunque la fase actual sea la 4.
   - El HUD **mantiene la pantalla encendida** mientras está delante (`KeepScreenOn`): se sostiene sin tocar y el móvil la apagaba a los 30 s.
 - Probado en el OPPO: con 10 % el usuario lee el HUD a oscuras; brillo medido 204 estable tras la transición; captura con el HUD en rojo pintado.
   Pendiente: probar el panel de brillo en el móvil (la instalación quedó a medias por desconexión; instalado después a las 18:06).
+
+### Primera versión descargable: 0.4.0 (2026-10-06)
+
+- Para que cualquiera pueda instalarla sin el SDK: APK firmado publicado a mano en GitHub Releases como *pre-release* (la Fase 4 sigue abierta). Decisión 032.
+- **Firma**: clave propia (`CN=CieloHud`, RSA 4096, ~27 años) generada fuera del repo, en `%USERPROFILE%\.cielohud\` (almacén y fichero de contraseña;
+  el usuario guarda una copia: sin ella no se puede actualizar lo instalado). `scripts/publish-apk.ps1` compila en Release desde limpio, firma y **verifica**
+  la firma con `apksigner` antes de dar el APK por bueno.
+  - Fallo encontrado: `apksigner` lee las contraseñas `file:` línea a línea (almacén y luego clave) del mismo fichero; con una sola línea fallaba la firma
+    y una segunda compilación, al darlo por actualizado, dejó un APK **sin firmar** con nombre de firmado. Ahora la contraseña va por variable de entorno,
+    se compila desde limpio y se verifica.
+- **Versión** 0.4.0, `ApplicationVersion` 400 (mayor×10000 + menor×100 + parche).
+- **Acerca de** (botón ACERCA DE en el pie, en lugar de DIAGNÓSTICO): qué es, privacidad, enlace al repositorio, datos y licencias, y el acceso a Diagnóstico.
+  Los textos de `LICENSE`, `THIRD-PARTY-NOTICES.md` y `licenses/*` van dentro del APK (BSD y OFL piden acompañar al binario) y se muestran ahí.
+- README: sección «Instalar en tu móvil» (origen desconocido, Play Protect, permisos, batería); fila del modo nocturno y número de tests al día.

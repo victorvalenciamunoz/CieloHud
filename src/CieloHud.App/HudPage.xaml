@@ -49,13 +49,13 @@
                     FontFamily="ChakraPetch" FontSize="11"
                     BorderWidth="1" CornerRadius="6" Padding="10,4"
                     Clicked="OnNightClicked" />
-            <Button Grid.Column="3" Text="DIAGNÓSTICO"
+            <Button Grid.Column="3" Text="ACERCA DE"
                     FontFamily="ChakraPetch" FontSize="11"
                     TextColor="{DynamicResource HudTextSoft}"
                     BackgroundColor="Transparent"
                     BorderColor="{DynamicResource HudTextDim}" BorderWidth="1"
                     CornerRadius="6" Padding="10,4"
-                    Clicked="OnDiagnosticsClicked" />
+                    Clicked="OnAboutClicked" />
         </Grid>
     </Grid>
 
