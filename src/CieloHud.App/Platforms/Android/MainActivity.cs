@@ -19,20 +19,18 @@ public class MainActivity : MauiAppCompatActivity
     {
         base.OnCreate(savedInstanceState);
         // Restored after being killed: the intent is the old one, already handled.
-        if (savedInstanceState is null)
-            HandleLaunch(Intent);
+        // A new activity brings a new HUD, which takes the target when it appears.
+        if (savedInstanceState is null && Target(Intent) is { } target)
+            LaunchRequests.Keep(target);
     }
 
-    // Tapping an alert while the app is open.
+    // Tapping an alert while the app is open: the HUD is there, maybe under diagnostics.
     protected override void OnNewIntent(Intent? intent)
     {
         base.OnNewIntent(intent);
-        HandleLaunch(intent);
-    }
-
-    private static void HandleLaunch(Intent? intent)
-    {
-        if (intent?.GetStringExtra(LaunchRequests.TargetExtra) is { } target)
+        if (Target(intent) is { } target)
             LaunchRequests.Request(target);
     }
+
+    private static string? Target(Intent? intent) => intent?.GetStringExtra(LaunchRequests.TargetExtra);
 }

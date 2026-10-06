@@ -9,7 +9,7 @@ namespace CieloHud.App.Platforms.Android.Alerts;
 /// <summary>
 /// Alerts on Android (decision 022): one <see cref="AlarmManager"/> alarm that wakes <see cref="AlertReceiver"/> even in Doze,
 /// exact when the user allows it ("Alarmas y recordatorios", <c>SCHEDULE_EXACT_ALARM</c>), otherwise a few minutes loose;
-/// notifications posted with <see cref="NotificationCompat"/>, on one channel for ISS passes and another for the Moon and the planets
+/// notifications posted with <see cref="NotificationCompat"/>, on one channel for ISS passes and another for the Moon and the planets (Mercury too)
 /// (decision 027), so each can be tuned on its own in the system settings.
 /// </summary>
 public sealed class AndroidAlertPlatform : IAlertPlatform
@@ -138,7 +138,7 @@ public sealed class AndroidAlertPlatform : IAlertPlatform
         // Lasts hours and is announced ahead: it makes a sound, but no banner over what you are doing.
         manager.CreateNotificationChannel(new NotificationChannel(ConjunctionChannelId, "Luna y planetas", NotificationImportance.Default)
         {
-            Description = "Aviso cuando la Luna pasa junto a Venus, Marte, Júpiter o Saturno, o dos de ellos se ven juntos: al anochecer, o la víspera a las 22:00 si es de madrugada.",
+            Description = "Aviso cuando la Luna pasa junto a Venus, Marte, Júpiter o Saturno, cuando dos de ellos se ven juntos y en el mejor día para ver Mercurio: antes de que oscurezca, o la víspera a las 22:00 si es de madrugada.",
         });
     }
 }

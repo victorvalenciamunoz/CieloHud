@@ -1,5 +1,6 @@
 using CieloHud.App.Alerts;
 using CieloHud.App.Hud;
+using CieloHud.Core.Apparitions;
 using CieloHud.Core.Conjunctions;
 using CieloHud.Core.Passes;
 using CieloHud.App.Services;
@@ -27,6 +28,7 @@ public static class MauiProgram
 		// Core (no UI, no state)
 		builder.Services.AddSingleton<ISolarSystemService, AstronomyEngineSolarSystemService>();
 		builder.Services.AddSingleton<ISunService, AstronomyEngineSunService>();
+		builder.Services.AddSingleton<IMagnitudeService, AstronomyEngineMagnitudeService>();
 		builder.Services.AddSingleton<ISatelliteService, Sgp4SatelliteService>();
 		builder.Services.AddSingleton<CieloHud.Core.Stars.IStarService, CieloHud.Core.Stars.AstronomyEngineStarService>();
 		builder.Services.AddSingleton<CieloHud.Core.Constellations.IConstellationLocator, CieloHud.Core.Constellations.AstronomyEngineConstellationLocator>();
@@ -49,6 +51,10 @@ public static class MauiProgram
 		builder.Services.AddSingleton<IConjunctionFinder>(sp => new ConjunctionFinder(
 			sp.GetRequiredService<ISolarSystemService>(),
 			sp.GetRequiredService<ISunService>()));
+		builder.Services.AddSingleton<IMercuryApparitionFinder>(sp => new MercuryApparitionFinder(
+			sp.GetRequiredService<ISolarSystemService>(),
+			sp.GetRequiredService<ISunService>(),
+			sp.GetRequiredService<IMagnitudeService>()));
 
 		// Device
 #if ANDROID
