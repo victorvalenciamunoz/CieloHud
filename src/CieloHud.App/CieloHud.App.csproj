@@ -14,8 +14,9 @@
 
 		<ApplicationTitle>CieloHud</ApplicationTitle>
 		<ApplicationId>com.cielohud.app</ApplicationId>
-		<ApplicationDisplayVersion>0.1</ApplicationDisplayVersion>
-		<ApplicationVersion>1</ApplicationVersion>
+		<!-- ApplicationVersion is major*10000 + minor*100 + patch: Android installs an update only if it grows (decision 032). -->
+		<ApplicationDisplayVersion>0.4.0</ApplicationDisplayVersion>
+		<ApplicationVersion>400</ApplicationVersion>
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">26.0</SupportedOSPlatformVersion>
 	</PropertyGroup>
@@ -31,6 +32,8 @@
 		<MauiImage Include="Resources\Images\*" />
 		<MauiFont Include="Resources\Fonts\*" />
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+		<!-- License texts that must travel with the app (BSD, OFL), shown in "Acerca de" (decision 032). Taken from the repo root, not copied. -->
+		<MauiAsset Include="..\..\LICENSE;..\..\THIRD-PARTY-NOTICES.md;..\..\licenses\*.txt" LogicalName="licenses\%(Filename)%(Extension)" />
 	</ItemGroup>
 
 	<ItemGroup>
