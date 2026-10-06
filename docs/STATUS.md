@@ -803,6 +803,26 @@ Hallazgo al revisar: el catálogo `BrightStars` no guarda la paralaje; se añadi
   (porcentajes y redondeo, día y hora local de la próxima fase con el cambio de hora y «la 1:05», distancias, tiempos de luz de 1 s a 2 h).
 - `dotnet test` 573 tests; build Android 0 avisos (la app aún no usa `Cards/`).
 
+### Paso 2 — Formato de los textos y los 7 objetivos (2026-10-06)
+
+- **Formato** (decisión 037): un Markdown por objeto en `src/CieloHud.Core/Cards/Texts/es/{targets,stars,constellations}/<id>.md`,
+  incrustado en Core: `# Título`, el texto (uno o más párrafos) y `## Fuentes` con una línea por fuente. Los identificadores son el nombre del cuerpo
+  (`Moon.md`, `Jupiter.md`), `ISS.md`, la designación de Bayer de las estrellas (`alf-CMa.md`) y el símbolo IAU de las constelaciones (`Ori.md`).
+- Core `CardTexts`: `Find(CardKey)`, `All` y `Parse`. Los espacios dentro de un número («282 000») y entre número y unidad («430 °C», «109 m», «27 %»)
+  pasan a ser de no separación. Un objeto sin fichero no tiene texto todavía, y su ficha saldrá solo con datos.
+- **Reglas comprobadas por los tests**: como máximo 400 caracteres (lo que cabe bajo el HUD sin desplazarse), al menos una fuente, texto plano
+  (sin marcas de Markdown), nada que dependa del momento («hoy», «ahora», «esta noche»…: eso lo pone el cálculo), solo objetos que existen
+  (cuerpo, estrella del catálogo o constelación IAU), los 7 objetivos con el nombre que usa la app, y la cuenta de lo pendiente (155 estrellas y 88 constelaciones).
+- **Los 7 textos**: Luna, Mercurio, Venus, Marte, Júpiter, Saturno e ISS, de 280 a 389 caracteres. Borradores escritos con ayuda de IA fuera del repo,
+  con cada cifra fija sacada de su fuente (fichas y páginas de datos de la NASA, la RAE, decisiones 010, 011 y 033). Revisados por el usuario en la conversación
+  y, uno a uno, en la PR (una casilla por texto).
+  Cambios de la revisión: en Mercurio, «mucha gente no lo ha visto nunca» (sin fuente) pasa a «unas pocas semanas al año» (sondeo de la decisión 033);
+  en la ISS se quita «donde suelen vivir siete personas» (cambia con las tripulaciones); la cita de la RAE para «lucero» la comprobó el usuario
+  (dle.rae.es no deja leerse con herramientas automáticas).
+- Pendiente: no se dice que las lunas de Júpiter se vean con prismáticos hasta tener su magnitud calculada (paso 4).
+- Consola: `--card` muestra también el texto, ajustado a 100 columnas, o «(sin texto todavía)».
+- `dotnet test` 594 tests; build Android 0 avisos (la app aún no usa los textos).
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.

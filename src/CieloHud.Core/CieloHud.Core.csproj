@@ -11,4 +11,9 @@
     <PackageReference Include="SGP.NET" Version="1.6.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Card texts (decision 037): cards/es/<folder>/<id>.md, read by CardTexts. -->
+    <EmbeddedResource Include="Cards\Texts\es\**\*.md" LogicalName="cards/es/%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
 </Project>
