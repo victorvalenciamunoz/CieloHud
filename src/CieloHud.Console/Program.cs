@@ -1,5 +1,6 @@
 using CieloHud.Console;
 using CieloHud.Core.Alerts;
+using CieloHud.Core.Apparitions;
 using CieloHud.Core.Conjunctions;
 using CieloHud.Core.Passes;
 using CieloHud.Core.Satellites;
@@ -33,6 +34,8 @@ var tleProvider = new CelesTrakTleProvider(http, cacheDirectory);
 
 if (options.ConjunctionsDays is { } conjunctionDays)
     return PrintConjunctions(conjunctionDays);
+if (options.MercuryDays is { } mercuryDays)
+    return PrintMercury(mercuryDays);
 
 return options.PassesDays is { } days
     ? await PrintPassesAsync(days)
@@ -111,5 +114,18 @@ int PrintConjunctions(int days)
 
     var alerts = new ConjunctionAlertPlanner().Plan(conjunctions.Concat(planetPairs), from, TimeZoneInfo.Local);
     System.Console.WriteLine(ConjunctionTableFormatter.Alerts(alerts, TimeZoneInfo.Local));
+    return 0;
+}
+
+int PrintMercury(int days)
+{
+    var from = options.Instant;
+    var to = from.AddDays(days);
+    var finder = new MercuryApparitionFinder(
+        new AstronomyEngineSolarSystemService(), new AstronomyEngineSunService(), new AstronomyEngineMagnitudeService());
+
+    System.Console.WriteLine(MercuryTableFormatter.Header(options.Observer, from, to, finder.Criteria));
+    System.Console.WriteLine(MercuryTableFormatter.Apparitions(finder.Find(options.Observer, from, to, TimeZoneInfo.Local)));
+    System.Console.WriteLine(MercuryTableFormatter.Windows(finder.FindWindows(options.Observer, from, to, TimeZoneInfo.Local)));
     return 0;
 }

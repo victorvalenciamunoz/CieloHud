@@ -25,4 +25,15 @@ internal static class AstronomyEngineLocator
             altitudeDegrees: topocentric.altitude,
             distanceKm: equatorial.dist * KmPerAstronomicalUnit);
     }
+
+    public static Body ToBody(CelestialBody body) => body switch
+    {
+        CelestialBody.Moon => Body.Moon,
+        CelestialBody.Mercury => Body.Mercury,
+        CelestialBody.Venus => Body.Venus,
+        CelestialBody.Mars => Body.Mars,
+        CelestialBody.Jupiter => Body.Jupiter,
+        CelestialBody.Saturn => Body.Saturn,
+        _ => throw new ArgumentOutOfRangeException(nameof(body), body, "Unsupported celestial body."),
+    };
 }

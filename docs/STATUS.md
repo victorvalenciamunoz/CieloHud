@@ -621,6 +621,47 @@ Pasos: 8) buscador en Core y validación; 9) aviso, texto y app.
   Captura: `docs/images/eventos.png`.
 - `dotnet test` 442 tests; build Android 0 avisos.
 
+### Mercurio: los días buenos para verlo
+
+Encargo: decidir con datos si CieloHud debe avisar de los días buenos para ver Mercurio, que estaba fuera de las conjunciones (decisión 025)
+y en VISION «como extra». Sondeo previo de dos años (oct 2026-sep 2028, Humanes de Madrid, cada minuto del crepúsculo): con el criterio de siempre
+(≥ 10° con el Sol ≤ -6°) y magnitud ≤ 0,5 salen **3 temporadas al año de 5 a 15 días**, con Mercurio a 10-14° y de magnitud -0,6 a 0,1 en su mejor día.
+**La elongación no basta**: la de octubre de 2026 (25°) deja a Mercurio a 3,4° con el Sol a -6°; la buena es la de noviembre al amanecer (19,5°). Decisión 033.
+Plan acordado: 11) buscador de temporadas en Core y validación; 12) aviso, texto y EVENTOS en Core; 13) la app. Sin APKs nuevos por ahora.
+
+### Paso 11 — Mercurio: buscador de temporadas (2026-10-06)
+
+- Core `Apparitions/`: `MercuryCriteria` (≥ 10°, Sol ≤ -6°, magnitud ≤ 0,5; muestreo cada minuto con una pasada previa cada 5 min; 30 días de margen),
+  `MercuryWindow` (anochecer o amanecer; inicio, mejor momento y fin de la ventana del día; magnitud), `MercuryApparition` (temporada: mejor día,
+  primer y último día, número de días), `IMercuryApparitionFinder` y `MercuryApparitionFinder`. Decisión 033.
+  - **Ventana**: los minutos con el Sol ≤ -6° y Mercurio a ≥ 10°; **mejor momento**, el más alto (en la práctica, con el Sol llegando a -6°: el inicio
+    al anochecer, el final al amanecer). Se queda si la magnitud en el mejor momento es ≤ 0,5. Anochecer o amanecer según la hora local.
+  - **Temporada**: días locales seguidos con ventana en la misma franja; **mejor día**, el de Mercurio más alto. `Find` devuelve las temporadas cuyo
+    mejor día cae en el rango, enteras (como las parejas de planetas); `FindWindows`, cada día.
+  - Una pasada cada 5 min busca dónde el Sol y Mercurio están a menos de 2° de los límites; solo ahí se muestrea cada minuto (las ventanas duran 1-21 min).
+    Pasos fijos en UTC (`Sky/TimeGrid`, ahora compartido con las conjunciones). Medido en el PC: 30 días (lo que pedirá EVENTOS, más el margen) en 0,18 s; un año en 0,5 s.
+- `IMagnitudeService` y `AstronomyEngineMagnitudeService` (`Illumination` de Astronomy Engine), aparte de `ISolarSystemService` para no tocar los cielos falsos de los tests.
+- Consola: `--mercury <días>` (1-1100) lista las temporadas y cada día. Solo formato.
+- Tests unitarios con un cielo falso: ventana de anochecer y de amanecer, alto solo con el cielo claro, ventana corta entre dos muestras gruesas,
+  tope de magnitud (0,5 sí, 0,51 no) y magnitud en el mejor momento, días seguidos → una temporada con su mejor día, un día sin ventana o demasiado débil
+  la parte en dos, anochecer y amanecer por separado, temporada entera con solo el mejor día en el rango, mejor día fuera del rango, durante la ventana del mejor día,
+  ventana abierta al final del rango, resultado independiente del instante del cálculo, franja según la hora local, criterios inválidos.
+- **Validación contra JPL Horizons** (Madrid, Mercurio 199 con refracción y magnitud aparente, Sol sin refracción, cada minuto; el mismo criterio aplicado a sus datos):
+
+  | Temporada | Días CieloHud / Horizons | Mejor día | Ventanas | Altura en el mejor momento |
+  |---|---|---|---|---|
+  | Amanecer, nov 2026 | 14-28 nov (15) / igual | 20 nov, 7:37, 12,39° al SE (118°), mag. -0,6 | las 15 iguales al minuto | máx. dif. 0,001° |
+  | Anochecer, feb 2027 | 31 ene-7 feb (8) / igual | 4 feb, 19:05, 11,08° al SO (247°), mag. -0,5 | las 8 iguales al minuto | máx. dif. 0,001° |
+  | Anochecer, may 2027 | 15-28 may (14) / 15-27 may (13) | 26 may, 22:06, 13,39° al O (292°), mag. 0,2 | las 13 comunes iguales al minuto | máx. dif. 0,001° |
+  | Anochecer, oct 2026 | ninguna / ninguna | 12 oct: Mercurio a 3,39° con el Sol a -6° (Horizons 3,391°) | — | — |
+
+  En todos los minutos del crepúsculo (Sol entre 0° y -12°, Mercurio sobre el horizonte) de las cuatro descargas: altura ≤ 0,0015°, acimut ≤ 0,0012°, Sol ≤ 0,0004°.
+  La **magnitud** difiere hasta 0,13 (Astronomy Engine más brillante; Horizons usa un modelo más reciente), y eso cambia el último día de mayo de 2027:
+  0,44 aquí y 0,51 en Horizons, frente al tope de 0,5. Aceptado: el tope es una regla práctica, no un umbral físico (decisión 033).
+  Quedan como tests de integración (altura 0,05°, magnitud 0,15): los 15 días de noviembre, las tres temporadas del año y octubre sin ninguna.
+- Sondeo y comparación en el scratchpad, fuera del repo.
+- `dotnet test` 482 tests; build Android 0 avisos (la app aún no usa `Apparitions/`).
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.
