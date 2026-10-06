@@ -1,4 +1,5 @@
 using static CieloHud.Core.Tests.Alerts.AlertConjunctions;
+using static CieloHud.Core.Tests.Alerts.AlertMercury;
 using static CieloHud.Core.Tests.Alerts.AlertPasses;
 
 namespace CieloHud.Core.Tests.Events;
@@ -98,6 +99,47 @@ public class UpcomingEventsTests
         var e = Assert.Single(UpcomingEvents.Build([], null, [jupiter], Now, Madrid));
 
         Assert.Equal("Luna", e.Target);
+    }
+
+    [Fact]
+    public void Mercury_BestDayHeightDirectionAndDays()
+    {
+        var now = Local("2026-11-01 12:00");
+
+        var e = Assert.Single(UpcomingEvents.Build([], null, [], now, Madrid, mercury: [NovemberDawn()]));
+
+        Assert.Equal(SkyEventKind.Mercury, e.Kind);
+        Assert.Equal(Local("2026-11-20 07:37"), e.At);
+        Assert.Equal(Local("2026-11-20 07:37"), e.Until);
+        Assert.Equal("Mercurio", e.Target);
+        Assert.Equal("≈7:35", e.Time);
+        Assert.Equal("Mercurio al amanecer (12°)", e.Title);
+        Assert.Equal("al SE · se ve del 14 al 28 nov", e.Details);
+        Assert.Equal(Local("2026-11-19 22:00"), e.AlertAt);
+    }
+
+    [Fact]
+    public void Mercury_AlreadyAnnouncedWithoutAlert_AndGoneOnceItsWindowCloses()
+    {
+        var february = FebruaryDusk();
+
+        var announced = Assert.Single(UpcomingEvents.Build([], null, [], Local("2027-02-04 12:00"), Madrid,
+            mercury: [february], notifiedMercury: [NotifiedMercury.From(february)]));
+        var closed = UpcomingEvents.Build([], null, [], Local("2027-02-04 19:12"), Madrid, mercury: [february]);
+
+        Assert.Null(announced.AlertAt);
+        Assert.Empty(closed);
+    }
+
+    [Fact]
+    public void Mercury_OrderedWithTheRest()
+    {
+        var now = Local("2027-02-04 12:00");
+        var jupiter = Conjunction(CelestialBody.Jupiter, "2027-02-04 20:15", "2027-02-04 22:00", "2027-02-05 01:00");
+
+        var events = UpcomingEvents.Build([], null, [jupiter], now, Madrid, mercury: [FebruaryDusk()]);
+
+        Assert.Equal([SkyEventKind.Mercury, SkyEventKind.MoonConjunction], events.Select(e => e.Kind));
     }
 
     [Theory]

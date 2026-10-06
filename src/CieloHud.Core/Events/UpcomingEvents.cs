@@ -1,4 +1,5 @@
 using CieloHud.Core.Alerts;
+using CieloHud.Core.Apparitions;
 using CieloHud.Core.Conjunctions;
 using CieloHud.Core.Passes;
 using static CieloHud.Core.Alerts.AlertWords;
@@ -6,7 +7,7 @@ using static CieloHud.Core.Alerts.AlertWords;
 namespace CieloHud.Core.Events;
 
 /// <summary>
-/// The list of upcoming events (decision 030): visible ISS passes and conjunctions, in order, each with when its alert will go
+/// The list of upcoming events (decisions 030 and 034): visible ISS passes, conjunctions and Mercury, in order, each with when its alert will go
 /// off. Pure: the caller finds the passes and conjunctions, for as far ahead as it wants to show. The alert times come from the
 /// same planners as the alerts, so the list and the notifications agree.
 /// </summary>
@@ -22,22 +23,28 @@ public static class UpcomingEvents
         TimeZoneInfo timeZone,
         IEnumerable<DateTimeOffset>? notifiedPasses = null,
         IEnumerable<NotifiedConjunction>? notifiedConjunctions = null,
-        AlertSettings? settings = null)
+        AlertSettings? settings = null,
+        IEnumerable<MercuryApparition>? mercury = null,
+        IEnumerable<NotifiedMercury>? notifiedMercury = null)
     {
         ArgumentNullException.ThrowIfNull(passes);
         ArgumentNullException.ThrowIfNull(conjunctions);
         ArgumentNullException.ThrowIfNull(timeZone);
         var passList = passes.Where(p => p.VisibleEnd.Instant > now).ToList();
         var conjunctionList = conjunctions.Where(c => c.End.Instant > now).ToList();
+        var mercuryList = (mercury ?? []).Where(a => a.Best.End.Instant > now).ToList();
 
         var passAlerts = tleEpoch is { } epoch
             ? new PassAlertPlanner(settings).Plan(passList, epoch, now, timeZone, notifiedPasses)
             : [];
         var conjunctionAlerts = new ConjunctionAlertPlanner(settings).Plan(conjunctionList, now, timeZone, notifiedConjunctions);
+        var mercuryAlerts = new MercuryAlertPlanner(settings).Plan(mercuryList, now, timeZone, notifiedMercury);
 
         var events = passList.Select(p => FromPass(p, passAlerts.FirstOrDefault(a => ReferenceEquals(a.Pass, p))?.NotifyAt, timeZone))
             .Concat(conjunctionList.Select(c => FromConjunction(c,
-                conjunctionAlerts.FirstOrDefault(a => a.Conjunctions.Any(x => ReferenceEquals(x, c)))?.NotifyAt, timeZone)));
+                conjunctionAlerts.FirstOrDefault(a => a.Conjunctions.Any(x => ReferenceEquals(x, c)))?.NotifyAt, timeZone)))
+            .Concat(mercuryList.Select(m => FromMercury(m,
+                mercuryAlerts.FirstOrDefault(a => ReferenceEquals(a.Apparition, m))?.NotifyAt, timeZone)));
         return events.OrderBy(e => e.At).ToList();
     }
 
@@ -90,6 +97,22 @@ public static class UpcomingEvents
             ConjunctionAlertText.GuideName(c.Guide),
             "≈" + Time(ConjunctionAlertText.Approximate(c, best, timeZone)),
             title,
+            details,
+            alertAt);
+    }
+
+    private static SkyEvent FromMercury(MercuryApparition m, DateTimeOffset? alertAt, TimeZoneInfo timeZone)
+    {
+        var best = m.Best.Best;
+        var details = $"al {Cardinal(best.Mercury.CardinalPoint)}"
+            + (MercuryAlertText.Days(m, timeZone) is { } days ? $" · se ve {days}" : "");
+        return new SkyEvent(
+            SkyEventKind.Mercury,
+            best.Instant,
+            m.Best.End.Instant,
+            MercuryAlertText.GuideName,
+            "≈" + Time(MercuryAlertText.Approximate(m.Best, timeZone)),
+            $"{MercuryAlertText.Title(m.Period)} ({Degrees(best.Mercury.AltitudeDegrees)}°)",
             details,
             alertAt);
     }

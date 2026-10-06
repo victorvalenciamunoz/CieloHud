@@ -662,6 +662,38 @@ Plan acordado: 11) buscador de temporadas en Core y validación; 12) aviso, text
 - Sondeo y comparación en el scratchpad, fuera del repo.
 - `dotnet test` 482 tests; build Android 0 avisos (la app aún no usa `Apparitions/`).
 
+### Paso 12 — Aviso de Mercurio, texto y EVENTOS (2026-10-06)
+
+- Elegido por el usuario: **un aviso por temporada, en su mejor día**, como las parejas de planetas. Decisión 034.
+- Core `Alerts/`: `MercuryAlertPlanner` (sobre `AlertPlanner`): aviso **30 min antes de que se abra la ventana del mejor día**
+  (`AlertSettings.MercuryLeadTime`); al amanecer cae en las horas de silencio y pasa a las 22:00 de la víspera. Merece la pena hasta que se cierra la ventana.
+  No se repite: misma franja (anochecer o amanecer) con el mejor momento a menos de 30 días (`SameMercurySeasonTolerance`; `NotifiedMercury` guarda franja y mejor momento).
+- `MercuryAlertText`: «Mercurio al amanecer» · «Mañana al amanecer, Mercurio a 12°, lo más alto en estas semanas · mejor hacia las 7:35 al SE · se ve del 14 al 28 nov».
+  «Hoy / Mañana / El 4 feb al anochecer»; «Ahora…» si se planifica con la ventana abierta, y pasado el mejor momento «Ahora, Mercurio bajo al O, hasta las 19:11».
+  - La altura va en el texto porque está bajo: hace falta un horizonte despejado.
+  - **Hora a 5 min**, la marca más cercana **dentro de la ventana**: al anochecer el mejor momento es el inicio, y «22:05» para una ventana que abre a las 22:06
+    sería antes de que oscurezca; dice «22:10». Sin marca dentro (18:47-18:49), el minuto exacto.
+  - El intervalo de días sale de `AlertWords.DateRange`, ahora común con «juntos del 9 al 23 nov».
+- EVENTOS: `SkyEventKind.Mercury` y `UpcomingEvents.Build` con las temporadas y las ya avisadas (parámetros opcionales al final: la app sigue igual hasta el paso 13).
+  «≈7:35 · Mercurio al amanecer (12°) · al SE · se ve del 14 al 28 nov», objetivo «Mercurio», con la hora de su aviso por el mismo planificador.
+- Consola: `--mercury` lista también los avisos. Los de los próximos dos años desde Madrid:
+
+  | Aviso | Texto |
+  |---|---|
+  | 19/11/2026 22:00 | Mañana al amanecer, Mercurio a 12°, lo más alto en estas semanas · mejor hacia las 7:35 al SE · se ve del 14 al 28 nov |
+  | 4/2/2027 18:35 | Hoy al anochecer, Mercurio a 11°, lo más alto en estas semanas · mejor hacia las 19:05 al SO · se ve del 31 ene al 7 feb |
+  | 26/5/2027 21:36 | Hoy al anochecer, Mercurio a 13°, lo más alto en estas semanas · mejor hacia las 22:10 al O · se ve del 15 al 28 may |
+  | 3/11/2027 22:00 | Mañana al amanecer, Mercurio a 12°, … · mejor hacia las 7:15 al E · se ve del 30 oct al 11 nov |
+  | 19/1/2028 18:17 | Hoy al anochecer, Mercurio a 10°, … · mejor hacia las 18:47 al SO · se ve del 17 al 21 ene |
+  | 8/5/2028 21:19 | Hoy al anochecer, Mercurio a 14°, … · mejor hacia las 21:50 al O · se ve del 28 abr al 10 may |
+
+  Horas y alturas sobre las temporadas validadas con Horizons en el paso 11.
+- Tests: planificador (anochecer a 30 min, amanecer → víspera, con la ventana abierta → ya, ventana cerrada, ya avisada aunque cambie el mejor día,
+  la otra franja o una temporada de hace meses no la bloquean, orden), texto (amanecer de víspera, anochecer del día, fecha, «Ahora» antes y después del mejor
+  momento, un solo día, redondeo dentro de la ventana en seis casos), EVENTOS (campos, ya avisada sin aviso, desaparece al cerrarse la ventana, orden con
+  las conjunciones) e integración con las efemérides reales (los tres avisos del año, antes de su ventana y fuera de las horas de silencio).
+- `dotnet test` 509 tests; build Android 0 avisos (la app aún no usa los avisos de Mercurio).
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.

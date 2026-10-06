@@ -1,7 +1,7 @@
 namespace CieloHud.Core.Alerts;
 
 /// <summary>
-/// When to announce visible passes and Moon-planet conjunctions. Fixed by design (no user input): ahead of time, never at night.
+/// When to announce visible passes, conjunctions and Mercury. Fixed by design (no user input): ahead of time, never at night.
 /// Times of day are local to the observer's time zone.
 /// </summary>
 public sealed record AlertSettings
@@ -14,6 +14,11 @@ public sealed record AlertSettings
     /// for an evening window, about sunset.
     /// </summary>
     public TimeSpan ConjunctionLeadTime { get; init; } = TimeSpan.FromMinutes(30);
+
+    /// <summary>
+    /// How long before Mercury's window opens, on the best day of its season, its alert goes off: time to find a clear, low horizon.
+    /// </summary>
+    public TimeSpan MercuryLeadTime { get; init; } = TimeSpan.FromMinutes(30);
 
     /// <summary>Start of the quiet hours (inclusive). No alert goes off in [<see cref="QuietStart"/>, <see cref="QuietEnd"/>).</summary>
     public TimeSpan QuietStart { get; init; } = TimeSpan.Zero;
@@ -48,6 +53,12 @@ public sealed record AlertSettings
     /// </summary>
     public TimeSpan SamePlanetPairTolerance { get; init; } = TimeSpan.FromDays(30);
 
+    /// <summary>
+    /// Mercury is announced once per season, on its best day. If that day shifts when planning again (another location), it is
+    /// still the same season within this long: seasons at the same end of the night are months apart.
+    /// </summary>
+    public TimeSpan SameMercurySeasonTolerance { get; init; } = TimeSpan.FromDays(30);
+
     /// <summary>How far ahead the app looks for passes and conjunctions on each recalculation.</summary>
     public TimeSpan Horizon { get; init; } = TimeSpan.FromDays(3);
 
@@ -65,7 +76,7 @@ public sealed record AlertSettings
     internal void Validate()
     {
         var day = TimeSpan.FromDays(1);
-        if (LeadTime < TimeSpan.Zero || ConjunctionLeadTime < TimeSpan.Zero)
+        if (LeadTime < TimeSpan.Zero || ConjunctionLeadTime < TimeSpan.Zero || MercuryLeadTime < TimeSpan.Zero)
             throw new ArgumentException("Lead times cannot be negative.");
         // Quiet hours within one calendar day, evening reminder after them: the reminder is always the evening before.
         if (QuietStart < TimeSpan.Zero || QuietStart >= QuietEnd || QuietEnd > EveningReminder || EveningReminder >= day)
