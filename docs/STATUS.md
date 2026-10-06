@@ -1,6 +1,6 @@
 # Estado
 
-Fase actual: 4 (ver PLAN.md). Fases 1 y 2 completadas el 2026-10-02; fase 3 el 2026-10-05.
+Fase actual: 5 (ver PLAN.md). Fases 1 y 2 completadas el 2026-10-02; fase 3 el 2026-10-05; fase 4 el 2026-10-06.
 
 ## Hecho
 
@@ -433,7 +433,7 @@ Plan acordado (2026-10-05): un aviso cuando la Luna pase cerca de un planeta bri
 al tocarlo, el HUD guía a la Luna. Mismo interruptor AVISOS, mismas horas de silencio y la misma alarma única que la ISS.
 Criterio: separación ≤ 5°, los dos a ≥ 10°, Sol ≤ -6°; Venus, Marte, Júpiter y Saturno (Mercurio fuera). Pasos:
 5) buscador en Core y validación; 6) cuándo avisar y texto en Core, con un planificador común para la ISS y las conjunciones; 7) integración en la app y prueba en el móvil.
-La validación de los avisos de la ISS contra un paso real (paso 4) sigue pendiente, aparte.
+La validación de los avisos de la ISS contra Heavens-Above (paso 4) se hizo al final, el 2026-10-06.
 
 ### Paso 5 — Buscador de conjunciones (2026-10-05)
 
@@ -729,6 +729,41 @@ Plan acordado: 11) buscador de temporadas en Core y validación; 12) aviso, text
 
 - Sin probar en el móvil: Mercurio en EVENTOS (la lista mira 30 días; aparecerá desde el 21 oct) y el aviso real (víspera del 20 nov, a las 22:00).
 - `dotnet test` 509 tests; build Android 0 avisos.
+
+### Paso 4 — Pasos de la ISS contra Heavens-Above (2026-10-06)
+
+- Plan acordado al principio de la fase: cerrarla tras ver un paso real con su aviso. El usuario prefirió cerrarla ya con la comparación
+  contra Heavens-Above y dejar la observación como comprobación en el cielo pendiente (abajo).
+- Heavens-Above, Humanes de Madrid (las mismas coordenadas del pueblo que la consola), búsqueda del 6 oct 0:00 al 16 oct 0:00, órbita con época del 6 oct.
+  CieloHud con el TLE de CelesTrak de la misma época (6 oct 00:20 UTC). Heavens-Above da el inicio y el fin a 10° de altura; para compararlos,
+  se buscó en CieloHud cuándo cruza la ISS los 10° (cada segundo, `Sgp4SatelliteService`).
+
+  | Paso | Heavens-Above: 10° · máximo · 10° | CieloHud: 10° · máximo · 10° |
+  |---|---|---|
+  | 11 oct | 7:56:35 SSE · 7:58:05, 12° SE · 7:59:35 ESE | 7:56:37 (155°) · 7:58:05, 12,4° (129°) · 7:59:34 (103°) |
+  | 13 oct | 7:56:53 SSO · 8:00:02, 37° SE · 8:03:12 ENE | 7:56:54 (205°) · 8:00:02, 36,5° (136°) · 8:03:11 (68°) |
+  | 14 oct | 7:10:13 S · 7:12:52, 21° SE · 7:15:33 E | 7:10:14 (184°) · 7:12:52, 21,5° (133°) · 7:15:32 (81°) |
+  | 15 oct | 6:24:12 SSE · 6:25:45, 13° SE · 6:27:19 E | 6:24:13 (156°) · 6:25:46, 12,7° (129°) · 6:27:19 (101°) |
+  | 15 oct | 7:58:47 OSO · 8:02:10, 71° NO · 8:05:34 NE | 7:58:48 (239°) · 8:02:10, 71,2° (325°) · 8:05:34 (50°) |
+
+  Los cinco pasos que Heavens-Above marca como «visible» en esos días son los cinco de CieloHud (`--passes`), a ≤ 2 s y con la misma altura máxima;
+  los de día («luz día») no salen en ninguno. El 16 oct 7:14 (67°) que da CieloHud queda fuera del rango de búsqueda de Heavens-Above.
+- Curiosidad de Heavens-Above: su lista «sólo los visibles» omite el 11 oct y el 15 oct de las 7:58, que en la vista «todos» marca como visibles.
+  Los dos son de madrugada con el Sol a -5,6° / -6,0° al pasar la ISS de 10°, como el del 13 (-5,9°), que sí lista; parece un filtro propio de esa lista.
+- Los avisos que da Core para estos pasos son los de la tabla del paso 1 (13/10 07:44 «A las 7:54 pasa la ISS · 11 min · aparece por el SO, máximo 37° al SE», etc.).
+- **Pendiente en el cielo**, sin bloquear la fase: ver el 13 oct que el aviso de las 7:44 llega y que la ISS pasa por donde dice (si está nublado, el 16 oct a las 7:12, 67°).
+  Hacia el 10 oct, comprobar en Diagnóstico y con `dumpsys alarm` que está programado (la app del móvil es ahora una build de Debug con AVISOS activado).
+
+## Fase 4 — Hecho
+
+- **Avisos con la app cerrada** (AlarmManager con una sola alarma y recálculo diario, también tras reiniciar o actualizar, y frente a los retrasos de ColorOS):
+  pasos visibles de la ISS (10 min antes; de madrugada, la víspera a las 22:00), la Luna junto a un planeta, dos planetas juntos y los mejores días de Mercurio.
+  Canales «Pasos de la ISS» y «Luna y planetas»; al tocar un aviso, el HUD guía a su objetivo. Sin red, la Luna, los planetas y Mercurio se siguen avisando.
+- **EVENTOS**: lo que viene en 30 días (3 para la ISS), con la hora de su aviso calculada por los mismos planificadores.
+- Validado: pasos de la ISS contra Heavens-Above (5 de 5 a ≤ 2 s); conjunciones (separación ≤ 0,0044°) y Mercurio (ventanas al minuto, posiciones ≤ 0,0015°)
+  contra JPL Horizons; una conjunción contra Stellarium Web; avisos, toques y el camino sin red en el OPPO.
+- 509 tests en verde, también en el CI. Decisiones 021-035.
+- Fuera de la fase, a petición del usuario: modo nocturno y APK descargable (0.4.0).
 
 ## Mejoras fuera de fase
 

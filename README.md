@@ -13,7 +13,7 @@
   <img alt=".NET 10" src="https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white" />
   <img alt=".NET MAUI Android" src="https://img.shields.io/badge/MAUI-Android-3DDC84?logo=android&logoColor=white" />
   <a href="https://github.com/victorvalenciamunoz/CieloHud/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/victorvalenciamunoz/CieloHud/actions/workflows/ci.yml/badge.svg" /></a>
-  <img alt="Tests" src="https://img.shields.io/badge/tests-442-7CFFB2" />
+  <img alt="Tests" src="https://img.shields.io/badge/tests-509-7CFFB2" />
   <img alt="Sin backend" src="https://img.shields.io/badge/backend-ninguno-0B1218" />
   <a href="LICENSE"><img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-4DD2FF" /></a>
 </p>
@@ -54,7 +54,9 @@ Además calcula **cuándo pasa la ISS por encima de ti y si se va a ver**: ilumi
 | 🧭 **Referencias** | Línea del horizonte con escala de altura, brújula con puntos cardinales, estrellas por brillo y planetas, todo moviéndose con el móvil. La **figura de la constelación** que tienes en la retícula, dibujada tenue con su nombre. Aviso cuando la brújula necesita calibración («dibuja un 8»). |
 | 🔴 **Modo nocturno** | Botón NOCHE: todo pasa a rojo sobre negro puro para no perder la adaptación a la oscuridad, se ocultan las barras del sistema y la pantalla baja al 10 % mientras la app está abierta (sin tocar el ajuste del móvil). Con el modo activado, NOCHE abre un panel para elegir 3, 6, 10 o 20 %. Se recuerda entre sesiones. |
 | 🛰️ **Pasos de la ISS** | Inicio, máximo y fin de cada paso visible en los próximos días, indicando si la ISS «aparece» saliendo de la sombra de la Tierra o «se apaga» a media travesía. |
-| 💻 **Consola** | Tabla de posiciones para cualquier lugar e instante, y tabla de pasos de la ISS al estilo Heavens-Above. |
+| 🔔 **Avisos** | Botón AVISOS: notificación 10 minutos antes de cada paso visible de la ISS, cuando la Luna pasa junto a un planeta, cuando dos planetas se ven juntos y en los mejores días para ver Mercurio. Funcionan con la app cerrada y tras reiniciar el móvil; de madrugada avisan la víspera a las 22:00. Al tocar el aviso, el HUD te lleva al objetivo. |
+| 📅 **Eventos** | Lo que se ve en los próximos 30 días (la ISS, en 3), con la hora a la que avisará. Toca uno y el HUD te lleva. |
+| 💻 **Consola** | Tabla de posiciones para cualquier lugar e instante, tabla de pasos de la ISS al estilo Heavens-Above, y listados de conjunciones y de los días buenos para ver Mercurio con sus avisos. |
 
 ## El juez: cuánto acierta
 
@@ -67,6 +69,9 @@ Nada de esto vale si el objeto no está donde la app dice. Cada parte se ha vali
 | Posición de la ISS (SGP4) | JPL Horizons | < 0,01°; distancia 567,41 km vs 567,35 km |
 | 7 pasos de la ISS en un día | JPL Horizons | los 7, salidas y puestas a ±60 s |
 | Pasos **visibles** de la ISS, 10 días | [Heavens-Above](https://www.heavens-above.com) | 10 de 10, máximo a ≤ 6 s y ≤ 1° |
+| Pasos visibles de la ISS, 11-15 oct 2026 (los que avisa la app) | Heavens-Above | 5 de 5, inicio, máximo y fin a ≤ 2 s |
+| La Luna junto a un planeta, planetas juntos | JPL Horizons | 8 conjunciones, separación ≤ 0,0044° |
+| Mejores días para ver Mercurio | JPL Horizons | ventanas iguales al minuto día a día, posición ≤ 0,0015° |
 | Constelación de planetas y Luna | JPL Horizons | 5 de 5 (sí: Saturno está en la Ballena, no en Piscis) |
 | Brújula del móvil | Punto de referencia en tierra con acimut conocido | 2,6° de error tras calibrar |
 
@@ -121,7 +126,7 @@ src/
   CieloHud.Console/     Consola para validar cálculos (solo formatea lo que devuelve Core)
   CieloHud.App/         App .NET MAUI para Android: HUD, sensores, GPS
 tests/
-  CieloHud.Core.Tests/  442 tests xUnit, con referencias de JPL Horizons, Stellarium y Heavens-Above
+  CieloHud.Core.Tests/  509 tests xUnit, con referencias de JPL Horizons, Stellarium y Heavens-Above
 docs/                   Visión, plan por fases, estado y decisiones (en español)
 ```
 
@@ -178,7 +183,7 @@ ISS        161.15° S   -37.26°  bajo el horizonte       8364 km
 - [x] **Fase 1** · Consola: dónde está cada cosa ahora, validado contra Horizons y Stellarium
 - [x] **Fase 2** · Próximos pasos visibles de la ISS, validado contra Heavens-Above
 - [x] **Fase 3** · HUD en MAUI para Android, validado en el cielo guiando hasta la Luna
-- [ ] **Fase 4** · Avisos: «esta noche a las 21:43 pasa la ISS, 5 minutos, por el noroeste»
+- [x] **Fase 4** · Avisos de la ISS, la Luna junto a un planeta, planetas juntos y Mercurio, con la app cerrada, validados contra Heavens-Above y JPL Horizons
 - [ ] **Fase 5** · Fichas del objeto: qué estás viendo, explicado para no expertos, con datos del momento («esta luz salió de Júpiter hace 49 minutos»)
 
 El detalle está en [`docs/`](docs): [visión](docs/VISION.md), [plan](docs/PLAN.md), [estado](docs/STATUS.md) y [decisiones](docs/DECISIONS.md). Ahí se explica, por ejemplo, por qué la altura del Sol se calcula sin refracción, o cómo se esquivó un bucle infinito de la librería de efemérides al apuntar al cénit.
