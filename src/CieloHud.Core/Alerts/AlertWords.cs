@@ -20,6 +20,17 @@ internal static class AlertWords
 
     public static string Time(DateTimeOffset local) => local.ToString("H:mm", Culture);
 
+    /// <summary>"del 9 al 23 nov", "del 28 oct al 5 nov", from two local instants; null when both fall on the same day.</summary>
+    public static string? DateRange(DateTimeOffset firstLocal, DateTimeOffset lastLocal)
+    {
+        if (firstLocal.Date == lastLocal.Date)
+            return null;
+        var lastText = $"{lastLocal.Day.ToString(Culture)} {Months[lastLocal.Month - 1]}";
+        return firstLocal.Month == lastLocal.Month && firstLocal.Year == lastLocal.Year
+            ? $"del {firstLocal.Day.ToString(Culture)} al {lastText}"
+            : $"del {firstLocal.Day.ToString(Culture)} {Months[firstLocal.Month - 1]} al {lastText}";
+    }
+
     /// <summary>The time with its article: "la 1:05" (one o'clock is singular), "las 21:43".</summary>
     public static string TheTime(DateTimeOffset local) => (local.Hour == 1 ? "la " : "las ") + Time(local);
 

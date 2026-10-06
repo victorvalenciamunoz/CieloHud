@@ -125,7 +125,10 @@ int PrintMercury(int days)
         new AstronomyEngineSolarSystemService(), new AstronomyEngineSunService(), new AstronomyEngineMagnitudeService());
 
     System.Console.WriteLine(MercuryTableFormatter.Header(options.Observer, from, to, finder.Criteria));
-    System.Console.WriteLine(MercuryTableFormatter.Apparitions(finder.Find(options.Observer, from, to, TimeZoneInfo.Local)));
+    var apparitions = finder.Find(options.Observer, from, to, TimeZoneInfo.Local);
+    System.Console.WriteLine(MercuryTableFormatter.Apparitions(apparitions));
     System.Console.WriteLine(MercuryTableFormatter.Windows(finder.FindWindows(options.Observer, from, to, TimeZoneInfo.Local)));
+    var alerts = new MercuryAlertPlanner().Plan(apparitions, from, TimeZoneInfo.Local);
+    System.Console.WriteLine(MercuryTableFormatter.Alerts(alerts, TimeZoneInfo.Local));
     return 0;
 }

@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using CieloHud.Core.Alerts;
 using CieloHud.Core.Apparitions;
 using CieloHud.Core.Sky;
 
@@ -54,6 +55,23 @@ public static class MercuryTableFormatter
             any = true;
             var minutes = Math.Round(w.Duration.TotalMinutes).ToString("F0", Culture);
             sb.AppendLine($"{Date(w.Best.Instant),-10} {Period(w.Period),-10} {Window(w),-11}  {minutes,3}  {BestText(w)}");
+        }
+        if (!any)
+            sb.AppendLine("(ninguno)");
+        return sb.ToString();
+    }
+
+    /// <summary>The alerts the app would post for these seasons, planned from the start of the listing.</summary>
+    public static string Alerts(IEnumerable<MercuryAlert> alerts, TimeZoneInfo timeZone)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("Avisos (planificados desde el inicio del listado):");
+        var any = false;
+        foreach (var alert in alerts)
+        {
+            any = true;
+            var at = TimeZoneInfo.ConvertTime(alert.NotifyAt, timeZone).ToString("yyyy-MM-dd HH:mm", Culture);
+            sb.AppendLine($"{at}  {MercuryAlertText.Title(alert)} · {MercuryAlertText.Body(alert, timeZone)}");
         }
         if (!any)
             sb.AppendLine("(ninguno)");

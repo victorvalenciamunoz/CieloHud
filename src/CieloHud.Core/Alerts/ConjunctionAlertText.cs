@@ -76,16 +76,7 @@ public static class ConjunctionAlertText
     // "del 9 al 23 nov", "del 28 oct al 5 nov": the local dates the windows start on. Null for the Moon, or a single night.
     internal static string? NightsTogether(Conjunction conjunction, TimeZoneInfo timeZone)
     {
-        if (conjunction.Nights is not { } nights)
-            return null;
-        var first = Local(nights.First, timeZone);
-        var last = Local(nights.Last, timeZone);
-        if (first.Date == last.Date)
-            return null;
-        var lastText = $"{last.Day.ToString(Culture)} {Months[last.Month - 1]}";
-        return first.Month == last.Month && first.Year == last.Year
-            ? $"del {first.Day.ToString(Culture)} al {lastText}"
-            : $"del {first.Day.ToString(Culture)} {Months[first.Month - 1]} al {lastText}";
+        return conjunction.Nights is { } nights ? DateRange(Local(nights.First, timeZone), Local(nights.Last, timeZone)) : null;
     }
 
     // Whole degrees; under half a degree is still "less than one", not "0°".
