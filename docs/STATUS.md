@@ -765,6 +765,44 @@ Plan acordado: 11) buscador de temporadas en Core y validación; 12) aviso, text
 - 509 tests en verde, también en el CI. Decisiones 021-035.
 - Fuera de la fase, a petición del usuario: modo nocturno y APK descargable (0.4.0).
 
+## Fase 5 — Fichas del objeto
+
+Plan acordado (2026-10-06): los datos del momento se calculan en Core con tests contra Horizons/SIMBAD, y los textos van aparte, revisados uno a uno (decisión 020).
+Pasos: 1) Luna y planetas: datos; 2) formato de los textos y los 7 objetivos; 3) la ficha en la app para los 7 objetivos; 4) lunas galileanas;
+5) anillos de Saturno; 6) altura y velocidad de la ISS; 7) estrellas: paralaje en el catálogo, años luz y ficha en «¿qué es?»; 8) textos de las estrellas por lotes;
+9) constelaciones: ficha en «¿qué es?» y textos por lotes.
+Elegido por el usuario: al llegar a AQUÍ la ficha se abre sola tras ~1,5 s, una vez por objetivo; en «¿qué es?», con un botón «VER FICHA».
+Se cierra con «CERRAR», con Atrás o al cambiar de objetivo; en modo noche, panel propio en rojo. Estrellas con paralaje dudosa: «unos…» con 2 cifras,
+e intervalo si el error relativo pasa del 20 %. Los textos, un Markdown por objeto con sus fuentes; si falta, la ficha sale solo con datos.
+Hallazgo al revisar: el catálogo `BrightStars` no guarda la paralaje; se añadirá regenerándolo desde SIMBAD (paso 7).
+
+### Paso 1 — Luna y planetas: datos del momento (2026-10-06)
+
+- Core `Cards/`: `ISolarSystemFactsService` y `AstronomyEngineSolarSystemFactsService`. Decisión 036.
+  - `MoonFacts`: distancia y tiempo de luz desde el observador, **fracción iluminada topocéntrica**, fase (diferencia de longitud Luna–Sol geocéntrica),
+    nombre de la fase y la próxima fase principal. `Illumination` de Astronomy Engine es geocéntrica, y desde Madrid la paralaje de la Luna mueve
+    la fracción hasta medio punto (21,49 % frente a 21,04 % el 6 oct a las 7:45), así que se calcula con los vectores Sol–Luna–observador.
+  - `MoonPhases.Name`: la fase principal se nombra hasta **1 día** antes o después de su instante; entre ellas, creciente o gibosa, creciente o menguante.
+  - `PlanetFacts`: distancia y tiempo de luz (`LightTravel`, velocidad de la luz exacta).
+  - `FactsText`: «Gibosa creciente, iluminada al 71 %», «Luna llena el lun 26 oct a las 5:12», «A 369 600 km: su luz tarda 1,2 segundos en llegar»,
+    «A 876 millones de km», «Esta luz salió de Júpiter hace 49 minutos»; menos de 10 min, «2 min y 40 s»; más de una hora, «1 h y 10 min».
+    Espacio de no separación entre miles y antes de unidades y «%».
+- Consola: `--card <moon|mercury|venus|mars|jupiter|saturn>` muestra las frases de la ficha y los valores en bruto para contrastarlos. Solo formato.
+- **Validación contra JPL Horizons** (Madrid, consultas del 6 oct):
+
+  | Dato | CieloHud | Horizons | Diferencia |
+  |---|---|---|---|
+  | Luna iluminada, 6 oct 5:45 UTC (topocéntrica) | 21,036 % | 21,035 % | 0,001 puntos |
+  | ídem 12 oct 19:00 / 20 oct 21:00 | 4,791 % / 70,433 % | 4,792 % / 70,430 % | ≤ 0,003 puntos |
+  | Luna nueva / cuarto creciente / llena / cuarto menguante (oct-nov 2026) | 15:50:36 / 16:13:19 / 04:12:15 / 20:28:58 UTC | 15:50:05 / 16:12:41 / 04:11:48 / 20:28:27 | 27-38 s |
+  | Distancia y tiempo de luz de los cinco planetas, 6 oct 5:45 UTC | Júpiter 48,7227 min | 48,7180 min | ≤ 0,01 % en todos |
+
+  Los instantes de las fases según Horizons salen de interpolar la diferencia de longitud eclíptica Luna–Sol (cantidad 31) diez minutos antes y después;
+  la hora se muestra al minuto. Quedan como tests de integración (iluminación 0,05 puntos, distancia y tiempo de luz 0,1 %, fases 1 min).
+- Tests unitarios: nombre de la fase (en el instante, hasta un día antes y después, justo fuera, los cuatro tramos, ángulos fuera de rango) y frases
+  (porcentajes y redondeo, día y hora local de la próxima fase con el cambio de hora y «la 1:05», distancias, tiempos de luz de 1 s a 2 h).
+- `dotnet test` 573 tests; build Android 0 avisos (la app aún no usa `Cards/`).
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.

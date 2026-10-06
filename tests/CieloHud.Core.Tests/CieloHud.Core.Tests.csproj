@@ -26,6 +26,7 @@
     <Using Include="CieloHud.Core.Apparitions" />
     <Using Include="CieloHud.Core.Conjunctions" />
     <Using Include="CieloHud.Core.Events" />
+    <Using Include="CieloHud.Core.Cards" />
   </ItemGroup>
 
   <ItemGroup>

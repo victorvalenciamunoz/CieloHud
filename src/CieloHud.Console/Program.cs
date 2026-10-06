@@ -1,6 +1,7 @@
 using CieloHud.Console;
 using CieloHud.Core.Alerts;
 using CieloHud.Core.Apparitions;
+using CieloHud.Core.Cards;
 using CieloHud.Core.Conjunctions;
 using CieloHud.Core.Passes;
 using CieloHud.Core.Satellites;
@@ -36,6 +37,8 @@ if (options.ConjunctionsDays is { } conjunctionDays)
     return PrintConjunctions(conjunctionDays);
 if (options.MercuryDays is { } mercuryDays)
     return PrintMercury(mercuryDays);
+if (options.CardBody is { } cardBody)
+    return PrintCard(cardBody);
 
 return options.PassesDays is { } days
     ? await PrintPassesAsync(days)
@@ -130,5 +133,15 @@ int PrintMercury(int days)
     System.Console.WriteLine(MercuryTableFormatter.Windows(finder.FindWindows(options.Observer, from, to, TimeZoneInfo.Local)));
     var alerts = new MercuryAlertPlanner().Plan(apparitions, from, TimeZoneInfo.Local);
     System.Console.WriteLine(MercuryTableFormatter.Alerts(alerts, TimeZoneInfo.Local));
+    return 0;
+}
+
+int PrintCard(CelestialBody body)
+{
+    var facts = new AstronomyEngineSolarSystemFactsService();
+    System.Console.WriteLine(SkyTableFormatter.Header(options.Observer, options.Instant));
+    System.Console.WriteLine(body == CelestialBody.Moon
+        ? CardFormatter.Moon(facts.Moon(options.Observer, options.Instant), options.Instant, TimeZoneInfo.Local)
+        : CardFormatter.Planet(SkyTableFormatter.Name(body), facts.Planet(body, options.Observer, options.Instant)));
     return 0;
 }

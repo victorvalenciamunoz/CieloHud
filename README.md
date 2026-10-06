@@ -13,7 +13,7 @@
   <img alt=".NET 10" src="https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white" />
   <img alt=".NET MAUI Android" src="https://img.shields.io/badge/MAUI-Android-3DDC84?logo=android&logoColor=white" />
   <a href="https://github.com/victorvalenciamunoz/CieloHud/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/victorvalenciamunoz/CieloHud/actions/workflows/ci.yml/badge.svg" /></a>
-  <img alt="Tests" src="https://img.shields.io/badge/tests-509-7CFFB2" />
+  <img alt="Tests" src="https://img.shields.io/badge/tests-573-7CFFB2" />
   <img alt="Sin backend" src="https://img.shields.io/badge/backend-ninguno-0B1218" />
   <a href="LICENSE"><img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-4DD2FF" /></a>
 </p>
@@ -123,10 +123,11 @@ src/
     Stars/                Catálogo de estrellas brillantes
     Constellations/       ¿En qué constelación cae esta dirección?
     Guidance/             Orientación del móvil, guía, proyección en pantalla, identificación
+    Cards/                Datos del momento para las fichas (fase de la Luna, distancia y tiempo de luz)
   CieloHud.Console/     Consola para validar cálculos (solo formatea lo que devuelve Core)
   CieloHud.App/         App .NET MAUI para Android: HUD, sensores, GPS
 tests/
-  CieloHud.Core.Tests/  509 tests xUnit, con referencias de JPL Horizons, Stellarium y Heavens-Above
+  CieloHud.Core.Tests/  573 tests xUnit, con referencias de JPL Horizons, Stellarium y Heavens-Above
 docs/                   Visión, plan por fases, estado y decisiones (en español)
 ```
 
@@ -154,6 +155,9 @@ dotnet run --project src/CieloHud.Console -- --lat 41.3874 --lon 2.1686 --time 2
 
 # Pasos visibles de la ISS en los próximos 14 días
 dotnet run --project src/CieloHud.Console -- --passes 14
+
+# Datos de la ficha de un objeto (moon, mercury, venus, mars, jupiter, saturn)
+dotnet run --project src/CieloHud.Console -- --card jupiter
 
 # App en el móvil conectado por USB
 dotnet build src/CieloHud.App -f net10.0-android -t:Install
