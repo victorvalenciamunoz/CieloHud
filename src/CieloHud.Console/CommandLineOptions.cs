@@ -1,6 +1,7 @@
 using System.Globalization;
 using CieloHud.Core.Sky;
 using CieloHud.Core.SolarSystem;
+using CieloHud.Core.Stars;
 
 namespace CieloHud.Console;
 
@@ -10,7 +11,7 @@ namespace CieloHud.Console;
 /// </summary>
 public sealed record CommandLineOptions(
     Observer Observer, DateTimeOffset Instant, int? PassesDays, int? ConjunctionsDays = null, int? MercuryDays = null, CelestialBody? CardBody = null,
-    bool CardIss = false)
+    bool CardIss = false, Star? CardStar = null)
 {
     public const string Usage = """
         Usage: CieloHud.Console [--lat <degrees>] [--lon <degrees>] [--alt <meters>] [--time <ISO-8601>]
@@ -27,7 +28,8 @@ public sealed record CommandLineOptions(
           --mercury Instead of the sky table, list the seasons when Mercury can be seen, and each of their days,
                     for this many days from --time (1-1100).
           --card    Instead of the sky table, the facts of the moment on an object's card at --time:
-                    moon, mercury, venus, mars, jupiter, saturn or iss (the ISS needs its orbit, from the network or the cache).
+                    moon, mercury, venus, mars, jupiter, saturn, iss (it needs its orbit, from the network or the cache),
+                    or a star by its IAU name or Bayer designation ("Betelgeuse", "gam Cas").
           --help    Show this text
 
         Numbers use a decimal point regardless of system locale.
@@ -42,6 +44,7 @@ public sealed record CommandLineOptions(
         int? passesDays = null, conjunctionsDays = null, mercuryDays = null;
         CelestialBody? cardBody = null;
         var cardIss = false;
+        Star? cardStar = null;
 
         for (var i = 0; i < args.Length; i++)
         {
@@ -62,6 +65,7 @@ public sealed record CommandLineOptions(
                 case "--conjunctions": conjunctionsDays = ParseDays(key, value, 1100); break;
                 case "--mercury": mercuryDays = ParseDays(key, value, 1100); break;
                 case "--card" when value.Equals("iss", StringComparison.OrdinalIgnoreCase): cardIss = true; break;
+                case "--card" when BrightStars.All.Any(s => Is(s, value)): cardStar = BrightStars.Get(value); break;
                 case "--card": cardBody = ParseBody(value); break;
                 default: throw new UsageException($"Unknown option {key}.");
             }
@@ -69,9 +73,9 @@ public sealed record CommandLineOptions(
 
         try
         {
-            if (new[] { passesDays, conjunctionsDays, mercuryDays }.Count(d => d is not null) + (cardBody is null && !cardIss ? 0 : 1) > 1)
+            if (new[] { passesDays, conjunctionsDays, mercuryDays }.Count(d => d is not null) + (cardBody is null && !cardIss && cardStar is null ? 0 : 1) > 1)
                 throw new UsageException("Use only one of --passes, --conjunctions, --mercury and --card.");
-            return new CommandLineOptions(new Observer(lat, lon, alt), instant, passesDays, conjunctionsDays, mercuryDays, cardBody, cardIss);
+            return new CommandLineOptions(new Observer(lat, lon, alt), instant, passesDays, conjunctionsDays, mercuryDays, cardBody, cardIss, cardStar);
         }
         catch (ArgumentOutOfRangeException ex)
         {
@@ -92,7 +96,10 @@ public sealed record CommandLineOptions(
     private static CelestialBody ParseBody(string value) =>
         Enum.TryParse<CelestialBody>(value, ignoreCase: true, out var body) && Enum.IsDefined(body) && !int.TryParse(value, out _)
             ? body
-            : throw new UsageException($"--card expects moon, mercury, venus, mars, jupiter, saturn or iss, got '{value}'.");
+            : throw new UsageException($"--card expects moon, mercury, venus, mars, jupiter, saturn, iss or a star of the catalog, got '{value}'.");
+
+    private static bool Is(Star star, string value) =>
+        string.Equals(star.ProperName, value, StringComparison.OrdinalIgnoreCase) || string.Equals(star.Designation, value, StringComparison.OrdinalIgnoreCase);
 
     private static DateTimeOffset ParseInstant(string value) =>
         DateTimeOffset.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var result)

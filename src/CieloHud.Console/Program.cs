@@ -37,6 +37,8 @@ if (options.ConjunctionsDays is { } conjunctionDays)
     return PrintConjunctions(conjunctionDays);
 if (options.MercuryDays is { } mercuryDays)
     return PrintMercury(mercuryDays);
+if (options.CardStar is { } cardStar)
+    return PrintStarCard(cardStar);
 if (options.CardIss)
     return await PrintIssCardAsync();
 if (options.CardBody is { } cardBody)
@@ -170,5 +172,11 @@ async Task<int> PrintIssCardAsync()
     System.Console.WriteLine(SkyTableFormatter.Header(options.Observer, options.Instant));
     System.Console.WriteLine(CardFormatter.Iss(facts.Satellite(tle, options.Observer, options.Instant), CardTexts.Find(CardKey.Iss)));
     System.Console.WriteLine(SkyTableFormatter.TleInfo(tle, options.Instant));
+    return 0;
+}
+
+int PrintStarCard(CieloHud.Core.Stars.Star star)
+{
+    System.Console.WriteLine(CardFormatter.Star(star, CardTexts.Find(CardKey.Star(star))));
     return 0;
 }

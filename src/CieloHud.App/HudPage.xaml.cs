@@ -401,7 +401,7 @@ public partial class HudPage : ContentPage
         }
 
         var matched = identified is { IsMatch: true } m
-            ? _catalog.Targets.FirstOrDefault(t => t.Name == m.Name && CardBuilder.HasCard(t))
+            ? _catalog.All.FirstOrDefault(t => t.Name == m.Name && CardBuilder.HasCard(t))
             : null;
         _offered = _cardOffer.Update(matched, now);
         ShowCardButton.IsVisible = _offered is not null;
@@ -434,6 +434,7 @@ public partial class HudPage : ContentPage
         CardPictureView.Invalidate();
         CardBody.Text = view.Text;
         CardBody.IsVisible = view.Text is not null;
+        CardNowHeader.Text = view.FactsHeader;
         CardNowHeader.IsVisible = view.Now.Count > 0;
         CardNow.Children.Clear();
         foreach (var line in view.Now)

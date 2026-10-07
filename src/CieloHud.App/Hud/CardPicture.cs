@@ -13,3 +13,6 @@ public sealed record JupiterPicture(JupiterMoonsFacts Moons) : CardPicture;
 
 /// <summary>Saturn's globe and rings, with today's tilt.</summary>
 public sealed record SaturnPicture(SaturnShape Shape) : CardPicture;
+
+/// <summary>A star: a point of light in its color, which is all the eye sees.</summary>
+public sealed record StarPicture(StarColor Color) : CardPicture;

@@ -88,6 +88,22 @@ public static class CardFormatter
         return sb.ToString();
     }
 
+    /// <summary>The star's line as the card shows it (with its IAU name; the app uses the Spanish one), then the raw parallax.</summary>
+    public static string Star(CieloHud.Core.Stars.Star star, CardText? text)
+    {
+        var light = StarLight.Of(star);
+        var sb = new StringBuilder();
+        sb.AppendLine($"{star.Name} ({star.Designation}, HIP {star.Hipparcos.ToString(Culture)})");
+        AppendText(sb, text);
+        sb.AppendLine($"  {FactsText.StarLight(star.Name, light)}");
+        sb.AppendLine();
+        sb.AppendLine($"  Paralaje (Hipparcos, van Leeuwen 2007): {star.ParallaxMas.ToString("F2", Culture)} ± {star.ParallaxErrorMas.ToString("F2", Culture)} mas " +
+            $"({(star.ParallaxErrorMas / star.ParallaxMas * 100).ToString("F1", Culture)} %)");
+        sb.AppendLine($"  Distancia: {light.Years.ToString("F1", Culture)} años luz, de {light.NearYears.ToString("F1", Culture)} a " +
+            $"{(double.IsInfinity(light.FarYears) ? "∞" : light.FarYears.ToString("F1", Culture))} · {light.Certainty}");
+        return sb.ToString();
+    }
+
     /// <summary>What the drawing uses: lit fraction, bright limb and north pole, in the HUD's axes.</summary>
     public static string Disc(BodyDisc disc)
     {
