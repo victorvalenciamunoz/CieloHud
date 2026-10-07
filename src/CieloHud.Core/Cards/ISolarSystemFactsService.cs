@@ -13,4 +13,7 @@ public interface ISolarSystemFactsService
 
     /// <summary>Where Io, Europa, Ganymede and Callisto are next to Jupiter, as the observer sees them.</summary>
     JupiterMoonsFacts JupiterMoons(Observer observer, DateTimeOffset instant);
+
+    /// <summary>How Saturn's rings are tilted towards us and where they are heading. The same from anywhere on Earth.</summary>
+    SaturnRingsFacts SaturnRings(DateTimeOffset instant);
 }

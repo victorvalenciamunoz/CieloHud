@@ -113,6 +113,33 @@ public static class FactsText
         return lines;
     }
 
+    // Below this the rings are a thin line even in a telescope.
+    private const double EdgeOnDegrees = 2;
+
+    private static readonly string[] MonthNames =
+        ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+
+    /// <summary>
+    /// Saturn's rings as a small telescope shows them (NASA: "Even a small telescope will allow you to see more details of
+    /// Saturn's rings"; binoculars only hint at them): "inclinados 7°", or "casi de canto" under 2°; then where they are heading,
+    /// "Se irán abriendo hasta 2032, cuando llegarán a 27°" (the month too when it is less than a year away).
+    /// </summary>
+    public static IReadOnlyList<string> SaturnRings(SaturnRingsFacts rings, DateTimeOffset now)
+    {
+        ArgumentNullException.ThrowIfNull(rings);
+        var tilt = Math.Abs(rings.TiltDegrees);
+        var seen = tilt < EdgeOnDegrees
+            ? "Con un telescopio pequeño, sus anillos se ven casi de canto, como una raya fina"
+            : $"Con un telescopio pequeño, sus anillos se ven inclinados {Degrees(tilt)}°";
+        var until = rings.Until - now < TimeSpan.FromDays(365)
+            ? $"{MonthNames[rings.Until.Month - 1]} de {rings.Until.Year.ToString(Culture)}"
+            : rings.Until.Year.ToString(Culture);
+        var trend = rings.Trend == RingTrend.Opening
+            ? $"Se irán abriendo hasta {until}, cuando llegarán a {Degrees(rings.TiltAtUntilDegrees)}°"
+            : $"Se irán cerrando hasta {until}, cuando se verán de canto";
+        return [seen, trend];
+    }
+
     /// <summary>"A", "A y B", "A, B y C".</summary>
     private static string List(IReadOnlyList<string> items) =>
         items.Count == 1 ? items[0] : $"{string.Join(", ", items.Take(items.Count - 1))} y {items[^1]}";

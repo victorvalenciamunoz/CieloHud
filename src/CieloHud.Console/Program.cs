@@ -145,5 +145,7 @@ int PrintCard(CelestialBody body)
         : CardFormatter.Planet(SkyTableFormatter.Name(body), facts.Planet(body, options.Observer, options.Instant), CardTexts.Find(CardKey.Body(body))));
     if (body == CelestialBody.Jupiter)
         System.Console.WriteLine(CardFormatter.JupiterMoons(facts.JupiterMoons(options.Observer, options.Instant)));
+    if (body == CelestialBody.Saturn)
+        System.Console.WriteLine(CardFormatter.SaturnRings(facts.SaturnRings(options.Instant), options.Instant));
     return 0;
 }

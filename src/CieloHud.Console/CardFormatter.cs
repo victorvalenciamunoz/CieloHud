@@ -41,6 +41,18 @@ public static class CardFormatter
         return sb.ToString();
     }
 
+    /// <summary>The rings' lines as the card shows them, then the raw tilt and trend.</summary>
+    public static string SaturnRings(SaturnRingsFacts rings, DateTimeOffset now)
+    {
+        var sb = new StringBuilder();
+        foreach (var line in FactsText.SaturnRings(rings, now))
+            sb.AppendLine($"  {line}");
+        sb.AppendLine();
+        sb.AppendLine($"  Inclinación vista desde la Tierra: {rings.TiltDegrees.ToString("F3", Culture)}° (+ cara norte, - cara sur)");
+        sb.AppendLine($"  Tendencia: {rings.Trend} hasta {rings.Until:yyyy-MM-dd} ({rings.TiltAtUntilDegrees.ToString("F2", Culture)}° vista desde el Sol)");
+        return sb.ToString();
+    }
+
     /// <summary>The moons' lines as the card shows them, then each moon's offset in Jupiter radii and arcseconds.</summary>
     public static string JupiterMoons(JupiterMoonsFacts moons)
     {

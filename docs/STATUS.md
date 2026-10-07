@@ -891,6 +891,28 @@ Hallazgo al revisar: el catálogo `BrightStars` no guarda la paralaje; se añadi
   en ese instante (7 oct 10:39).
 - `dotnet test` 646 tests; build Android 0 avisos.
 
+### Paso 5 — Anillos de Saturno (2026-10-07)
+
+- Core `Cards/`: `ISolarSystemFactsService.SaturnRings` → `SaturnRingsFacts`. Decisión 040.
+  - **Inclinación vista desde la Tierra**: el ángulo entre la visual y el plano de los anillos, con el polo de Saturno de la IAU (`RotationAxis`, WGCCRE 2015).
+    Signo de la IAU y de Horizons (positivo si se ve la cara norte); el `ring_tilt` de `Illumination` da el mismo valor con el signo cambiado.
+  - **Tendencia**: la misma inclinación vista desde el Sol, que cambia sin vaivenes, buscada día a día hasta su próximo máximo o su próximo cero
+    (~3 ms en el PC). Mes a mes la Tierra puede invertirla: del 7 oct al 6 nov 2026 los anillos pasan de 7,36° a 6,45°, aunque se estén abriendo hasta 2032.
+- `FactsText.SaturnRings`: «Con un telescopio pequeño, sus anillos se ven inclinados 7°» (o «casi de canto, como una raya fina» por debajo de 2°) y
+  «Se irán abriendo hasta 2032, cuando llegarán a 27°» / «Se irán cerrando hasta 2039, cuando se verán de canto» (con el mes si falta menos de un año).
+  «Con un telescopio pequeño», según la NASA: con prismáticos los anillos apenas se adivinan («appearing more like "ears"»), y «Even a small telescope will
+  allow you to see more details of Saturn's rings» (Watch the Skies, 24 ago 2023).
+- App: la ficha de Saturno añade esas dos líneas. Consola: `--card saturn` con la inclinación con signo y la fecha del extremo.
+- **Validación contra JPL Horizons**, que no da la inclinación de los anillos: se obtiene de dos formas independientes que coinciden entre sí a 0,001°.
+  - Desde la Tierra: la latitud del observador sobre Saturno (cantidad 14) es **planetodética**; en un planeta tan achatado son 9,0° frente a los 7,36° reales.
+    Pasada a planetocéntrica con los radios de Saturno, y también calculada con la dirección a Saturno (cantidad 1) y el polo de la IAU: 11 fechas de 2025 a 2032,
+    a ≤ 0,02° de CieloHud.
+  - Desde el Sol (cantidad 15, mensual): máximo de 26,73° en abril de 2032 (CieloHud: 12 abr, 26,74°); de canto entre el 1 ene y el 1 feb de 2039 (CieloHud: 22 ene)
+    y entre el 1 may y el 1 jun de 2025 (CieloHud: 6 may, el equinoccio de Saturno); diferencia ≤ 0,006°.
+  - Quedan como tests de integración (0,05°, y el extremo dentro del intervalo de Horizons).
+- Probado en el móvil: pendiente. Saturno estaba bajo el horizonte (−30°), y entonces el HUD no guía (Fase 3). Esta noche, desde las 21:30, a 19-30° al E-SE.
+- `dotnet test` 666 tests; build Android 0 avisos.
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.
