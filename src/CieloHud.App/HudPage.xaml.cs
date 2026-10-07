@@ -506,8 +506,11 @@ public partial class HudPage : ContentPage
             _ = CardScroll.ScrollToAsync(0, 0, false);
     }
 
-    /// <summary>The page's width less the card's margins and padding, as in the XAML.</summary>
-    private double CardContentWidth => Width - (2 * 12 + 2 * 16);
+    /// <summary>
+    /// The page's width less the card's margins, padding and border, as in the XAML. Without the border the measure was 2 dp
+    /// too wide and could miss a wrapped line: a card just over the limit lost its last line and showed no VER MÁS.
+    /// </summary>
+    private double CardContentWidth => Width - (2 * 12 + 2 * 16 + 2 * 1);
 
     private void CloseCard()
     {
