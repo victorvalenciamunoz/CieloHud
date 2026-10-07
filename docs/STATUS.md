@@ -991,8 +991,11 @@ Hallazgo al revisar: el catálogo `BrightStars` no guarda la paralaje; se añadi
   La altura de Horizons sale de su posición en ITRF93 (`REF_PLANE='BODY EQUATOR'`) pasada a altura sobre el elipsoide WGS-84; la velocidad, de sus vectores en ICRF.
   Periodo: 92,99 min (15,48706258 vueltas al día en el TLE). Quedan como tests de integración (altura 0,5 km, velocidad 5 m/s), con cinco instantes
   para los cuatro casos de visibilidad (el paso rasante del 2 oct a las 19:33 y la salida de la sombra del 15 oct a las 4:25).
-- Probado en el móvil: pendiente. De día la ISS solo se ve en el HUD unos minutos por paso: hoy, 14:17-14:26 al N (13°), 15:54-16:04 al NNE (24°)
-  y 17:31-17:42 al SO (55°).
+- **Probado en el OPPO** (7 oct, 14:17, la ISS recién salida por el NO a 1° de altura, de día): «A 430 km de altura y a 2210 km de ti»,
+  «Va a 27 600 km/h, 7,7 km cada segundo», «La ilumina el Sol, pero hay demasiada luz en el cielo para verla». La consola, a las 14:17:30:
+  430,23 km, 2274 km, 7,6572 km/s, cielo demasiado claro (la distancia baja unos 6 km por segundo mientras se acerca). Captura: `docs/images/ficha-iss.png`.
+- Pendiente en el móvil: «se puede ver a simple vista» con el paso del 13 oct (máximo a las 8:00, 36° al SE), y «en la sombra de la Tierra» del 14 oct
+  en adelante, cuando la ISS sale ya alta de la sombra (por ejemplo el 16 oct, que «aparece» a las 7:12 a 19° al SO): la frase debe cambiar sola en el refresco.
 - `dotnet test` 736 tests; build Android 0 avisos.
 
 ## Mejoras fuera de fase
