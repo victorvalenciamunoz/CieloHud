@@ -1,3 +1,4 @@
+using CieloHud.Core.Cards;
 using CieloHud.Core.Satellites;
 using CieloHud.Core.Sky;
 using CieloHud.Core.SolarSystem;
@@ -24,21 +25,27 @@ public abstract class SkyTarget
 
     /// <summary>Short reason shown when <see cref="Locate"/> returns null.</summary>
     public virtual string? Unavailable => null;
+
+    /// <summary>Which card it has: its written text and facts (decision 038).</summary>
+    public abstract CardKey Card { get; }
 }
 
 public sealed class BodyTarget : SkyTarget
 {
     private readonly ISolarSystemService _service;
-    private readonly CelestialBody _body;
 
     public BodyTarget(string name, CelestialBody body, ISolarSystemService service)
         : base(name, body == CelestialBody.Moon ? "nuestro satélite" : "planeta")
     {
-        _body = body;
+        Body = body;
         _service = service;
     }
 
-    public override HorizontalPosition? Locate(Observer observer, DateTimeOffset instant) => _service.Locate(_body, observer, instant);
+    public CelestialBody Body { get; }
+
+    public override CardKey Card => CardKey.Body(Body);
+
+    public override HorizontalPosition? Locate(Observer observer, DateTimeOffset instant) => _service.Locate(Body, observer, instant);
 }
 
 public sealed class StarTarget : SkyTarget
@@ -52,6 +59,8 @@ public sealed class StarTarget : SkyTarget
     }
 
     public Star Star { get; }
+
+    public override CardKey Card => CardKey.Star(Star);
 
     public override HorizontalPosition? Locate(Observer observer, DateTimeOffset instant) => _service.Locate(Star, observer, instant);
 }
@@ -72,6 +81,8 @@ public sealed class SatelliteTarget : SkyTarget
     }
 
     public override string? Unavailable => _error ?? (_tle is null ? "descargando órbita…" : null);
+
+    public override CardKey Card => CardKey.Iss;
 
     public override HorizontalPosition? Locate(Observer observer, DateTimeOffset instant) =>
         _tle is { } tle ? _service.Locate(tle, observer, instant) : null;

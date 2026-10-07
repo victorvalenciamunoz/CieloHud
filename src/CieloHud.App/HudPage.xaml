@@ -31,6 +31,38 @@
             </VerticalStackLayout>
         </Border>
 
+        <!-- Object card (decision 038): opens by itself after a moment on AQUÍ, or with VER FICHA in identify mode.
+             Our own panel in the palette, red at night. Closed with CERRAR, Back or another target. -->
+        <Border Grid.Row="1" x:Name="CardPanel" IsVisible="False" VerticalOptions="End" Margin="12,0,12,4" Padding="16,14"
+                StrokeThickness="1" BackgroundColor="{DynamicResource HudBackground}" Stroke="{DynamicResource HudTextDim}">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="8" />
+            </Border.StrokeShape>
+            <!-- Height set in code to fit the content (a ScrollView alone takes all the height it is allowed). -->
+            <ScrollView x:Name="CardScroll">
+                <VerticalStackLayout x:Name="CardContent" Spacing="8">
+                    <Label x:Name="CardTitle" FontFamily="ChakraPetchBold" FontSize="20" CharacterSpacing="1"
+                           TextColor="{DynamicResource HudLocked}" />
+                    <Label x:Name="CardSubtitle" FontFamily="OpenSansRegular" FontSize="12" Margin="0,-6,0,0"
+                           TextColor="{DynamicResource HudTextMuted}" />
+                    <Label x:Name="CardBody" FontFamily="OpenSansRegular" FontSize="14" LineHeight="1.15"
+                           TextColor="{DynamicResource HudText}" />
+                    <Label x:Name="CardNowHeader" Text="AHORA" FontFamily="ChakraPetchBold" FontSize="11" CharacterSpacing="1"
+                           Margin="0,4,0,0" TextColor="{DynamicResource HudTextSoft}" />
+                    <VerticalStackLayout x:Name="CardNow" Spacing="3" />
+                    <Button x:Name="CloseCardButton" Text="CERRAR" HorizontalOptions="End" Margin="0,4,0,0"
+                            FontFamily="ChakraPetch" FontSize="11" BorderWidth="1" CornerRadius="6" Padding="10,4"
+                            Clicked="OnCloseCardClicked" />
+                </VerticalStackLayout>
+            </ScrollView>
+        </Border>
+
+        <!-- In identify mode, under the name of what the reticle is on. Styled in code, like the chips. -->
+        <Button Grid.Row="1" x:Name="ShowCardButton" Text="VER FICHA" IsVisible="False"
+                VerticalOptions="End" HorizontalOptions="Center" Margin="0,0,0,8"
+                FontFamily="ChakraPetchBold" FontSize="12" BorderWidth="1" CornerRadius="14" Padding="14,6"
+                Clicked="OnShowCardClicked" />
+
         <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="8" Padding="16,8,16,20">
             <!-- What is coming up. The coordinates that were here are in diagnostics. -->
             <Button Text="EVENTOS" HorizontalOptions="Start"

@@ -318,3 +318,13 @@ Formato: contexto → decisión → alternativas descartadas.
   - **Sin texto no se bloquea nada**: la ficha sale solo con datos. El test de pendientes se actualiza con cada lote y debe llegar a cero al cerrar la fase.
   - Los espacios dentro de números y entre número y unidad se vuelven de no separación al leer: quien escribe usa espacios normales.
 - Alternativas: un JSON por categoría (descartada: comillas escapadas, líneas larguísimas y diffs ilegibles para revisar prosa); YAML con un paquete NuGet (descartada: dependencia para un formato que se lee en 60 líneas); C# generado como el catálogo de estrellas (descartada: los textos se escriben y corrigen a mano, no se generan); ficheros en la app MAUI (descartada: sin tests en el CI); recursos `.resx` (descartada: pensados para cadenas cortas de interfaz, incómodos de revisar en un diff).
+
+## 038 — La ficha en la app: sola en AQUÍ, con un botón en «¿qué es?», panel propio
+- Contexto: al encontrar algo, la ficha cuenta qué es (Fase 5). Hay que decidir cuándo aparece sin estorbar a la guía, cómo se cierra y cómo se ve de noche.
+- Decisión (elegida por el usuario en el plan de la fase):
+  - **Modo guía: se abre sola tras 1,5 s seguidos en AQUÍ, una vez por objetivo.** Es lo que se tarda en bajar el móvil y mirar; al volver la vista a la pantalla, la ficha está ahí. Salir de AQUÍ antes reinicia la cuenta; cerrarla no la vuelve a abrir hasta elegir otro objetivo. Al bajar el móvil se sale de AQUÍ, pero la ficha no se cierra.
+  - **«¿Qué es?»: botón VER FICHA**, no apertura automática: al barrer el cielo la identificación cambia a cada momento. El botón sigue 2 s después de perder lo reconocido, porque con 3-5° de error de brújula la retícula entra y sale del objeto y el botón parpadearía bajo el dedo; otro objeto lo sustituye en el acto.
+  - Las dos reglas, en Core (`CardAutoOpen`, `RecentMatch`), con tests: son tiempos y estados difíciles de probar en el móvil.
+  - **Se cierra** con CERRAR, con Atrás o al elegir otro objetivo (también al tocar un aviso).
+  - **Panel propio** con la paleta (`DynamicResource`), como el del brillo nocturno: un diálogo del sistema sería blanco de noche. Abajo, sin tapar la retícula; alto según el contenido, hasta 440 dp, y desplazable si no cabe (fuentes del sistema grandes). Los datos se recalculan cada 10 s mientras está abierta.
+- Alternativas: abrirla al instante en AQUÍ (descartada: taparía el final de la guía y aparecería al rozar el objetivo); un botón también en AQUÍ (descartada: obliga a tocar el móvil con el brazo levantado); abrirla sola en «¿qué es?» al reconocer algo (descartada: se abriría y cerraría al barrer); otra página (descartada: se perdería el HUD de fondo y la vuelta sería más lenta).
