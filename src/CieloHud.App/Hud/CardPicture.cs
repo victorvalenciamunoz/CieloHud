@@ -1,0 +1,15 @@
+using CieloHud.Core.Cards;
+
+namespace CieloHud.App.Hud;
+
+/// <summary>What the drawing on a card shows, worked out in Core for this moment (decision 041). The ISS has none.</summary>
+public abstract record CardPicture;
+
+/// <summary>The Moon, Mercury, Venus or Mars: the lit part of the disc, turned as in the sky.</summary>
+public sealed record PhasePicture(BodyDisc Disc) : CardPicture;
+
+/// <summary>Jupiter as a dot, with the moons that can be told apart from it in their places.</summary>
+public sealed record JupiterPicture(JupiterMoonsFacts Moons) : CardPicture;
+
+/// <summary>Saturn's globe and rings, with today's tilt.</summary>
+public sealed record SaturnPicture(SaturnShape Shape) : CardPicture;
