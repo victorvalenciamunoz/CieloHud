@@ -967,6 +967,34 @@ Hallazgo al revisar: el catálogo `BrightStars` no guarda la paralaje; se añadi
 - Capturas: `docs/images/ficha-jupiter.png`, `ficha-venus.png` y `ficha-marte-dibujo.png` (también en el README).
 - `dotnet test` 708 tests; build Android 0 avisos.
 
+### Paso 7 — Altura y velocidad de la ISS (2026-10-07)
+
+- Core `Cards/` (decisión 043): `ISatelliteFactsService` y `Sgp4SatelliteFactsService` → `SatelliteFacts`.
+  - Altura sobre el elipsoide (conversión geodésica de SGP.NET), distancia al observador (la del HUD), velocidad inercial y periodo, todo de SGP4.
+  - `SatelliteSights`: bajo el horizonte, en la sombra de la Tierra, cielo demasiado claro (Sol por encima de −6°) o visible; las reglas de un paso visible.
+- `FactsText`: «A 424 km de altura y a 570 km de ti», «Va a 27 600 km/h, 7,7 km cada segundo» y una de estas cuatro:
+  - «La ilumina el Sol y tu cielo está oscuro: se puede ver a simple vista»;
+  - «La ilumina el Sol, pero hay demasiada luz en el cielo para verla»;
+  - «Está en la sombra de la Tierra: ahora no se ve»;
+  - «Ya está bajo el horizonte: ahora no se ve».
+  Sin el periodo: el texto revisado ya dice «cada hora y media».
+- App: la ficha de la ISS añade esas líneas en AHORA (sin dibujo). Consola: `--card iss`, con los valores en bruto y la edad del TLE.
+- **Validación contra JPL Horizons** (ISS −125544, vectores geocéntricos, `TIME_TYPE='UT'`), con el TLE fijo de los tests (época 1 oct 19:41 UTC):
+
+  | Instante (UTC) | Altura CieloHud / Horizons | Velocidad CieloHud / Horizons |
+  |---|---|---|
+  | 2 oct 11:26 | 428,84 / 428,83 km | 7,6574 / 7,6574 km/s |
+  | 2 oct 17:56 | 422,50 / 422,55 km | 7,6629 / 7,6629 km/s |
+  | 2 oct 21:00 | 424,01 / 424,07 km | 7,6622 / 7,6621 km/s |
+  | 3 oct 3:00 | 429,69 / 429,68 km | 7,6581 / 7,6581 km/s |
+
+  La altura de Horizons sale de su posición en ITRF93 (`REF_PLANE='BODY EQUATOR'`) pasada a altura sobre el elipsoide WGS-84; la velocidad, de sus vectores en ICRF.
+  Periodo: 92,99 min (15,48706258 vueltas al día en el TLE). Quedan como tests de integración (altura 0,5 km, velocidad 5 m/s), con cinco instantes
+  para los cuatro casos de visibilidad (el paso rasante del 2 oct a las 19:33 y la salida de la sombra del 15 oct a las 4:25).
+- Probado en el móvil: pendiente. De día la ISS solo se ve en el HUD unos minutos por paso: hoy, 14:17-14:26 al N (13°), 15:54-16:04 al NNE (24°)
+  y 17:31-17:42 al SO (55°).
+- `dotnet test` 736 tests; build Android 0 avisos.
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.

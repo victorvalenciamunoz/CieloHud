@@ -368,3 +368,15 @@ Formato: contexto → decisión → alternativas descartadas.
   - **Noticias, descartadas.** Necesitan red y un criterio editorial diario («nada sensacionalista») que ningún canal garantiza y que la app no puede aplicar sin IA ni servidor (decisión 020). No se revisan ni se contrastan como los textos de las fichas (decisión 037). Y una lista de noticias invita a entrar a mirar qué hay, cuando la app solo pide atención si hay algo que ver (VISION). Para eso ya hay buenas fuentes divulgativas.
   - **Efemérides, como Fase 6** (PLAN): escritas y revisadas como las fichas, con fuente y sin red; solo las ligadas a lo que la app enseña; pocas y buenas; en la ficha del objeto, no en EVENTOS ni como aviso.
 - Alternativas: un canal de noticias de una fuente fiable (NASA, ESA, el IAC) leído en la app (descartada: red, sin revisar, y el sensacionalismo lo decide la fuente); efemérides en EVENTOS (descartada por el usuario: EVENTOS es lo que se va a poder ver); una efeméride cada día del año (descartada: 366 textos que revisar, muchos de relleno).
+
+## 043 — Ficha de la ISS: altura sobre el elipsoide, velocidad inercial y por qué se ve o no
+- Contexto: la ficha de la ISS solo tenía su texto. Faltaban los datos del momento (Fase 5, paso 7), sin dibujo (decisión 041).
+- Decisión:
+  - **Altura sobre el elipsoide** (la conversión geodésica de SGP.NET), no sobre una Tierra esférica: la diferencia llega a ~21 km, más de lo que varía su órbita. Al kilómetro.
+  - **Velocidad inercial**, alrededor del centro de la Tierra (la de SGP4): es la cifra que da la NASA. La relativa al suelo es hasta 0,4 km/s menor. En km/h, a la centena, y en km por segundo, a la décima.
+  - **Distancia a ti**, la misma del HUD, a la decena de km.
+  - **Por qué se ve o no**, con las reglas de un paso visible (decisión 011): bajo el horizonte (la ficha se recalcula cada 10 s y puede ponerse con ella abierta) gana a todo; en la sombra de la Tierra no se ve haga el cielo que haga; iluminada, el Sol debe estar por debajo de −6°.
+  - Sin el periodo («una vuelta cada 93 minutos»): el texto revisado ya dice «cada hora y media», y apenas cambia.
+  - Las frases en Core (`FactsText`), con tests; consola `--card iss`.
+- Validación: JPL Horizons, vectores de la ISS (−125544) en ITRF93 para la altura y en ICRF para la velocidad, en 4 instantes con el TLE fijo de los tests: altura ≤ 0,06 km, velocidad ≤ 0,1 m/s (STATUS, paso 7).
+- Alternativas: altura sobre una Tierra esférica (descartada: hasta 21 km de error); velocidad respecto al suelo (descartada: no es la que se cita en ninguna parte); «ahora pasa sobre…» un país o ciudad (descartada: necesita un mapa de nombres); solo «iluminada» o «en sombra» (descartada: de día está iluminada y no se ve).
