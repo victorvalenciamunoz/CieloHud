@@ -1044,6 +1044,43 @@ Hallazgo al revisar: el catálogo `BrightStars` no guarda la paralaje; se añadi
   Captura: `docs/images/guia-ver-ficha.png`.
 - `dotnet test` 793 tests; build Android 0 avisos.
 
+### Paso 9 — Textos de las estrellas por lotes (desde el 2026-10-07)
+
+Criterios en la decisión 046: lo notable de la estrella, una comparación fácil y el origen del nombre o cómo encontrarla; nada de lo que calcula la ficha
+(distancia, color, magnitud); cada dato con su cita en «## Fuentes». Lotes de unos 20, cada uno en su PR con una casilla por texto: el primero, las más
+brillantes o conocidas; después, por constelación o zona del cielo.
+
+**Lote 1 (2026-10-07)**: las 15 más brillantes del catálogo (Sirio, Arturo, Vega, Capella, Rigel, Proción, Betelgeuse, Altair, Aldebarán, Antares,
+Espiga, Pólux, Fomalhaut, Deneb y Régulo) y 5 conocidas por algo concreto (Cástor, Estrella Polar, Mizar, Algol y Alnilam). De 273 a 396 caracteres.
+- Fuentes: las páginas *Stars* de Jim Kaler; NASA/Hubble (Betelgeuse), ESA/Hubble (Fomalhaut), NASA APOD (Polar) y la Planetary Fact Sheet (órbitas
+  de Venus y Marte para comparar); RAE, «canícula», comprobada por el usuario (la RAE no deja leerse con herramientas automáticas).
+- Hallazgos al contrastar: el «planeta» de Fomalhaut que da Kaler resultó en 2020 una nube de polvo (ESA/Hubble), y así lo cuenta el texto. La página del
+  Hubble sobre Betelgeuse da otra distancia más, unos 725 años luz: su texto dice que no se conoce bien, sin cifra. Mizar, «la primera doble conocida (1650)»
+  según Kaler, queda en «de las primeras… en el siglo XVII». La RAE no dice que «canícula» venga de Sirio, sino que en astronomía es el tiempo en que Sirio
+  sale con el Sol; el texto dice eso.
+- Revisión en la conversación: cinco ajustes para no decir más que la fuente (Altair gira «en 10 horas o menos», las Híades son la cabeza del Toro, Marte
+  pasa «a veces» por Escorpio, Cástor está «una vez y media» más lejos que Pólux, la altura de la Polar vale «desde el hemisferio norte»).
+- Test nuevo: los textos de estrellas no dicen «años luz» ni «magnitud» (lo pone el cálculo). Pendientes: 135 estrellas y 88 constelaciones.
+- Consola: `--card Sirius` y `--card Polaris` muestran el texto con sus datos.
+- **Probado en el OPPO** (7 oct, de día, «¿qué es?» + VER FICHA):
+
+  | Prueba | Resultado |
+  |---|---|
+  | Vega, 17:29 (316 caracteres) | el texto y dos líneas de DATOS; la de la magnitud, cortada a media línea y **sin VER MÁS** |
+  | Estrella Polar, 17:35, con la corrección (378 caracteres) | plegada: el texto y dos líneas de DATOS, con VER MÁS; desplegada, entera con VER MENOS |
+
+  Corregido durante la prueba (`HudPage.FitCard`): la ficha medía su contenido con 2 dp de más de ancho, porque no descontaba el borde de 1 dp
+  a cada lado. Con un texto justo por encima del límite, la medida salía una línea corta: la ficha «cabía» sobre el papel, perdía la última línea
+  y no salía VER MÁS. Con el ancho bien descontado, la medida coincide con la altura real (441 dp en la Polar, comprobado con un registro temporal).
+  Las fichas de la Luna y los planetas no lo notaban: pasan del límite con mucho margen.
+  Captura: `docs/images/ficha-estrella-texto.png`.
+- Cambio pedido por el usuario al ver las fichas: el brillo va solo con el número, «Brillo: magnitud 2,0», sin la coletilla «(cuanto menor, más brilla;
+  desde ciudad se ven hasta la 3)» (decisión 046, corrige 044).
+- Elegido por el usuario: en la ficha de una estrella, **DATOS va antes del texto**, para que la ficha plegada enseñe siempre sus tres datos (`CardView.FactsFirst`;
+  la página mueve el texto solo cuando cambia de sitio). Probado en el OPPO (17:55): Vega plegada con el punto, DATOS con sus tres líneas y el texto entero;
+  la Luna, abierta a continuación, sigue con el texto antes de AHORA. La captura `docs/images/ficha-estrella-texto.png` es la de Vega.
+- `dotnet test` 794 tests; build Android 0 avisos.
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.

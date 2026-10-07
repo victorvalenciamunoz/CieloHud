@@ -93,7 +93,7 @@ dotnet run --project src/CieloHud.Console -- [--lat 40.4168] [--lon -3.7038] [--
 - Datos del momento calculados en local y contrastables con Horizons o Stellarium:
   - Luna: fase y fracción iluminada (Astronomy Engine MoonPhase, Illumination).
   - Júpiter: lunas galileanas a cada lado (JupiterMoons).
-  - Saturno: inclinación de los anillos (Illumination, ing_tilt).
+  - Saturno: inclinación de los anillos (Illumination, ring_tilt).
   - Planetas: distancia y tiempo que tarda su luz en llegar.
   - Estrellas: años que tarda su luz en llegar, desde la paralaje de Hipparcos (no la de SIMBAD, que para muchas de estas es Gaia, saturada;
     decisión 044), su color y su brillo explicado.
@@ -112,3 +112,18 @@ dotnet run --project src/CieloHud.Console -- [--lat 40.4168] [--lon -3.7038] [--
 - Escritas y revisadas como los textos de las fichas: un Markdown por efeméride, con su fuente, revisado uno a uno. Sin red y sin IA en la app.
 - Dónde: en la ficha del objeto (preferencia del usuario). No en EVENTOS, que es lo que se va a poder ver, ni como aviso.
 - Por decidir: la ventana (el día exacto, la semana o el mes). Con el día exacto y en la ficha de su objeto, casi nunca coincidirían.
+
+## Idea: guiar también a las estrellas (apuntada el 2026-10-07, sin planificar ni fase asignada)
+
+- Propuesta del usuario al probar las fichas de estrellas: que la guía lleve también a una estrella, como a un planeta. Caso claro: la Estrella Polar
+  para encontrar el norte, o «¿dónde está Vega?».
+- Cambia lo acordado: VISION dice «pocos objetos que buscar, pero más cosas que se puedan reconocer», y la decisión 044, que las estrellas no son
+  objetivos de la guía. Si se hace, va con una decisión nueva que lo corrija.
+- Lo técnico ya está: las 155 son `SkyTarget` (`StarTarget`), con su posición calculada; la flecha y AQUÍ sirven tal cual.
+- Lo que hay que diseñar es cómo se elige. Idea: un chip ESTRELLAS que abre una caja de texto con autocompletado sobre una lista.
+  - Con la caja vacía, las que están sobre el horizonte, ordenadas por brillo: se elige sin escribir y sin saber nombres.
+  - Al escribir, filtra las 155 por su nombre en español y el IAU («Sirio», «Sirius»), sin tildes ni mayúsculas, y por designación («gam Cas»).
+  - Las que están bajo el horizonte salen marcadas; elegidas, la guía hace lo de siempre con un objetivo bajo el horizonte (no guía).
+  - El filtrado y el orden, en Core con sus tests; la pantalla, con `Entry` y `CollectionView` (MAUI no trae autocompletado; sin paquetes).
+  - El teclado tapa medio HUD y deslumbra de noche: la lista tiene que bastar sin escribir, y en modo noche, todo en rojo.
+- Podría ir junto a las constelaciones (paso 10 de la Fase 5), que también podrían ser destino de la guía.

@@ -446,6 +446,7 @@ public partial class HudPage : ContentPage
         CardPictureView.Invalidate();
         CardBody.Text = view.Text;
         CardBody.IsVisible = view.Text is not null;
+        PlaceCardBody(view.FactsFirst);
         CardNowHeader.Text = view.FactsHeader;
         CardNowHeader.IsVisible = view.Now.Count > 0;
         CardNow.Children.Clear();
@@ -493,6 +494,24 @@ public partial class HudPage : ContentPage
         CardScroll.HeightRequest = Math.Min(content, _cardExpanded ? expanded : CardCollapsedHeight);
     }
 
+    /// <summary>
+    /// The text goes after the drawing (XAML order) or, on a star's card, after its facts. Moved only when it changes,
+    /// not on every 10 s refresh.
+    /// </summary>
+    private void PlaceCardBody(bool factsFirst)
+    {
+        var last = CardContent.IndexOf(CardBody) == CardContent.Count - 1;
+        if (last == factsFirst)
+            return;
+        CardContent.Remove(CardBody);
+        if (factsFirst)
+            CardContent.Add(CardBody);
+        else
+            CardContent.Insert(CardContent.IndexOf(CardNowHeader), CardBody);
+        // After the facts, the same extra air the header has above it.
+        CardBody.Margin = factsFirst ? new Thickness(0, 4, 0, 0) : new Thickness(0);
+    }
+
     /// <summary>Of the content above the footer: with the footer, about the 440 dp the card had before it (decision 038).</summary>
     private const double CardCollapsedHeight = 400;
 
@@ -506,8 +525,11 @@ public partial class HudPage : ContentPage
             _ = CardScroll.ScrollToAsync(0, 0, false);
     }
 
-    /// <summary>The page's width less the card's margins and padding, as in the XAML.</summary>
-    private double CardContentWidth => Width - (2 * 12 + 2 * 16);
+    /// <summary>
+    /// The page's width less the card's margins, padding and border, as in the XAML. Without the border the measure was 2 dp
+    /// too wide and could miss a wrapped line: a card just over the limit lost its last line and showed no VER MÁS.
+    /// </summary>
+    private double CardContentWidth => Width - (2 * 12 + 2 * 16 + 2 * 1);
 
     private void CloseCard()
     {

@@ -122,11 +122,23 @@ public class CardTextsTests
         }
     }
 
+    /// <summary>
+    /// A star's card already computes how long its light took and explains its magnitude (decision 044): its text
+    /// does not repeat them, so the two can never disagree (decision 046).
+    /// </summary>
+    [Fact]
+    public void StarTexts_DoNotRepeatTheComputedFacts()
+    {
+        Assert.Contains(CardTexts.All.Keys, k => k.Kind == CardKind.Star);
+        foreach (var (_, card) in CardTexts.All.Where(c => c.Key.Kind == CardKind.Star))
+            Assert.DoesNotMatch(new Regex(@"años luz|magnitud", RegexOptions.IgnoreCase), card.Body.Replace(NoBreakSpace, ' '));
+    }
+
     /// <summary>Texts still to write; update when a batch is committed. Their cards show only the facts.</summary>
     [Fact]
     public void PendingTexts()
     {
-        Assert.Equal(155, BrightStars.All.Count(s => CardTexts.Find(CardKey.Star(s)) is null));
+        Assert.Equal(135, BrightStars.All.Count(s => CardTexts.Find(CardKey.Star(s)) is null));
         Assert.Equal(88, ConstellationFigures.All.Count(c => CardTexts.Find(CardKey.Constellation(c.Symbol)) is null));
     }
 }

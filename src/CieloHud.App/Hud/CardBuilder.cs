@@ -7,8 +7,11 @@ namespace CieloHud.App.Hud;
 /// <summary>
 /// What a card shows: name, what it is and where, its drawing (null if it has none), its written text (null if not written
 /// yet), and its facts under <paramref name="FactsHeader"/>: "AHORA" when they change with the moment, "DATOS" for a star.
+/// <paramref name="FactsFirst"/>: a star's facts are three short lines and go before its text, so the folded card shows
+/// them all (decision 046); the other cards keep the text first.
 /// </summary>
-public sealed record CardView(string Title, string Subtitle, CardPicture? Picture, string? Text, string FactsHeader, IReadOnlyList<string> Now);
+public sealed record CardView(string Title, string Subtitle, CardPicture? Picture, string? Text, string FactsHeader, IReadOnlyList<string> Now,
+    bool FactsFirst);
 
 /// <summary>
 /// Puts a card together from Core: the reviewed text (<see cref="CardTexts"/>), the facts of the moment, already in
@@ -24,8 +27,9 @@ public sealed class CardBuilder(ISolarSystemFactsService facts, ISatelliteFactsS
     {
         var subtitle = constellation is null ? target.Kind : $"{target.Kind} · en {constellation}";
         var (picture, lines) = Now(target, observer, now);
-        var header = target is StarTarget ? "DATOS" : "AHORA";
-        return new CardView(target.Name.ToUpperInvariant(), subtitle, picture, CardTexts.Find(target.Card)?.Body, header, lines);
+        var star = target is StarTarget;
+        return new CardView(target.Name.ToUpperInvariant(), subtitle, picture, CardTexts.Find(target.Card)?.Body, star ? "DATOS" : "AHORA", lines,
+            FactsFirst: star);
     }
 
     private (CardPicture? Picture, IReadOnlyList<string> Lines) Now(SkyTarget target, Observer observer, DateTimeOffset now)

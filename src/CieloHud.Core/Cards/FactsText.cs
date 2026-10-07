@@ -196,14 +196,14 @@ public static class FactsText
     };
 
     /// <summary>
-    /// "Brillo: magnitud 0,4 (cuanto menor, más brilla; desde ciudad se ven hasta la 3)". The scale runs backwards, so the
-    /// number alone would mislead; the city limit is the one the catalog is built on (decision 015).
+    /// "Brillo: magnitud 0,4". Just the number: the explanation of the backwards scale ("cuanto menor, más brilla…") was
+    /// dropped after seeing the cards with their texts (decision 046).
     /// </summary>
     public static string StarMagnitude(double magnitude)
     {
         var rounded = Math.Round(magnitude, 1, MidpointRounding.AwayFromZero);
         var number = Math.Abs(rounded).ToString("0.0", Culture).Replace('.', ',');
-        return $"Brillo: magnitud {(rounded < 0 ? "−" : "")}{number} (cuanto menor, más brilla; desde ciudad se ven hasta la 3)";
+        return $"Brillo: magnitud {(rounded < 0 ? "−" : "")}{number}";
     }
 
     /// <summary>8.64 → 8.6, 432.6 → 430, 1157 → 1200 (or 1100 rounding down).</summary>
