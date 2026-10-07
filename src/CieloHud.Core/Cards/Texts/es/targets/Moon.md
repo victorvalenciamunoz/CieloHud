@@ -1,6 +1,6 @@
 # Luna
 
-Nuestro satélite. Gira sobre sí misma al mismo ritmo que da la vuelta a la Tierra, por eso siempre nos enseña la misma cara.
+Gira sobre sí misma al mismo ritmo que da la vuelta a la Tierra, por eso siempre nos enseña la misma cara.
 Las manchas oscuras se llaman mares, pero no tienen agua: son cuencas de grandes impactos que se llenaron de lava hace más
 de mil millones de años. Su diámetro es algo más de la cuarta parte del de la Tierra.
 

@@ -846,6 +846,7 @@ Hallazgo al revisar: el catálogo `BrightStars` no guarda la paralaje; se añadi
   | NOCHE con la ficha abierta | toda en rojo sobre negro, sin blancos |
 
   Constelaciones y distancias coinciden con la consola y con lo validado contra Horizons (decisión 014 y paso 1).
+- Revisión del texto de la Luna al verlo en la ficha: se quita «Nuestro satélite.», que repetía el subtítulo («nuestro satélite · en Leo»).
 - Corregido durante la prueba: el panel dejaba un hueco bajo CERRAR (un `ScrollView` ocupa toda la altura que se le permite); ahora se mide el contenido.
 - Incidencia: tras cambiar de rama, la app se cerraba al arrancar con el fallo de `Theme.MaterialComponents` del paso 12 de la Fase 3.
   Bastó con borrar `bin/` y `obj/` de la app e instalar encima, **sin desinstalar**: se conservaron los ajustes (AVISOS) y las alarmas.
