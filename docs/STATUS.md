@@ -777,7 +777,7 @@ estrellas; 10) constelaciones.
 Elegido por el usuario: al llegar a AQUÍ la ficha se abre sola tras ~1,5 s, una vez por objetivo; en «¿qué es?», con un botón «VER FICHA».
 Se cierra con «CERRAR», con Atrás o al cambiar de objetivo; en modo noche, panel propio en rojo. Estrellas con paralaje dudosa: «unos…» con 2 cifras,
 e intervalo si el error relativo pasa del 20 %. Los textos, un Markdown por objeto con sus fuentes; si falta, la ficha sale solo con datos.
-Hallazgo al revisar: el catálogo `BrightStars` no guarda la paralaje; se añadirá regenerándolo desde SIMBAD (paso 7).
+Hallazgo al revisar: el catálogo `BrightStars` no guarda la paralaje; se añadió en el paso 8, de Hipparcos y no de SIMBAD (decisión 044).
 
 ### Paso 1 — Luna y planetas: datos del momento (2026-10-06)
 
@@ -997,6 +997,41 @@ Hallazgo al revisar: el catálogo `BrightStars` no guarda la paralaje; se añadi
 - Pendiente en el móvil: «se puede ver a simple vista» con el paso del 13 oct (máximo a las 8:00, 36° al SE), y «en la sombra de la Tierra» del 14 oct
   en adelante, cuando la ISS sale ya alta de la sombra (por ejemplo el 16 oct, que «aparece» a las 7:12 a 19° al SO): la frase debe cambiar sola en el refresco.
 - `dotnet test` 736 tests; build Android 0 avisos.
+
+### Paso 8 — Estrellas: distancia, color y ficha en «¿qué es?» (2026-10-07)
+
+- **Catálogo** (decisión 044): `Star` gana el número Hipparcos, la paralaje y su error (Hipparcos, van Leeuwen 2007, VizieR I/311, cruzada por posición
+  a < 20″) y el tipo espectral (SIMBAD). Regenerado con un script del scratchpad que solo añade esos campos: coordenadas, magnitudes y nombres no cambian.
+  - SIMBAD daba Gaia para 54 estrellas y nada para β Sco y γ¹ Leo. Comparadas con Hipparcos, 8 de esas 54 discrepan en más de 3σ:
+
+    | Estrella | Gaia, vía SIMBAD | Hipparcos |
+    |---|---|---|
+    | Tarazed | 5,59 ± 0,39 mas (584 años luz) | 8,26 ± 0,17 (395) |
+    | Tania Australis | 17,80 ± 0,39 | 14,16 ± 0,54 |
+    | Xamidimura | 1,87 ± 0,74 | 6,51 ± 0,91 |
+    | Kaus Borealis, Cor Caroli, γ Hya, ε Leo, Porrima | | 3-4,5σ |
+
+  - En las 99 en que SIMBAD ya usaba Hipparcos, el valor es idéntico.
+- Core `Cards/`:
+  - `StarLight`: años luz y su margen (una desviación de la paralaje), y la certeza según el error relativo: ≤ 5 % (117 estrellas), ≤ 20 % (34),
+    ≤ 50 % (Alnilam, Aludra, ο² CMa) y más (Almaaz, 84 %).
+  - `StarColors`: el color por la letra del tipo espectral. Con B−V y sus límites habituales, 42 de 155 cambiaban de color (Aldebarán «rojiza»).
+  - `FactsText`: «Esta luz salió de Sirio hace 8,6 años», «… hace unos 500 años», «… hace entre 1600 y 2700 años», «… hace más de 1100 años»
+    (dos cifras; «más de» redondea hacia abajo); «Su luz es anaranjada»; «Brillo: magnitud 0,4 (cuanto menor, más brilla; desde ciudad se ven hasta la 3)».
+- App: VER FICHA en «¿qué es?» también para las 155 estrellas. Su ficha lleva un punto de luz de su color, «DATOS» en vez de «AHORA» (no cambian
+  con el momento) y esas tres líneas; sin texto todavía (paso 9). Consola: `--card <estrella>` por nombre IAU o designación («Betelgeuse», «gam Cas»).
+- **Validación**:
+  - Hipparcos en VizieR: los valores de los tests (Sirio, Betelgeuse, Polaris, Deneb, Alnilam y las cuatro en que SIMBAD daba otra cosa).
+  - NASA: Sirio a 8,6 años luz ([Hubble](https://science.nasa.gov/asset/hubble/the-dog-star-sirius-and-its-tiny-companion/)) y Vega a 25
+    ([APOD](https://science.nasa.gov/image-article/apod-1998-august-23-vega/)); CieloHud, 8,6 y 25. Betelgeuse: «unos 500» (440-570) frente a 548, 650 o 700
+    según la página de la NASA; su distancia se discute de verdad, y lo dirá su texto revisado (paso 9).
+  - Color: los tests fijan once estrellas conocidas (Rigel azulada, Sirio blanca, Procyon de un blanco amarillento, Capella amarillenta, Arturo anaranjada,
+    Betelgeuse rojiza…) y que las 155 tienen tipo espectral con clase.
+- **Probado en el OPPO** (7 oct, 16:36, de día, «¿qué es?» hacia Régulo): «Esta luz salió de Régulo hace 79 años», «Su luz es azulada» (B8),
+  «Brillo: magnitud 1,4 (…)», con un punto azulado; la consola da 41,13 ± 0,35 mas, 79,3 años luz. Captura: `docs/images/ficha-estrella.png`.
+- Descartado al plantearlo con el usuario: el puesto en brillo «de las que se ven desde España» (la app se puede usar en cualquier país); y queda apuntado
+  que el catálogo no tiene las estrellas del sur (declinación < −50°).
+- `dotnet test` 800 tests; build Android 0 avisos.
 
 ## Mejoras fuera de fase
 
