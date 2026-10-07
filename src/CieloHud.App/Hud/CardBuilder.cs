@@ -33,6 +33,9 @@ public sealed class CardBuilder(ISolarSystemFactsService facts)
             case BodyTarget { Body: CelestialBody.Jupiter }:
                 var jupiter = facts.Planet(CelestialBody.Jupiter, observer, now);
                 return [FactsText.PlanetDistance(jupiter), FactsText.PlanetLight(jupiter), .. FactsText.JupiterMoons(facts.JupiterMoons(observer, now))];
+            case BodyTarget { Body: CelestialBody.Saturn }:
+                var saturn = facts.Planet(CelestialBody.Saturn, observer, now);
+                return [FactsText.PlanetDistance(saturn), FactsText.PlanetLight(saturn), .. FactsText.SaturnRings(facts.SaturnRings(now), now)];
             case BodyTarget planet:
                 var p = facts.Planet(planet.Body, observer, now);
                 return [FactsText.PlanetDistance(p), FactsText.PlanetLight(p)];

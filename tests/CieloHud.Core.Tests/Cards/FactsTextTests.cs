@@ -156,6 +156,39 @@ public class FactsTextTests
         Assert.Equal(["Ahora no se ve ninguna de sus cuatro lunas grandes", "Ío está detrás de Júpiter"], lines);
     }
 
+    private static readonly DateTimeOffset Today = new(2026, 10, 7, 9, 0, 0, TimeSpan.Zero);
+
+    [Fact]
+    public void SaturnRings_TiltedAndOpening()
+    {
+        var rings = new SaturnRingsFacts(-7.36, RingTrend.Opening, new DateTimeOffset(2032, 4, 12, 9, 0, 0, TimeSpan.Zero), 26.74);
+
+        Assert.Equal(
+            ["Con un telescopio pequeño, sus anillos se ven inclinados 7°", "Se irán abriendo hasta 2032, cuando llegarán a 27°"],
+            FactsText.SaturnRings(rings, Today));
+    }
+
+    [Fact]
+    public void SaturnRings_Closing_EdgeOnSoon_SaysTheMonth()
+    {
+        var rings = new SaturnRingsFacts(1.31, RingTrend.Closing, new DateTimeOffset(2027, 5, 6, 0, 0, 0, TimeSpan.Zero), 0);
+
+        Assert.Equal(
+            ["Con un telescopio pequeño, sus anillos se ven casi de canto, como una raya fina", "Se irán cerrando hasta mayo de 2027, cuando se verán de canto"],
+            FactsText.SaturnRings(rings, Today));
+    }
+
+    [Theory]
+    [InlineData(-1.99, "casi de canto")]
+    [InlineData(2.0, "inclinados 2°")]
+    [InlineData(26.5, "inclinados 27°")] // halves up
+    public void SaturnRings_TiltWithoutSign(double tilt, string expected)
+    {
+        var rings = new SaturnRingsFacts(tilt, RingTrend.Closing, Today.AddYears(5), 0);
+
+        Assert.Contains(expected, FactsText.SaturnRings(rings, Today)[0]);
+    }
+
     [Fact]
     public void Duration_Negative_Throws()
     {

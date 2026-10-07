@@ -98,6 +98,40 @@ public sealed class AstronomyEngineSolarSystemFactsService : ISolarSystemFactsSe
             JupiterRadiusArcseconds: radiusAu / distance * 180 / Math.PI * 3600);
     }
 
+    // Saturn takes 29.5 years around the Sun: its rings go from edge-on to widest and back twice, about 7 years each way.
+    private const int RingSearchDays = 12 * 366;
+
+    /// <summary>
+    /// The tilt from the Earth is the angle between Saturn's pole (IAU WGCCRE 2015, <c>RotationAxis</c>) and the ring plane as seen
+    /// along our line of sight. The trend comes from the same angle seen from the Sun, which changes smoothly; searched day by day
+    /// for its next widest point or its next crossing of zero.
+    /// </summary>
+    public SaturnRingsFacts SaturnRings(DateTimeOffset instant)
+    {
+        var time = new AstroTime(instant.UtcDateTime);
+        var tilt = RingLatitude(time, Astronomy.GeoVector(Body.Saturn, time, Aberration.Corrected));
+
+        double FromSun(AstroTime t) => RingLatitude(t, Astronomy.HelioVector(Body.Saturn, t));
+        var previous = FromSun(time);
+        var opening = Math.Abs(FromSun(time.AddDays(1))) > Math.Abs(previous);
+        for (var day = 1; day <= RingSearchDays; day++)
+        {
+            var next = FromSun(time.AddDays(day));
+            var ended = opening ? Math.Abs(next) < Math.Abs(previous) : Math.Sign(next) != Math.Sign(previous);
+            if (ended)
+                return new SaturnRingsFacts(tilt, opening ? RingTrend.Opening : RingTrend.Closing, instant.AddDays(day - 1), opening ? Math.Abs(previous) : 0);
+            previous = next;
+        }
+        throw new InvalidOperationException("Saturn's rings did not reach their widest or edge-on in 12 years.");
+    }
+
+    /// <summary>Latitude over Saturn's ring plane of whoever looks along <paramref name="toSaturn"/>, in degrees.</summary>
+    private static double RingLatitude(AstroTime time, AstroVector toSaturn)
+    {
+        var pole = Astronomy.RotationAxis(Body.Saturn, time).north;
+        return Math.Asin(-Dot(toSaturn, pole) / toSaturn.Length()) * 180 / Math.PI;
+    }
+
     private static double Dot(AstroVector a, AstroVector b) => a.x * b.x + a.y * b.y + a.z * b.z;
 
     private static AstroVector Cross(AstroVector a, AstroVector b) =>
