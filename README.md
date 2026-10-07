@@ -13,7 +13,7 @@
   <img alt=".NET 10" src="https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white" />
   <img alt=".NET MAUI Android" src="https://img.shields.io/badge/MAUI-Android-3DDC84?logo=android&logoColor=white" />
   <a href="https://github.com/victorvalenciamunoz/CieloHud/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/victorvalenciamunoz/CieloHud/actions/workflows/ci.yml/badge.svg" /></a>
-  <img alt="Tests" src="https://img.shields.io/badge/tests-800-7CFFB2" />
+  <img alt="Tests" src="https://img.shields.io/badge/tests-793-7CFFB2" />
   <img alt="Sin backend" src="https://img.shields.io/badge/backend-ninguno-0B1218" />
   <a href="LICENSE"><img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-4DD2FF" /></a>
 </p>
@@ -62,7 +62,7 @@ Además calcula **cuándo pasa la ISS por encima de ti y si se va a ver**: ilumi
 |---|---|
 | 🎯 **Guía** | Luna, Mercurio, Venus, Marte, Júpiter, Saturno e ISS. Flecha en el borde cuando está fuera de pantalla, marcador cuando está a la vista, **AQUÍ** con histéresis (entra a 4°, sale a 6°) para que no parpadee con el ruido de la brújula. |
 | 🔭 **¿Qué es eso?** | Reconoce Luna, planetas, ISS y **155 estrellas** (todas las de magnitud < 3 visibles desde España, con su nombre IAU o su letra griega). Prefiere la más brillante cuando hay varias candidatas. Dice siempre en cuál de las **88 constelaciones** estás mirando. |
-| 🪐 **Fichas** | Al llegar a **AQUÍ** se abre sola; en «¿qué es?», con VER FICHA. Un texto breve escrito y revisado, con sus fuentes, y **AHORA**: fase de la Luna y su próxima fase principal, distancia y cuánto tardó su luz en llegar, dónde están las lunas de Júpiter (o cuál está detrás o en su sombra), cuánto se inclinan los anillos de Saturno, y a qué altura y velocidad va la ISS y si ahora se puede ver. Encima, en la Luna y los planetas, un **dibujo calculado al momento**, girado como se ve en el cielo, con su color (en rojo de noche). Los 7 objetivos y, en «¿qué es?», las 155 estrellas: cuánto tardó su luz en llegar, su color y su brillo explicado. |
+| 🪐 **Fichas** | Con VER FICHA: en la guía, siempre a mano para el objetivo elegido (se resalta al llegar a **AQUÍ**); en «¿qué es?», para lo que reconoce. Un texto breve escrito y revisado, con sus fuentes, y **AHORA**: fase de la Luna y su próxima fase principal, distancia y cuánto tardó su luz en llegar, dónde están las lunas de Júpiter (o cuál está detrás o en su sombra), cuánto se inclinan los anillos de Saturno, y a qué altura y velocidad va la ISS y si ahora se puede ver. Encima, en la Luna y los planetas, un **dibujo calculado al momento**, girado como se ve en el cielo, con su color (en rojo de noche). Los 7 objetivos y, en «¿qué es?», las 155 estrellas: cuánto tardó su luz en llegar, su color y su brillo explicado. |
 | 🧭 **Referencias** | Línea del horizonte con escala de altura, brújula con puntos cardinales, estrellas por brillo y planetas, todo moviéndose con el móvil. La **figura de la constelación** que tienes en la retícula, dibujada tenue con su nombre. Aviso cuando la brújula necesita calibración («dibuja un 8»). |
 | 🔴 **Modo nocturno** | Botón NOCHE: todo pasa a rojo sobre negro puro para no perder la adaptación a la oscuridad, se ocultan las barras del sistema y la pantalla baja al 10 % mientras la app está abierta (sin tocar el ajuste del móvil). Con el modo activado, NOCHE abre un panel para elegir 3, 6, 10 o 20 %. Se recuerda entre sesiones. |
 | 🛰️ **Pasos de la ISS** | Inicio, máximo y fin de cada paso visible en los próximos días, indicando si la ISS «aparece» saliendo de la sombra de la Tierra o «se apaga» a media travesía. |
@@ -145,7 +145,7 @@ src/
   CieloHud.Console/     Consola para validar cálculos (solo formatea lo que devuelve Core)
   CieloHud.App/         App .NET MAUI para Android: HUD, sensores, GPS
 tests/
-  CieloHud.Core.Tests/  800 tests xUnit, con referencias de JPL Horizons, Stellarium y Heavens-Above
+  CieloHud.Core.Tests/  793 tests xUnit, con referencias de JPL Horizons, Stellarium y Heavens-Above
 docs/                   Visión, plan por fases, estado y decisiones (en español)
 ```
 
