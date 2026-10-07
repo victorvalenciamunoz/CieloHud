@@ -774,7 +774,8 @@ Pasos: 1) Luna y planetas: datos; 2) formato de los textos y los 7 objetivos; 3)
 Ampliado el 2026-10-07 (el usuario eligió dibujos calculados frente a fotos, tras ver un boceto): un paso de **dibujos** después del 5, y los siguientes
 se corren: 6) dibujos de la Luna y los planetas con su fase, Júpiter con sus lunas y Saturno con sus anillos; 7) ISS; 8) estrellas: datos; 9) textos de las
 estrellas; 10) constelaciones.
-Elegido por el usuario: al llegar a AQUÍ la ficha se abre sola tras ~1,5 s, una vez por objetivo; en «¿qué es?», con un botón «VER FICHA».
+Elegido por el usuario: al llegar a AQUÍ la ficha se abre sola tras ~1,5 s, una vez por objetivo; en «¿qué es?», con un botón «VER FICHA». Corregido el
+2026-10-07 tras usarla (decisión 045): en la guía, VER FICHA siempre visible, resaltado en AQUÍ; la ficha ya no se abre sola.
 Se cierra con «CERRAR», con Atrás o al cambiar de objetivo; en modo noche, panel propio en rojo. Estrellas con paralaje dudosa: «unos…» con 2 cifras,
 e intervalo si el error relativo pasa del 20 %. Los textos, un Markdown por objeto con sus fuentes; si falta, la ficha sale solo con datos.
 Hallazgo al revisar: el catálogo `BrightStars` no guarda la paralaje; se añadió en el paso 8, de Hipparcos y no de SIMBAD (decisión 044).
@@ -1032,6 +1033,16 @@ Hallazgo al revisar: el catálogo `BrightStars` no guarda la paralaje; se añadi
 - Descartado al plantearlo con el usuario: el puesto en brillo «de las que se ven desde España» (la app se puede usar en cualquier país); y queda apuntado
   que el catálogo no tiene las estrellas del sur (declinación < −50°).
 - `dotnet test` 800 tests; build Android 0 avisos.
+
+### Ajuste tras usarla: VER FICHA en la guía (2026-10-07)
+
+- Al usar la app, la ficha que se abría sola en AQUÍ tapaba el final de la guía y, una vez cerrada, no se podía volver a abrir. Decisión 045 (corrige la 038):
+  en modo guía, **VER FICHA siempre visible** para el objetivo elegido y **relleno al llegar a AQUÍ**; la ficha ya no se abre sola. En «¿qué es?», igual que antes.
+  El botón se oculta con el panel de brillo del modo noche. Se quita `CardAutoOpen` de Core con sus 7 tests.
+- Probado en el OPPO (16:54, guía a la Luna, al O a 14°): VER FICHA con borde bajo «derecha 2° · sube 100°» y el rótulo, sin taparlos; la ficha se abre
+  antes de encontrar la Luna, se cierra y se vuelve a abrir. Al llegar a AQUÍ el botón se rellena; durante 16 s en AQUÍ (8 capturas) la ficha no se abrió sola.
+  Captura: `docs/images/guia-ver-ficha.png`.
+- `dotnet test` 793 tests; build Android 0 avisos.
 
 ## Mejoras fuera de fase
 

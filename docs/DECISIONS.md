@@ -392,3 +392,12 @@ Formato: contexto → decisión → alternativas descartadas.
   - **Límite conocido**: el catálogo solo tiene estrellas con declinación mayor que −50° (decisión 015). Desde el hemisferio sur faltarían Canopus, Alfa Centauri o la Cruz del Sur.
 - Validación: Hipparcos en VizieR (los valores de los tests); las 99 en que SIMBAD ya usaba Hipparcos, idénticas; distancias de la NASA para Sirio (8,6) y Vega (25). Betelgeuse: «unos 500» (440-570) frente a 548, 650 o 700 según la página de la NASA; su distancia se discute y lo dirá su texto revisado.
 - Alternativas: la paralaje que elige SIMBAD (descartada: Gaia saturada); Gaia DR3 donde discrepe menos (descartada: elegir a mano estrella a estrella); el puesto en brillo «de las que se ven desde España» (descartado por el usuario: la app se puede usar en cualquier país); el puesto en todo el cielo (pospuesto: discutible en dobles y variables; mejor en el texto revisado cuando sea notable); temperatura desde B−V (descartada: errores del 15-20 % en las calientes); «da tanta luz como N soles» (pospuesto a los textos: hereda la incertidumbre de la distancia y es solo luz visible); el tipo espectral tal cual (jerga).
+
+## 045 — La ficha en la guía: VER FICHA siempre visible, sin abrirse sola (corrige 038)
+- Contexto: al usar la app, la ficha que se abría sola tras 1,5 s en AQUÍ (decisión 038) estorbaba: tapaba el final de la guía cuando aún se estaba afinando (AQUÍ salta en cuanto la retícula roza el objetivo), obligaba a cerrarla y, una vez cerrada, no había forma de volver a abrirla.
+- Decisión (propuesta por el usuario):
+  - En modo guía, **VER FICHA siempre visible** para el objetivo elegido, también antes de encontrarlo o con él bajo el horizonte: en la guía ya se sabe qué objeto es. Se abre y se cierra cuantas veces se quiera.
+  - Al llegar a **AQUÍ** el botón se **rellena** (como un chip seleccionado): la pista de «ya lo tienes, puedes leer», sin tapar nada.
+  - En «¿qué es?», sin cambios: el botón sale con lo reconocido y se mantiene 2 s (`RecentMatch`).
+  - Se oculta con el panel de brillo del modo noche, que vive en el mismo sitio. Se quita `CardAutoOpen` (y sus 7 tests).
+- Alternativas: el botón solo en AQUÍ (descartada: no se podría consultar la ficha mientras se busca, y en AQUÍ la retícula entra y sale); mantener la apertura sola y añadir el botón (descartada: el modal seguiría saliendo en mitad de la guía); un toque largo sobre el chip del objetivo (descartada: escondido).
