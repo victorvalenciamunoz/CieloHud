@@ -1094,6 +1094,8 @@ y Delta). De 276 a 390 caracteres. Primeros textos de estrellas sin nombre IAU: 
   «lo corriente a veces es una ventaja» como dice Kaler, no «sirve de referencia»; el «próximo eclipse» de Gamma de Perseo que da Kaler (2019) no se usa.
   Athebyne: Kaler la llama Al Dhibain y no explica el nombre IAU; el texto solo dice que los árabes llamaban «las dos hienas» a la pareja que forma con Zeta.
 - Aprobados por el usuario sin cambios. Pendientes: 113 estrellas y 88 constelaciones.
+- Probado en el OPPO (18:29, de día, «¿qué es?» hacia el norte): la ficha de Kochab con DATOS (130 años, anaranjada, magnitud 2,1) y su texto debajo.
+  Para encontrarla hubo que calcular dónde estaba (Kochab, al N a 52°; Gamma de Casiopea, al NE a 24°): justo el caso de la idea de guiar a las estrellas (PLAN).
 - `dotnet test` 794 tests; build Android 0 avisos.
 
 ## Mejoras fuera de fase
