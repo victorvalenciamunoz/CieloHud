@@ -29,6 +29,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<ISolarSystemService, AstronomyEngineSolarSystemService>();
 		builder.Services.AddSingleton<ISunService, AstronomyEngineSunService>();
 		builder.Services.AddSingleton<IMagnitudeService, AstronomyEngineMagnitudeService>();
+		builder.Services.AddSingleton<CieloHud.Core.Cards.ISolarSystemFactsService, CieloHud.Core.Cards.AstronomyEngineSolarSystemFactsService>();
 		builder.Services.AddSingleton<ISatelliteService, Sgp4SatelliteService>();
 		builder.Services.AddSingleton<CieloHud.Core.Stars.IStarService, CieloHud.Core.Stars.AstronomyEngineStarService>();
 		builder.Services.AddSingleton<CieloHud.Core.Constellations.IConstellationLocator, CieloHud.Core.Constellations.AstronomyEngineConstellationLocator>();
@@ -73,6 +74,7 @@ public static class MauiProgram
 
 		// HUD
 		builder.Services.AddSingleton<TargetCatalog>();
+		builder.Services.AddSingleton<CardBuilder>();
 		builder.Services.AddSingleton(Preferences.Default);
 		builder.Services.AddSingleton<NightMode>();
 		builder.Services.AddTransient<HudPage>();

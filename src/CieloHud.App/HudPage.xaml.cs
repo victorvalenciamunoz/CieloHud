@@ -2,6 +2,7 @@ using System.Globalization;
 using CieloHud.App.Alerts;
 using CieloHud.App.Hud;
 using CieloHud.App.Services;
+using CieloHud.Core.Cards;
 using CieloHud.Core.Constellations;
 using CieloHud.Core.Guidance;
 using CieloHud.Core.Sky;
@@ -27,6 +28,7 @@ public partial class HudPage : ContentPage
     private readonly NightMode _nightMode;
     private readonly AlertService _alerts;
     private readonly ObserverStore _observers;
+    private readonly CardBuilder _cards;
     private readonly GuidanceCalculator _guidance = new();
     private readonly HudDrawable _drawable = new();
     private readonly Dictionary<SkyTarget, Button> _chips = new();
@@ -52,9 +54,17 @@ public partial class HudPage : ContentPage
     private DateTimeOffset _figureComputedAt = DateTimeOffset.MinValue;
     private IReadOnlyList<IReadOnlyList<HorizontalPosition>> _figure = [];
 
+    // The object card (decision 038): opened by itself on AQUÍ, or offered with VER FICHA in identify mode.
+    private static readonly TimeSpan CardRefreshInterval = TimeSpan.FromSeconds(10);
+    private readonly CardAutoOpen _cardAutoOpen = new();
+    private readonly RecentMatch<SkyTarget> _cardOffer = new();
+    private SkyTarget? _offered;
+    private SkyTarget? _cardTarget;
+    private DateTimeOffset _cardBuiltAt;
+
     public HudPage(IPointingSource pointing, ILocationSource location, TargetCatalog catalog,
         IConstellationLocator constellations, IConstellationFigureLocator figures, NightMode nightMode,
-        AlertService alerts, ObserverStore observers)
+        AlertService alerts, ObserverStore observers, CardBuilder cards)
     {
         InitializeComponent();
         _pointing = pointing;
@@ -65,6 +75,7 @@ public partial class HudPage : ContentPage
         _nightMode = nightMode;
         _alerts = alerts;
         _observers = observers;
+        _cards = cards;
         _target = catalog.Targets[0];
         Canvas.Drawable = _drawable;
         BuildTargetBar();
@@ -123,6 +134,8 @@ public partial class HudPage : ContentPage
         StyleChip(NightButton, _nightMode.IsOn);
         StyleChip(AlertsButton, _alerts.IsOn);
         StyleChip(LeaveNightButton, false);
+        StyleChip(CloseCardButton, false);
+        StyleChip(ShowCardButton, true);
         foreach (var (brightness, chip) in _brightnessChips)
             StyleChip(chip, Math.Abs(brightness - _nightMode.Brightness) < 0.001f);
     }
@@ -155,6 +168,9 @@ public partial class HudPage : ContentPage
             return;
         }
         NightPanel.IsVisible = !NightPanel.IsVisible;
+        // Both live at the bottom: the brightness panel replaces an open card.
+        if (NightPanel.IsVisible)
+            CloseCard();
         ApplyPalette();
     }
 
@@ -252,6 +268,9 @@ public partial class HudPage : ContentPage
         _target = target;
         _onTarget = false;
         _skyComputedAt = DateTimeOffset.MinValue;
+        CloseCard();
+        _cardAutoOpen.Reset();
+        _cardOffer.Clear();
         StyleChips();
         await PrepareSatellitesAsync();
     }
@@ -327,6 +346,9 @@ public partial class HudPage : ContentPage
             guidance = g;
         }
 
+        var identified = _target is null && pointing is { } here ? Identify(here, now) : null;
+        UpdateCard(guidance, identified, now);
+
         _drawable.Frame = new HudFrame
         {
             TargetName = _target?.Name ?? "",
@@ -343,13 +365,115 @@ public partial class HudPage : ContentPage
                 .ToList(),
             NeedsCalibration = _pointing.Accuracy.NeedsCalibration(),
             IdentifyMode = _target is null,
-            Identified = _target is null && pointing is { } here ? Identify(here, now) : null,
+            Identified = identified,
             PointingConstellation = underReticle is { } c ? SpanishNames.Constellation(c) : null,
             TargetConstellation = _targetConstellation,
             ConstellationFigure = _figure,
             ConstellationFigureName = underReticle is { } n ? SpanishNames.WithoutArticle(SpanishNames.Constellation(n)) : null,
         };
         Canvas.Invalidate();
+    }
+
+    /// <summary>
+    /// Every frame: in guide mode the card opens by itself after a moment on AQUÍ, once per target; in identify mode
+    /// VER FICHA is offered for what the reticle is on, kept a little while the reticle wobbles. An open card stays open
+    /// (lowering the phone leaves AQUÍ) and its facts are refreshed now and then.
+    /// </summary>
+    private void UpdateCard(Guidance? guidance, IdentifyResult? identified, DateTimeOffset now)
+    {
+        if (CardPanel.IsVisible)
+        {
+            if (_cardTarget is { } open && now - _cardBuiltAt > CardRefreshInterval)
+                ShowCard(open, now);
+            return;
+        }
+
+        if (_target is { } target)
+        {
+            if (guidance is { } g && CardBuilder.HasCard(target) && _cardAutoOpen.Update(g.IsOnTarget, now))
+                ShowCard(target, now);
+            return;
+        }
+
+        var matched = identified is { IsMatch: true } m
+            ? _catalog.Targets.FirstOrDefault(t => t.Name == m.Name && CardBuilder.HasCard(t))
+            : null;
+        _offered = _cardOffer.Update(matched, now);
+        ShowCardButton.IsVisible = _offered is not null;
+    }
+
+    private void OnShowCardClicked(object? sender, EventArgs e)
+    {
+        if (_offered is { } target)
+            ShowCard(target, DateTimeOffset.UtcNow);
+    }
+
+    private void OnCloseCardClicked(object? sender, EventArgs e) => CloseCard();
+
+    private void ShowCard(SkyTarget target, DateTimeOffset now)
+    {
+        if (_observer is not { } observer)
+            return;
+
+        var located = _sky.FirstOrDefault(s => s.Target == target);
+        var constellation = located.Target is null
+            ? null
+            : ConstellationAt(located.Position.AzimuthDegrees, located.Position.AltitudeDegrees, now);
+        var view = _cards.Build(target, constellation, observer, now);
+
+        CardTitle.Text = view.Title;
+        CardSubtitle.Text = view.Subtitle;
+        CardBody.Text = view.Text;
+        CardBody.IsVisible = view.Text is not null;
+        CardNowHeader.IsVisible = view.Now.Count > 0;
+        CardNow.Children.Clear();
+        foreach (var line in view.Now)
+        {
+            var label = new Label { Text = line, FontFamily = "OpenSansRegular", FontSize = 14 };
+            label.SetDynamicResource(Label.TextColorProperty, "HudText");
+            CardNow.Children.Add(label);
+        }
+
+        var opening = !CardPanel.IsVisible;
+        _cardTarget = target;
+        _cardBuiltAt = now;
+        NightPanel.IsVisible = false;
+        ShowCardButton.IsVisible = false;
+        FitCard();
+        CardPanel.IsVisible = true;
+        if (opening)
+            _ = CardScroll.ScrollToAsync(0, 0, false);
+    }
+
+    /// <summary>
+    /// A ScrollView takes all the height it is allowed, which left a gap under CERRAR on short cards: give it the height of
+    /// its content instead, up to <see cref="CardMaxHeight"/>, and scroll beyond that (large system fonts).
+    /// </summary>
+    private void FitCard()
+    {
+        const double horizontalChrome = 2 * 12 + 2 * 16; // card margins and padding, as in the XAML
+        var width = Width - horizontalChrome;
+        if (width <= 0)
+            return;
+        var content = CardContent.Measure(width, double.PositiveInfinity);
+        CardScroll.HeightRequest = Math.Min(content.Height, CardMaxHeight);
+    }
+
+    private const double CardMaxHeight = 440;
+
+    private void CloseCard()
+    {
+        CardPanel.IsVisible = false;
+        _cardTarget = null;
+    }
+
+    /// <summary>Back closes the card first, as it would a dialog.</summary>
+    protected override bool OnBackButtonPressed()
+    {
+        if (!CardPanel.IsVisible)
+            return base.OnBackButtonPressed();
+        CloseCard();
+        return true;
     }
 
     private void UpdateFigure(string? symbol, DateTimeOffset now)

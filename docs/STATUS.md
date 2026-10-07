@@ -823,6 +823,35 @@ Hallazgo al revisar: el catálogo `BrightStars` no guarda la paralaje; se añadi
 - Consola: `--card` muestra también el texto, ajustado a 100 columnas, o «(sin texto todavía)».
 - `dotnet test` 594 tests; build Android 0 avisos (la app aún no usa los textos).
 
+### Paso 3 — La ficha en la app para los 7 objetivos (2026-10-07)
+
+- **Cuándo se abre** (decisión 038): en modo guía, sola tras **1,5 s seguidos en AQUÍ**, una vez por objetivo (`Core/Cards/CardAutoOpen`);
+  en «¿QUÉ ES?», con el botón **VER FICHA** bajo el nombre de lo reconocido, que se mantiene 2 s aunque la retícula se salga un momento
+  (`Core/Cards/RecentMatch`). Solo los 7 objetivos; estrellas y constelaciones, en los pasos 7 y 9.
+- **Cómo se cierra**: CERRAR, el botón Atrás o elegir otro objetivo (también al tocar un aviso). Al bajar el móvil se sale de AQUÍ, pero la ficha sigue
+  abierta. El panel de brillo del modo noche la sustituye si se abre.
+- **Qué muestra** (`Hud/CardBuilder`): nombre, «planeta · en Cáncer», el texto revisado y «AHORA» con los datos del paso 1, que se recalculan cada 10 s
+  mientras está abierta. La ISS aún no tiene datos (paso 6). Panel propio con la paleta, en rojo en modo noche, con la altura de su contenido
+  (como mucho 440 dp; si no cabe, se desplaza).
+- Tests de Core: abrir tras el tiempo, una sola vez aunque se salga y se vuelva, salir antes reinicia la cuenta, objetivo nuevo, nunca en AQUÍ;
+  mantener lo reconocido durante el margen, reiniciarlo al verlo de nuevo, otro objeto lo sustituye, olvidarlo.
+- Validado en el OPPO (Android 16, Debug, de día):
+
+  | Prueba | Resultado |
+  |---|---|
+  | Luna, AQUÍ ~2 s | se abre sola: «nuestro satélite · en Leo», «Luna menguante, iluminada al 12 %», «Luna nueva el sáb 10 oct a las 17:50», «A 371 600 km» |
+  | CERRAR y seguir en la Luna | no se reabre |
+  | Júpiter, AQUÍ | se abre la suya: «en Leo», «A 874 millones de km», «hace 49 minutos»; se cierra con Atrás |
+  | «¿QUÉ ES?» apuntando a Marte | VER FICHA → «en Cáncer», «A 243 millones de km», «hace 13 minutos» |
+  | NOCHE con la ficha abierta | toda en rojo sobre negro, sin blancos |
+
+  Constelaciones y distancias coinciden con la consola y con lo validado contra Horizons (decisión 014 y paso 1).
+- Corregido durante la prueba: el panel dejaba un hueco bajo CERRAR (un `ScrollView` ocupa toda la altura que se le permite); ahora se mide el contenido.
+- Incidencia: tras cambiar de rama, la app se cerraba al arrancar con el fallo de `Theme.MaterialComponents` del paso 12 de la Fase 3.
+  Bastó con borrar `bin/` y `obj/` de la app e instalar encima, **sin desinstalar**: se conservaron los ajustes (AVISOS) y las alarmas.
+- Captura: `docs/images/ficha-marte.png`.
+- `dotnet test` 608 tests; build Android 0 avisos.
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.
