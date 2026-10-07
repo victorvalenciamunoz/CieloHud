@@ -84,6 +84,9 @@ public sealed class SatelliteTarget : SkyTarget
 
     public override CardKey Card => CardKey.Iss;
 
+    /// <summary>The orbital elements once fetched, for the card; null until then or without network.</summary>
+    public Tle? Tle => _tle;
+
     public override HorizontalPosition? Locate(Observer observer, DateTimeOffset instant) =>
         _tle is { } tle ? _service.Locate(tle, observer, instant) : null;
 

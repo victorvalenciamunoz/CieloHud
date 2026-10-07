@@ -37,6 +37,8 @@ if (options.ConjunctionsDays is { } conjunctionDays)
     return PrintConjunctions(conjunctionDays);
 if (options.MercuryDays is { } mercuryDays)
     return PrintMercury(mercuryDays);
+if (options.CardIss)
+    return await PrintIssCardAsync();
 if (options.CardBody is { } cardBody)
     return PrintCard(cardBody);
 
@@ -148,5 +150,25 @@ int PrintCard(CelestialBody body)
     if (body == CelestialBody.Saturn)
         System.Console.WriteLine(CardFormatter.SaturnRings(facts.SaturnRings(options.Instant), options.Instant));
     System.Console.WriteLine(CardFormatter.Disc(facts.Disc(body, options.Observer, options.Instant)));
+    return 0;
+}
+
+async Task<int> PrintIssCardAsync()
+{
+    Tle tle;
+    try
+    {
+        tle = await tleProvider.GetTleAsync(IssNoradNumber);
+    }
+    catch (TleUnavailableException ex)
+    {
+        System.Console.Error.WriteLine($"Error: no se pudo obtener el TLE de la ISS ({ex.InnerException?.Message}).");
+        return 2;
+    }
+
+    var facts = new Sgp4SatelliteFactsService(new Sgp4SatelliteService(), new Sgp4SatelliteIlluminationService(), new AstronomyEngineSunService());
+    System.Console.WriteLine(SkyTableFormatter.Header(options.Observer, options.Instant));
+    System.Console.WriteLine(CardFormatter.Iss(facts.Satellite(tle, options.Observer, options.Instant), CardTexts.Find(CardKey.Iss)));
+    System.Console.WriteLine(SkyTableFormatter.TleInfo(tle, options.Instant));
     return 0;
 }

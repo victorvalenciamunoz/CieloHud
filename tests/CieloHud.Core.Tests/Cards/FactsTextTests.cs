@@ -194,4 +194,34 @@ public class FactsTextTests
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => FactsText.Duration(TimeSpan.FromSeconds(-1)));
     }
+
+    private static SatelliteFacts Iss(
+        double altitudeKm = 424.07, double distanceKm = 567.4, double speed = 7.6622, SatelliteSight sight = SatelliteSight.Visible) =>
+        new(altitudeKm, distanceKm, speed, TimeSpan.FromMinutes(92.99), sight);
+
+    [Theory]
+    [InlineData(424.07, 567.4, "A 424 km de altura y a 570 km de ti")]
+    [InlineData(418.6, 1234.0, "A 419 km de altura y a 1230 km de ti")]
+    [InlineData(421.0, 2363.5, "A 421 km de altura y a 2360 km de ti")]
+    public void SatelliteAltitude_HeightToTheKilometerDistanceToTen(double altitudeKm, double distanceKm, string expected)
+    {
+        Assert.Equal(expected.Replace(" km", $"{Space}km"), FactsText.SatelliteAltitude(Iss(altitudeKm, distanceKm)));
+    }
+
+    [Fact]
+    public void SatelliteSpeed_KmPerHourToTheHundredAndKmPerSecond()
+    {
+        // 7.6622 km/s = 27 584 km/h.
+        Assert.Equal($"Va a 27{Space}600{Space}km/h, 7,7{Space}km cada segundo", FactsText.SatelliteSpeed(Iss()));
+    }
+
+    [Theory]
+    [InlineData(SatelliteSight.Visible, "La ilumina el Sol y tu cielo está oscuro: se puede ver a simple vista")]
+    [InlineData(SatelliteSight.SkyTooBright, "La ilumina el Sol, pero hay demasiada luz en el cielo para verla")]
+    [InlineData(SatelliteSight.InEarthShadow, "Está en la sombra de la Tierra: ahora no se ve")]
+    [InlineData(SatelliteSight.BelowHorizon, "Ya está bajo el horizonte: ahora no se ve")]
+    public void SatelliteVisibility_SaysWhyItShowsOrNot(SatelliteSight sight, string expected)
+    {
+        Assert.Equal(expected, FactsText.SatelliteVisibility(Iss(sight: sight)));
+    }
 }

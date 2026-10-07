@@ -71,6 +71,23 @@ public static class CardFormatter
         return sb.ToString();
     }
 
+    /// <summary>The ISS's lines as the card shows them, then the raw height, distance, speed and period.</summary>
+    public static string Iss(SatelliteFacts iss, CardText? text)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("ISS");
+        AppendText(sb, text);
+        sb.AppendLine($"  {FactsText.SatelliteAltitude(iss)}");
+        sb.AppendLine($"  {FactsText.SatelliteSpeed(iss)}");
+        sb.AppendLine($"  {FactsText.SatelliteVisibility(iss)}");
+        sb.AppendLine();
+        sb.AppendLine($"  Altura sobre el elipsoide: {iss.AltitudeKm.ToString("F2", Culture)} km");
+        sb.AppendLine($"  Distancia al observador: {iss.DistanceKm.ToString("F1", Culture)} km");
+        sb.AppendLine($"  Velocidad (inercial): {iss.SpeedKmPerSecond.ToString("F4", Culture)} km/s = {(iss.SpeedKmPerSecond * 3600).ToString("F0", Culture)} km/h");
+        sb.AppendLine($"  Periodo: {iss.Period.TotalMinutes.ToString("F3", Culture)} min · {iss.Sight}");
+        return sb.ToString();
+    }
+
     /// <summary>What the drawing uses: lit fraction, bright limb and north pole, in the HUD's axes.</summary>
     public static string Disc(BodyDisc disc)
     {

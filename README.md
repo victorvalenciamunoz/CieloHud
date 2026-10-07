@@ -13,7 +13,7 @@
   <img alt=".NET 10" src="https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white" />
   <img alt=".NET MAUI Android" src="https://img.shields.io/badge/MAUI-Android-3DDC84?logo=android&logoColor=white" />
   <a href="https://github.com/victorvalenciamunoz/CieloHud/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/victorvalenciamunoz/CieloHud/actions/workflows/ci.yml/badge.svg" /></a>
-  <img alt="Tests" src="https://img.shields.io/badge/tests-708-7CFFB2" />
+  <img alt="Tests" src="https://img.shields.io/badge/tests-736-7CFFB2" />
   <img alt="Sin backend" src="https://img.shields.io/badge/backend-ninguno-0B1218" />
   <a href="LICENSE"><img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-4DD2FF" /></a>
 </p>
@@ -62,7 +62,7 @@ Además calcula **cuándo pasa la ISS por encima de ti y si se va a ver**: ilumi
 |---|---|
 | 🎯 **Guía** | Luna, Mercurio, Venus, Marte, Júpiter, Saturno e ISS. Flecha en el borde cuando está fuera de pantalla, marcador cuando está a la vista, **AQUÍ** con histéresis (entra a 4°, sale a 6°) para que no parpadee con el ruido de la brújula. |
 | 🔭 **¿Qué es eso?** | Reconoce Luna, planetas, ISS y **155 estrellas** (todas las de magnitud < 3 visibles desde España, con su nombre IAU o su letra griega). Prefiere la más brillante cuando hay varias candidatas. Dice siempre en cuál de las **88 constelaciones** estás mirando. |
-| 🪐 **Fichas** | Al llegar a **AQUÍ** se abre sola; en «¿qué es?», con VER FICHA. Un texto breve escrito y revisado, con sus fuentes, y **AHORA**: fase de la Luna y su próxima fase principal, distancia y cuánto tardó su luz en llegar, dónde están las lunas de Júpiter (o cuál está detrás o en su sombra) y cuánto se inclinan los anillos de Saturno. Encima, un **dibujo calculado al momento**, girado como se ve en el cielo, con su color (en rojo de noche). Por ahora, los 7 objetivos. |
+| 🪐 **Fichas** | Al llegar a **AQUÍ** se abre sola; en «¿qué es?», con VER FICHA. Un texto breve escrito y revisado, con sus fuentes, y **AHORA**: fase de la Luna y su próxima fase principal, distancia y cuánto tardó su luz en llegar, dónde están las lunas de Júpiter (o cuál está detrás o en su sombra) cuánto se inclinan los anillos de Saturno, y a qué altura y velocidad va la ISS y si ahora se puede ver. Encima, en la Luna y los planetas, un **dibujo calculado al momento**, girado como se ve en el cielo, con su color (en rojo de noche). Por ahora, los 7 objetivos. |
 | 🧭 **Referencias** | Línea del horizonte con escala de altura, brújula con puntos cardinales, estrellas por brillo y planetas, todo moviéndose con el móvil. La **figura de la constelación** que tienes en la retícula, dibujada tenue con su nombre. Aviso cuando la brújula necesita calibración («dibuja un 8»). |
 | 🔴 **Modo nocturno** | Botón NOCHE: todo pasa a rojo sobre negro puro para no perder la adaptación a la oscuridad, se ocultan las barras del sistema y la pantalla baja al 10 % mientras la app está abierta (sin tocar el ajuste del móvil). Con el modo activado, NOCHE abre un panel para elegir 3, 6, 10 o 20 %. Se recuerda entre sesiones. |
 | 🛰️ **Pasos de la ISS** | Inicio, máximo y fin de cada paso visible en los próximos días, indicando si la ISS «aparece» saliendo de la sombra de la Tierra o «se apaga» a media travesía. |
@@ -88,6 +88,7 @@ Nada de esto vale si el objeto no está donde la app dice. Cada parte se ha vali
 | Fase de la Luna, distancias y tiempo de luz | JPL Horizons | iluminada ≤ 0,003 puntos; fases principales a < 40 s; distancias ≤ 0,01 % |
 | Lunas de Júpiter | JPL Horizons | posición ≤ 0,02 radios de Júpiter; ocultaciones, tránsitos y eclipses al minuto |
 | Inclinación de los anillos de Saturno | JPL Horizons | ≤ 0,02° en 11 fechas de 2025 a 2032 |
+| Altura y velocidad de la ISS | JPL Horizons | altura ≤ 0,06 km, velocidad ≤ 0,1 m/s |
 | Dibujos: lado iluminado y giro | JPL Horizons, Stellarium Web | borde iluminado ≤ 0,17°, polo ≤ 0,01°; la Luna, Venus, Marte y Júpiter, iguales que en Stellarium |
 | Brújula del móvil | Punto de referencia en tierra con acimut conocido | 2,6° de error tras calibrar |
 
@@ -143,7 +144,7 @@ src/
   CieloHud.Console/     Consola para validar cálculos (solo formatea lo que devuelve Core)
   CieloHud.App/         App .NET MAUI para Android: HUD, sensores, GPS
 tests/
-  CieloHud.Core.Tests/  708 tests xUnit, con referencias de JPL Horizons, Stellarium y Heavens-Above
+  CieloHud.Core.Tests/  736 tests xUnit, con referencias de JPL Horizons, Stellarium y Heavens-Above
 docs/                   Visión, plan por fases, estado y decisiones (en español)
 ```
 
@@ -173,7 +174,7 @@ dotnet run --project src/CieloHud.Console -- --lat 41.3874 --lon 2.1686 --time 2
 # Pasos visibles de la ISS en los próximos 14 días
 dotnet run --project src/CieloHud.Console -- --passes 14
 
-# Datos de la ficha de un objeto (moon, mercury, venus, mars, jupiter, saturn)
+# Datos de la ficha de un objeto (moon, mercury, venus, mars, jupiter, saturn, iss)
 dotnet run --project src/CieloHud.Console -- --card jupiter
 
 # App en el móvil conectado por USB
@@ -205,7 +206,7 @@ ISS        161.15° S   -37.26°  bajo el horizonte       8364 km
 - [x] **Fase 2** · Próximos pasos visibles de la ISS, validado contra Heavens-Above
 - [x] **Fase 3** · HUD en MAUI para Android, validado en el cielo guiando hasta la Luna
 - [x] **Fase 4** · Avisos de la ISS, la Luna junto a un planeta, planetas juntos y Mercurio, con la app cerrada, validados contra Heavens-Above y JPL Horizons
-- [ ] **Fase 5** · Fichas del objeto: qué estás viendo, explicado para no expertos, con datos del momento («esta luz salió de Júpiter hace 49 minutos») y un dibujo calculado. Hechas las de la Luna y los planetas; faltan los datos de la ISS, las estrellas y las constelaciones
+- [ ] **Fase 5** · Fichas del objeto: qué estás viendo, explicado para no expertos, con datos del momento («esta luz salió de Júpiter hace 49 minutos») y un dibujo calculado. Hechas las de la Luna, los planetas y la ISS; faltan las estrellas y las constelaciones
 
 El detalle está en [`docs/`](docs): [visión](docs/VISION.md), [plan](docs/PLAN.md), [estado](docs/STATUS.md) y [decisiones](docs/DECISIONS.md). Ahí se explica, por ejemplo, por qué la altura del Sol se calcula sin refracción, o cómo se esquivó un bucle infinito de la librería de efemérides al apuntar al cénit.
 

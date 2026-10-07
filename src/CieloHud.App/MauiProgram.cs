@@ -44,6 +44,10 @@ public static class MauiProgram
 			new CelesTrakTleProvider(sp.GetRequiredService<HttpClient>(), Path.Combine(FileSystem.AppDataDirectory, "tle")));
 		builder.Services.AddSingleton<ISatellitePassPredictor, Sgp4SatellitePassPredictor>();
 		builder.Services.AddSingleton<ISatelliteIlluminationService, Sgp4SatelliteIlluminationService>();
+		builder.Services.AddSingleton<CieloHud.Core.Cards.ISatelliteFactsService>(sp => new CieloHud.Core.Cards.Sgp4SatelliteFactsService(
+			sp.GetRequiredService<ISatelliteService>(),
+			sp.GetRequiredService<ISatelliteIlluminationService>(),
+			sp.GetRequiredService<ISunService>()));
 		builder.Services.AddSingleton<IVisiblePassFinder>(sp => new VisiblePassFinder(
 			sp.GetRequiredService<ISatellitePassPredictor>(),
 			sp.GetRequiredService<ISatelliteService>(),
