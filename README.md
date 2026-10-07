@@ -27,6 +27,8 @@ CieloHud responde a dos preguntas, con el móvil en la mano y sin escribir nada:
 - **«¿Dónde está?»** Eliges Saturno y la app te dice *«izquierda 48° · sube 44°»* hasta que la retícula se pone verde: **AQUÍ**. Bajas el móvil y ahí está.
 - **«¿Qué es eso?»** Apuntas a un punto brillante y te dice *«BETELGEUSE · estrella · en Orión»*. Si no hay nada conocido, al menos te dice hacia qué constelación miras y qué tienes cerca.
 
+Cuando lo encuentras, una **ficha** te cuenta qué estás viendo, con un dibujo calculado para ese momento: la Luna o Venus con su fase y girados como en el cielo, Júpiter con sus lunas en su sitio, Saturno con la inclinación de sus anillos.
+
 Además calcula **cuándo pasa la ISS por encima de ti y si se va a ver**: iluminada por el Sol, con tu cielo ya oscuro y lo bastante alta.
 
 <p align="center">
@@ -37,6 +39,15 @@ Además calcula **cuándo pasa la ISS por encima de ti y si se va a ver**: ilumi
   <img src="docs/images/hud-constelacion.png" width="260" alt="Figura del Dragón sobre el cielo del norte: 'Hacia el Dragón'" />
 </p>
 <p align="center"><sub>Modo guía hacia Júpiter · modo «¿qué es?» · figura de la constelación bajo la retícula. Horizonte, brújula, estrellas y figuras se mueven con el móvil.</sub></p>
+
+<p align="center">
+  <img src="docs/images/ficha-venus.png" width="260" alt="Ficha de Venus: creciente fina iluminada arriba a la derecha, a 47 millones de km" />
+  &nbsp;
+  <img src="docs/images/ficha-marte-dibujo.png" width="260" alt="Ficha de Marte: disco anaranjado iluminado al 90 %, su luz salió hace 13 minutos" />
+  &nbsp;
+  <img src="docs/images/ficha-jupiter.png" width="260" alt="Ficha de Júpiter: vista de prismáticos con Europa e Ío a la izquierda y Ganímedes y Calisto a la derecha" />
+</p>
+<p align="center"><sub>Fichas del 7 oct 2026 a mediodía: Venus, una creciente del 9 % · Marte, casi lleno · Júpiter y sus lunas, como con prismáticos. Contrastadas con Stellarium a la misma hora.</sub></p>
 
 ### Principios
 
@@ -51,6 +62,7 @@ Además calcula **cuándo pasa la ISS por encima de ti y si se va a ver**: ilumi
 |---|---|
 | 🎯 **Guía** | Luna, Mercurio, Venus, Marte, Júpiter, Saturno e ISS. Flecha en el borde cuando está fuera de pantalla, marcador cuando está a la vista, **AQUÍ** con histéresis (entra a 4°, sale a 6°) para que no parpadee con el ruido de la brújula. |
 | 🔭 **¿Qué es eso?** | Reconoce Luna, planetas, ISS y **155 estrellas** (todas las de magnitud < 3 visibles desde España, con su nombre IAU o su letra griega). Prefiere la más brillante cuando hay varias candidatas. Dice siempre en cuál de las **88 constelaciones** estás mirando. |
+| 🪐 **Fichas** | Al llegar a **AQUÍ** se abre sola; en «¿qué es?», con VER FICHA. Un texto breve escrito y revisado, con sus fuentes, y **AHORA**: fase de la Luna y su próxima fase principal, distancia y cuánto tardó su luz en llegar, dónde están las lunas de Júpiter (o cuál está detrás o en su sombra) y cuánto se inclinan los anillos de Saturno. Encima, un **dibujo calculado al momento**, girado como se ve en el cielo, con su color (en rojo de noche). Por ahora, los 7 objetivos. |
 | 🧭 **Referencias** | Línea del horizonte con escala de altura, brújula con puntos cardinales, estrellas por brillo y planetas, todo moviéndose con el móvil. La **figura de la constelación** que tienes en la retícula, dibujada tenue con su nombre. Aviso cuando la brújula necesita calibración («dibuja un 8»). |
 | 🔴 **Modo nocturno** | Botón NOCHE: todo pasa a rojo sobre negro puro para no perder la adaptación a la oscuridad, se ocultan las barras del sistema y la pantalla baja al 10 % mientras la app está abierta (sin tocar el ajuste del móvil). Con el modo activado, NOCHE abre un panel para elegir 3, 6, 10 o 20 %. Se recuerda entre sesiones. |
 | 🛰️ **Pasos de la ISS** | Inicio, máximo y fin de cada paso visible en los próximos días, indicando si la ISS «aparece» saliendo de la sombra de la Tierra o «se apaga» a media travesía. |
@@ -73,6 +85,10 @@ Nada de esto vale si el objeto no está donde la app dice. Cada parte se ha vali
 | La Luna junto a un planeta, planetas juntos | JPL Horizons | 8 conjunciones, separación ≤ 0,0044° |
 | Mejores días para ver Mercurio | JPL Horizons | ventanas iguales al minuto día a día, posición ≤ 0,0015° |
 | Constelación de planetas y Luna | JPL Horizons | 5 de 5 (sí: Saturno está en la Ballena, no en Piscis) |
+| Fase de la Luna, distancias y tiempo de luz | JPL Horizons | iluminada ≤ 0,003 puntos; fases principales a < 40 s; distancias ≤ 0,01 % |
+| Lunas de Júpiter | JPL Horizons | posición ≤ 0,02 radios de Júpiter; ocultaciones, tránsitos y eclipses al minuto |
+| Inclinación de los anillos de Saturno | JPL Horizons | ≤ 0,02° en 11 fechas de 2025 a 2032 |
+| Dibujos: lado iluminado y giro | JPL Horizons, Stellarium Web | borde iluminado ≤ 0,17°, polo ≤ 0,01°; la Luna, Venus, Marte y Júpiter, iguales que en Stellarium |
 | Brújula del móvil | Punto de referencia en tierra con acimut conocido | 2,6° de error tras calibrar |
 
 El objetivo era 0,5° para planetas y 1° para la ISS; el cálculo va dos órdenes de magnitud por debajo. El límite real es el **magnetómetro del móvil** (unos 3–5°), y por eso la app guía a una zona, no a un píxel.
@@ -134,6 +150,7 @@ docs/                   Visión, plan por fases, estado y decisiones (en españo
 ## Instalar en tu móvil
 
 Descarga el APK de la [última versión](https://github.com/victorvalenciamunoz/CieloHud/releases) desde el propio móvil (Android 8.0 o posterior) y ábrelo.
+La 0.4.0 llega hasta los avisos (Fase 4); las fichas aún no están en ningún APK publicado.
 Android pedirá permiso para instalar apps de origen desconocido, y Play Protect puede avisar de que no la conoce: es normal en una app que no está en Google Play.
 
 Al abrirla pedirá la **ubicación** (para calcular tu cielo; no sale del móvil). Si activas **AVISOS**, también las **notificaciones** y, para que el aviso
@@ -188,7 +205,7 @@ ISS        161.15° S   -37.26°  bajo el horizonte       8364 km
 - [x] **Fase 2** · Próximos pasos visibles de la ISS, validado contra Heavens-Above
 - [x] **Fase 3** · HUD en MAUI para Android, validado en el cielo guiando hasta la Luna
 - [x] **Fase 4** · Avisos de la ISS, la Luna junto a un planeta, planetas juntos y Mercurio, con la app cerrada, validados contra Heavens-Above y JPL Horizons
-- [ ] **Fase 5** · Fichas del objeto: qué estás viendo, explicado para no expertos, con datos del momento («esta luz salió de Júpiter hace 49 minutos»)
+- [ ] **Fase 5** · Fichas del objeto: qué estás viendo, explicado para no expertos, con datos del momento («esta luz salió de Júpiter hace 49 minutos») y un dibujo calculado. Hechas las de la Luna y los planetas; faltan los datos de la ISS, las estrellas y las constelaciones
 
 El detalle está en [`docs/`](docs): [visión](docs/VISION.md), [plan](docs/PLAN.md), [estado](docs/STATUS.md) y [decisiones](docs/DECISIONS.md). Ahí se explica, por ejemplo, por qué la altura del Sol se calcula sin refracción, o cómo se esquivó un bucle infinito de la librería de efemérides al apuntar al cénit.
 

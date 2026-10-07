@@ -964,7 +964,7 @@ Hallazgo al revisar: el catálogo `BrightStars` no guarda la paralaje; se añadi
 
   Las diferencias de posición y distancia de la Luna vienen de la ubicación (Stellarium, la del usuario; la consola, el centro de Madrid).
 - Pendiente: Saturno en el móvil y en Stellarium (inclinación y giro de los anillos), esta noche desde las 21:30, con la prueba del paso 5.
-- Captura: `docs/images/ficha-jupiter.png`.
+- Capturas: `docs/images/ficha-jupiter.png`, `ficha-venus.png` y `ficha-marte-dibujo.png` (también en el README).
 - `dotnet test` 708 tests; build Android 0 avisos.
 
 ## Mejoras fuera de fase
