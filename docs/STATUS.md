@@ -1076,6 +1076,9 @@ Espiga, Pólux, Fomalhaut, Deneb y Régulo) y 5 conocidas por algo concreto (Cá
   Captura: `docs/images/ficha-estrella-texto.png`.
 - Cambio pedido por el usuario al ver las fichas: el brillo va solo con el número, «Brillo: magnitud 2,0», sin la coletilla «(cuanto menor, más brilla;
   desde ciudad se ven hasta la 3)» (decisión 046, corrige 044).
+- Elegido por el usuario: en la ficha de una estrella, **DATOS va antes del texto**, para que la ficha plegada enseñe siempre sus tres datos (`CardView.FactsFirst`;
+  la página mueve el texto solo cuando cambia de sitio). Probado en el OPPO (17:55): Vega plegada con el punto, DATOS con sus tres líneas y el texto entero;
+  la Luna, abierta a continuación, sigue con el texto antes de AHORA. La captura `docs/images/ficha-estrella-texto.png` es la de Vega.
 - `dotnet test` 794 tests; build Android 0 avisos.
 
 ## Mejoras fuera de fase

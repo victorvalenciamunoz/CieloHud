@@ -446,6 +446,7 @@ public partial class HudPage : ContentPage
         CardPictureView.Invalidate();
         CardBody.Text = view.Text;
         CardBody.IsVisible = view.Text is not null;
+        PlaceCardBody(view.FactsFirst);
         CardNowHeader.Text = view.FactsHeader;
         CardNowHeader.IsVisible = view.Now.Count > 0;
         CardNow.Children.Clear();
@@ -491,6 +492,24 @@ public partial class HudPage : ContentPage
         CardMoreButton.IsVisible = !fits;
         CardMoreButton.Text = _cardExpanded ? "VER MENOS" : "VER MÁS";
         CardScroll.HeightRequest = Math.Min(content, _cardExpanded ? expanded : CardCollapsedHeight);
+    }
+
+    /// <summary>
+    /// The text goes after the drawing (XAML order) or, on a star's card, after its facts. Moved only when it changes,
+    /// not on every 10 s refresh.
+    /// </summary>
+    private void PlaceCardBody(bool factsFirst)
+    {
+        var last = CardContent.IndexOf(CardBody) == CardContent.Count - 1;
+        if (last == factsFirst)
+            return;
+        CardContent.Remove(CardBody);
+        if (factsFirst)
+            CardContent.Add(CardBody);
+        else
+            CardContent.Insert(CardContent.IndexOf(CardNowHeader), CardBody);
+        // After the facts, the same extra air the header has above it.
+        CardBody.Margin = factsFirst ? new Thickness(0, 4, 0, 0) : new Thickness(0);
     }
 
     /// <summary>Of the content above the footer: with the footer, about the 440 dp the card had before it (decision 038).</summary>
