@@ -57,7 +57,8 @@ public partial class HudPage : ContentPage
 
     // The object card (decision 038): opened by itself on AQUÍ, or offered with VER FICHA in identify mode.
     private static readonly TimeSpan CardRefreshInterval = TimeSpan.FromSeconds(10);
-    private readonly CardAutoOpen _cardAutoOpen = new();
+    /// <summary>Whether VER FICHA is filled: in identify mode, and in guide mode on AQUÍ. Null until first styled.</summary>
+    private bool? _cardButtonLit;
     private readonly RecentMatch<SkyTarget> _cardOffer = new();
     private SkyTarget? _offered;
     private SkyTarget? _cardTarget;
@@ -140,7 +141,7 @@ public partial class HudPage : ContentPage
         StyleChip(LeaveNightButton, false);
         StyleChip(CloseCardButton, false);
         StyleChip(CardMoreButton, false);
-        StyleChip(ShowCardButton, true);
+        StyleChip(ShowCardButton, _cardButtonLit ?? true);
         foreach (var (brightness, chip) in _brightnessChips)
             StyleChip(chip, Math.Abs(brightness - _nightMode.Brightness) < 0.001f);
     }
@@ -274,7 +275,6 @@ public partial class HudPage : ContentPage
         _onTarget = false;
         _skyComputedAt = DateTimeOffset.MinValue;
         CloseCard();
-        _cardAutoOpen.Reset();
         _cardOffer.Clear();
         StyleChips();
         await PrepareSatellitesAsync();
@@ -380,9 +380,10 @@ public partial class HudPage : ContentPage
     }
 
     /// <summary>
-    /// Every frame: in guide mode the card opens by itself after a moment on AQUÍ, once per target; in identify mode
-    /// VER FICHA is offered for what the reticle is on, kept a little while the reticle wobbles. An open card stays open
-    /// (lowering the phone leaves AQUÍ) and its facts are refreshed now and then.
+    /// Every frame: VER FICHA is offered for the chosen target all along in guide mode, filled on AQUÍ; in identify mode, for
+    /// what the reticle is on, kept a little while the reticle wobbles. The card never opens by itself (decision 045): it
+    /// covered the end of the guide and, once closed, could not be opened again. An open card stays open and its facts are
+    /// refreshed now and then.
     /// </summary>
     private void UpdateCard(Guidance? guidance, IdentifyResult? identified, DateTimeOffset now)
     {
@@ -395,16 +396,27 @@ public partial class HudPage : ContentPage
 
         if (_target is { } target)
         {
-            if (guidance is { } g && CardBuilder.HasCard(target) && _cardAutoOpen.Update(g.IsOnTarget, now))
-                ShowCard(target, now);
-            return;
+            _offered = CardBuilder.HasCard(target) ? target : null;
+            LightCardButton(guidance is { IsOnTarget: true });
         }
+        else
+        {
+            var matched = identified is { IsMatch: true } m
+                ? _catalog.All.FirstOrDefault(t => t.Name == m.Name && CardBuilder.HasCard(t))
+                : null;
+            _offered = _cardOffer.Update(matched, now);
+            LightCardButton(true);
+        }
+        // The brightness panel lives at the bottom too.
+        ShowCardButton.IsVisible = _offered is not null && !NightPanel.IsVisible;
+    }
 
-        var matched = identified is { IsMatch: true } m
-            ? _catalog.All.FirstOrDefault(t => t.Name == m.Name && CardBuilder.HasCard(t))
-            : null;
-        _offered = _cardOffer.Update(matched, now);
-        ShowCardButton.IsVisible = _offered is not null;
+    private void LightCardButton(bool lit)
+    {
+        if (_cardButtonLit == lit)
+            return;
+        _cardButtonLit = lit;
+        StyleChip(ShowCardButton, lit);
     }
 
     private void OnShowCardClicked(object? sender, EventArgs e)

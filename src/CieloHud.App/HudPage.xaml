@@ -67,7 +67,8 @@
             </Grid>
         </Border>
 
-        <!-- In identify mode, under the name of what the reticle is on. Styled in code, like the chips. -->
+        <!-- The card of the chosen target in guide mode (filled on AQUÍ), or of what the reticle is on in identify mode.
+             Styled in code, like the chips. -->
         <Button Grid.Row="1" x:Name="ShowCardButton" Text="VER FICHA" IsVisible="False"
                 VerticalOptions="End" HorizontalOptions="Center" Margin="0,0,0,8"
                 FontFamily="ChakraPetchBold" FontSize="12" BorderWidth="1" CornerRadius="14" Padding="14,6"
