@@ -50,7 +50,7 @@
 
             <Label Text="DATOS Y LICENCIAS" Style="{StaticResource Section}" />
             <Label Style="{StaticResource Body}"
-                   Text="Posiciones de la Luna y los planetas: Astronomy Engine (MIT). Órbita de la ISS: SGP.NET (MIT) con elementos de CelesTrak. Estrellas: base de datos SIMBAD (CDS, Estrasburgo) y nombres del Grupo de Trabajo de Nombres de Estrellas de la IAU. Figuras de las constelaciones: d3-celestial, de Olaf Frohn (BSD). Fuentes Chakra Petch y Open Sans (SIL Open Font License)." />
+                   Text="Posiciones de la Luna y los planetas: Astronomy Engine (MIT). Órbita de la ISS: SGP.NET (MIT) con elementos de CelesTrak. Estrellas: base de datos SIMBAD (CDS, Estrasburgo), paralajes del catálogo Hipparcos (ESA, en VizieR) y nombres del Grupo de Trabajo de Nombres de Estrellas de la IAU. Figuras de las constelaciones: d3-celestial, de Olaf Frohn (BSD). Fuentes Chakra Petch y Open Sans (SIL Open Font License)." />
             <Button x:Name="LicensesButton" Text="VER LOS TEXTOS DE LAS LICENCIAS" Style="{StaticResource Link}" Clicked="OnLicensesClicked" />
             <Label x:Name="LicensesLabel" IsVisible="False" FontFamily="OpenSansRegular" FontSize="11"
                    TextColor="{DynamicResource HudTextMuted}" Margin="0,8,0,0" />

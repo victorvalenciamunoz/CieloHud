@@ -6,9 +6,9 @@ namespace CieloHud.App.Hud;
 
 /// <summary>
 /// What a card shows: name, what it is and where, its drawing (null if it has none), its written text (null if not written
-/// yet) and the facts of now.
+/// yet), and its facts under <paramref name="FactsHeader"/>: "AHORA" when they change with the moment, "DATOS" for a star.
 /// </summary>
-public sealed record CardView(string Title, string Subtitle, CardPicture? Picture, string? Text, IReadOnlyList<string> Now);
+public sealed record CardView(string Title, string Subtitle, CardPicture? Picture, string? Text, string FactsHeader, IReadOnlyList<string> Now);
 
 /// <summary>
 /// Puts a card together from Core: the reviewed text (<see cref="CardTexts"/>), the facts of the moment, already in
@@ -16,15 +16,16 @@ public sealed record CardView(string Title, string Subtitle, CardPicture? Pictur
 /// </summary>
 public sealed class CardBuilder(ISolarSystemFactsService facts, ISatelliteFactsService satellites)
 {
-    /// <summary>The seven targets have cards; stars and constellations get theirs in later steps.</summary>
-    public static bool HasCard(SkyTarget target) => target is BodyTarget or SatelliteTarget;
+    /// <summary>The seven targets and the stars have cards; constellations get theirs in a later step.</summary>
+    public static bool HasCard(SkyTarget target) => target is BodyTarget or SatelliteTarget or StarTarget;
 
     /// <param name="constellation">Where it is, with article ("la Ballena"), or null without a location.</param>
     public CardView Build(SkyTarget target, string? constellation, Observer observer, DateTimeOffset now)
     {
         var subtitle = constellation is null ? target.Kind : $"{target.Kind} · en {constellation}";
         var (picture, lines) = Now(target, observer, now);
-        return new CardView(target.Name.ToUpperInvariant(), subtitle, picture, CardTexts.Find(target.Card)?.Body, lines);
+        var header = target is StarTarget ? "DATOS" : "AHORA";
+        return new CardView(target.Name.ToUpperInvariant(), subtitle, picture, CardTexts.Find(target.Card)?.Body, header, lines);
     }
 
     private (CardPicture? Picture, IReadOnlyList<string> Lines) Now(SkyTarget target, Observer observer, DateTimeOffset now)
@@ -46,6 +47,10 @@ public sealed class CardBuilder(ISolarSystemFactsService facts, ISatelliteFactsS
                 var pole = facts.Disc(CelestialBody.Saturn, observer, now).NorthPoleDegrees;
                 return (new SaturnPicture(SaturnShape.Of(rings.TiltDegrees, pole)),
                     [FactsText.PlanetDistance(saturn), FactsText.PlanetLight(saturn), .. FactsText.SaturnRings(rings, now)]);
+            case StarTarget star:
+                var color = StarColors.Of(star.Star);
+                return (new StarPicture(color),
+                    [FactsText.StarLight(star.Name, StarLight.Of(star.Star)), FactsText.StarColorName(color), FactsText.StarMagnitude(star.Star.Magnitude)]);
             case SatelliteTarget { Tle: { } tle }:
                 var iss = satellites.Satellite(tle, observer, now);
                 return (null, [FactsText.SatelliteAltitude(iss), FactsText.SatelliteSpeed(iss), FactsText.SatelliteVisibility(iss)]);

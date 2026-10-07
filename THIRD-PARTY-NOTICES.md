@@ -21,8 +21,10 @@ el siguiente software, datos y fuentes de terceros, cada uno con su propia licen
 
 ## Datos
 
-- **Coordenadas y magnitudes de estrellas** (`src/CieloHud.Core/Stars/BrightStars.cs`): base de datos SIMBAD, CDS, Estrasburgo.
+- **Coordenadas, magnitudes y tipos espectrales de estrellas** (`src/CieloHud.Core/Stars/BrightStars.cs`): base de datos SIMBAD, CDS, Estrasburgo.
   *This research has made use of the SIMBAD database, operated at CDS, Strasbourg, France.*
+- **Paralajes de estrellas** (mismo fichero): catálogo Hipparcos de la ESA, nueva reducción (van Leeuwen 2007, A&A 474, 653), catálogo I/311 de VizieR.
+  *This research has made use of the VizieR catalogue access tool, CDS, Strasbourg, France (DOI: 10.26093/cds/vizier).*
 - **Nombres propios de estrellas**: IAU Catalog of Star Names, IAU Division C Working Group on Star Names (WGSN),
   https://www.iau.org/public/themes/naming_stars/ (Creative Commons Attribution).
 - **Límites de constelaciones**: límites oficiales de la IAU (Delporte, 1930), en la implementación de Roman (1987)

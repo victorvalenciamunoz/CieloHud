@@ -162,6 +162,61 @@ public static class FactsText
         _ => throw new ArgumentOutOfRangeException(nameof(satellite), satellite.Sight, null),
     };
 
+    /// <summary>
+    /// "Esta luz salió de Sirio hace 8,6 años", "… hace unos 500 años", "… hace entre 1600 y 2700 años", "… hace más de 1100 años":
+    /// two significant figures, worded by how sure the parallax is (decision 044). "Más de" rounds down, so it stays true.
+    /// </summary>
+    /// <param name="name">The star's name as the app shows it ("Sirio", "Gamma de Casiopea").</param>
+    public static string StarLight(string name, StarLight light)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        var when = light.Certainty switch
+        {
+            DistanceCertainty.Precise => $"hace {Years(TwoFigures(light.Years))}",
+            DistanceCertainty.About => $"hace unos {Years(TwoFigures(light.Years))}",
+            DistanceCertainty.Between => $"hace entre {Figures(TwoFigures(light.NearYears))} y {Years(TwoFigures(light.FarYears))}",
+            DistanceCertainty.MoreThan => $"hace más de {Years(TwoFigures(light.NearYears, roundDown: true))}",
+            _ => throw new ArgumentOutOfRangeException(nameof(light), light.Certainty, null),
+        };
+        return $"Esta luz salió de {name} {when}";
+
+        static string Years(double years) => $"{Figures(years)} {(years == 1 ? "año" : "años")}";
+    }
+
+    /// <summary>"Su luz es anaranjada".</summary>
+    public static string StarColorName(StarColor color) => color switch
+    {
+        Cards.StarColor.Bluish => "Su luz es azulada",
+        Cards.StarColor.White => "Su luz es blanca",
+        Cards.StarColor.YellowishWhite => "Su luz es de un blanco amarillento",
+        Cards.StarColor.Yellowish => "Su luz es amarillenta",
+        Cards.StarColor.Orange => "Su luz es anaranjada",
+        Cards.StarColor.Reddish => "Su luz es rojiza",
+        _ => throw new ArgumentOutOfRangeException(nameof(color), color, null),
+    };
+
+    /// <summary>
+    /// "Brillo: magnitud 0,4 (cuanto menor, más brilla; desde ciudad se ven hasta la 3)". The scale runs backwards, so the
+    /// number alone would mislead; the city limit is the one the catalog is built on (decision 015).
+    /// </summary>
+    public static string StarMagnitude(double magnitude)
+    {
+        var rounded = Math.Round(magnitude, 1, MidpointRounding.AwayFromZero);
+        var number = Math.Abs(rounded).ToString("0.0", Culture).Replace('.', ',');
+        return $"Brillo: magnitud {(rounded < 0 ? "−" : "")}{number} (cuanto menor, más brilla; desde ciudad se ven hasta la 3)";
+    }
+
+    /// <summary>8.64 → 8.6, 432.6 → 430, 1157 → 1200 (or 1100 rounding down).</summary>
+    private static double TwoFigures(double x, bool roundDown = false)
+    {
+        var scale = Math.Pow(10, Math.Floor(Math.Log10(x)) - 1);
+        return (roundDown ? Math.Floor(x / scale) : Math.Round(x / scale, MidpointRounding.AwayFromZero)) * scale;
+    }
+
+    /// <summary>"8,6" with a decimal comma below 10, whole numbers grouped above ("13 000").</summary>
+    private static string Figures(double x) =>
+        x < 10 ? x.ToString("0.#", Culture).Replace('.', ',') : Grouped((int)Math.Round(x));
+
     /// <summary>"A", "A y B", "A, B y C".</summary>
     private static string List(IReadOnlyList<string> items) =>
         items.Count == 1 ? items[0] : $"{string.Join(", ", items.Take(items.Count - 1))} y {items[^1]}";

@@ -95,7 +95,8 @@ dotnet run --project src/CieloHud.Console -- [--lat 40.4168] [--lon -3.7038] [--
   - Júpiter: lunas galileanas a cada lado (JupiterMoons).
   - Saturno: inclinación de los anillos (Illumination, ing_tilt).
   - Planetas: distancia y tiempo que tarda su luz en llegar.
-  - Estrellas: años que tarda su luz en llegar, desde la paralaje de SIMBAD (la misma fuente que el catálogo).
+  - Estrellas: años que tarda su luz en llegar, desde la paralaje de Hipparcos (no la de SIMBAD, que para muchas de estas es Gaia, saturada;
+    decisión 044), su color y su brillo explicado.
   - ISS: altura y velocidad.
 - Un dibujo de cada objetivo calculado en el momento, no una foto (añadido el 2026-10-07 a petición del usuario): la Luna y los planetas
   con su fase, Júpiter con sus lunas en su sitio y Saturno con la inclinación de sus anillos de ese día. Contrastable con Stellarium y en rojo de noche.

@@ -47,6 +47,7 @@ public sealed class CardDrawing : IDrawable
     public static double HeightFor(CardPicture? picture, double width) => picture switch
     {
         PhasePicture => 2 * (PhaseRadius + Margin),
+        StarPicture => 2 * (StarHalo + Margin),
         SaturnPicture saturn => 2 * (SaturnHalfHeight(saturn.Shape) + Margin),
         JupiterPicture jupiter => JupiterLayout(jupiter.Moons, (float)width).Height,
         _ => 0,
@@ -59,6 +60,9 @@ public sealed class CardDrawing : IDrawable
         var center = new PointF(r.Center.X, r.Center.Y);
         switch (Picture)
         {
+            case StarPicture star:
+                DrawStar(canvas, center, star.Color);
+                break;
             case PhasePicture phase:
                 DrawPhase(canvas, center, phase.Disc);
                 break;
@@ -86,6 +90,29 @@ public sealed class CardDrawing : IDrawable
     };
 
     private static readonly Color SaturnRingsColor = Color.FromArgb("#B8A57A");
+
+    /// <summary>A star's point of light and its glow: no disc, the eye sees none.</summary>
+    private const float StarCore = 4;
+    private const float StarHalo = 20;
+
+    /// <summary>The colors of <see cref="StarColor"/>, toned so they read on the dark card; at night, the palette's red.</summary>
+    private static readonly Dictionary<StarColor, Color> StarTrueColors = new()
+    {
+        [StarColor.Bluish] = Color.FromArgb("#A8C6FF"),
+        [StarColor.White] = Color.FromArgb("#F2F5FF"),
+        [StarColor.YellowishWhite] = Color.FromArgb("#FFF3D6"),
+        [StarColor.Yellowish] = Color.FromArgb("#FFE39A"),
+        [StarColor.Orange] = Color.FromArgb("#FFB86E"),
+        [StarColor.Reddish] = Color.FromArgb("#FF8A5C"),
+    };
+
+    private void DrawStar(ICanvas canvas, PointF center, StarColor color)
+    {
+        var tint = Palette.TrueColors ? StarTrueColors[color] : Palette.Text;
+        Halo(canvas, center, StarCore, StarHalo, tint, 0.55f);
+        canvas.FillColor = tint;
+        canvas.FillCircle(center, StarCore);
+    }
 
     private Color BodyColor(CelestialBody body) => Palette.TrueColors ? TrueColors[body] : Palette.Text;
 
