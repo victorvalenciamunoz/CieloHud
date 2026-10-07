@@ -140,6 +140,28 @@ public static class FactsText
         return [seen, trend];
     }
 
+    /// <summary>"A 424 km de altura y a 650 km de ti": the height to the kilometer, the distance to ten.</summary>
+    public static string SatelliteAltitude(SatelliteFacts satellite) =>
+        $"A {Grouped(Round(satellite.AltitudeKm))}{Space}km de altura y a {Grouped(Round(satellite.DistanceKm / 10) * 10)}{Space}km de ti";
+
+    /// <summary>
+    /// "Va a 27 600 km/h, 7,7 km cada segundo": to the hundred km/h, and to the tenth per second. Not the turn around the Earth:
+    /// the written text already says it (every hour and a half), and it hardly changes.
+    /// </summary>
+    public static string SatelliteSpeed(SatelliteFacts satellite) =>
+        $"Va a {Grouped(Round(satellite.SpeedKmPerSecond * 3600 / 100) * 100)}{Space}km/h, " +
+        $"{satellite.SpeedKmPerSecond.ToString("0.0", Culture).Replace('.', ',')}{Space}km cada segundo";
+
+    /// <summary>Why it shows or not right now: what lights it and how dark the sky is.</summary>
+    public static string SatelliteVisibility(SatelliteFacts satellite) => satellite.Sight switch
+    {
+        SatelliteSight.Visible => "La ilumina el Sol y tu cielo está oscuro: se puede ver a simple vista",
+        SatelliteSight.SkyTooBright => "La ilumina el Sol, pero hay demasiada luz en el cielo para verla",
+        SatelliteSight.InEarthShadow => "Está en la sombra de la Tierra: ahora no se ve",
+        SatelliteSight.BelowHorizon => "Ya está bajo el horizonte: ahora no se ve",
+        _ => throw new ArgumentOutOfRangeException(nameof(satellite), satellite.Sight, null),
+    };
+
     /// <summary>"A", "A y B", "A, B y C".</summary>
     private static string List(IReadOnlyList<string> items) =>
         items.Count == 1 ? items[0] : $"{string.Join(", ", items.Take(items.Count - 1))} y {items[^1]}";

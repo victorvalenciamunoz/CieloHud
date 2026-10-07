@@ -14,7 +14,7 @@ public sealed record CardView(string Title, string Subtitle, CardPicture? Pictur
 /// Puts a card together from Core: the reviewed text (<see cref="CardTexts"/>), the facts of the moment, already in
 /// Spanish (<see cref="FactsText"/>), and what the drawing needs. Only picks which facts go with which object.
 /// </summary>
-public sealed class CardBuilder(ISolarSystemFactsService facts)
+public sealed class CardBuilder(ISolarSystemFactsService facts, ISatelliteFactsService satellites)
 {
     /// <summary>The seven targets have cards; stars and constellations get theirs in later steps.</summary>
     public static bool HasCard(SkyTarget target) => target is BodyTarget or SatelliteTarget;
@@ -46,11 +46,14 @@ public sealed class CardBuilder(ISolarSystemFactsService facts)
                 var pole = facts.Disc(CelestialBody.Saturn, observer, now).NorthPoleDegrees;
                 return (new SaturnPicture(SaturnShape.Of(rings.TiltDegrees, pole)),
                     [FactsText.PlanetDistance(saturn), FactsText.PlanetLight(saturn), .. FactsText.SaturnRings(rings, now)]);
+            case SatelliteTarget { Tle: { } tle }:
+                var iss = satellites.Satellite(tle, observer, now);
+                return (null, [FactsText.SatelliteAltitude(iss), FactsText.SatelliteSpeed(iss), FactsText.SatelliteVisibility(iss)]);
             case BodyTarget planet:
                 var p = facts.Planet(planet.Body, observer, now);
                 return (new PhasePicture(facts.Disc(planet.Body, observer, now)), [FactsText.PlanetDistance(p), FactsText.PlanetLight(p)]);
             default:
-                // The ISS has nothing to draw, and its height and speed come in step 7.
+                // The ISS before its orbit is downloaded (or without network): only its text.
                 return (null, []);
         }
     }
