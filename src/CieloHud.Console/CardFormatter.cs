@@ -71,6 +71,17 @@ public static class CardFormatter
         return sb.ToString();
     }
 
+    /// <summary>What the drawing uses: lit fraction, bright limb and north pole, in the HUD's axes.</summary>
+    public static string Disc(BodyDisc disc)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("  Dibujo (0° hacia el cénit, 90° a la derecha):");
+        sb.AppendLine($"    Iluminada: {(disc.IlluminatedFraction * 100).ToString("F3", Culture)} %");
+        sb.AppendLine($"    Borde iluminado hacia: {disc.BrightLimbDegrees.ToString("F2", Culture)}°");
+        sb.AppendLine($"    Polo norte hacia: {disc.NorthPoleDegrees.ToString("F2", Culture)}°");
+        return sb.ToString();
+    }
+
     /// <summary>The written text, wrapped, then a blank line; a note when it is not written yet.</summary>
     private static void AppendText(StringBuilder sb, CardText? text)
     {

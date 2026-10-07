@@ -16,4 +16,7 @@ public interface ISolarSystemFactsService
 
     /// <summary>How Saturn's rings are tilted towards us and where they are heading. The same from anywhere on Earth.</summary>
     SaturnRingsFacts SaturnRings(DateTimeOffset instant);
+
+    /// <summary>Phase and orientation of any <see cref="CelestialBody"/>'s disc as the observer sees it, for its drawing.</summary>
+    BodyDisc Disc(CelestialBody body, Observer observer, DateTimeOffset instant);
 }
