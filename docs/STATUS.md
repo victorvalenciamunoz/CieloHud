@@ -1062,6 +1062,18 @@ Espiga, Pólux, Fomalhaut, Deneb y Régulo) y 5 conocidas por algo concreto (Cá
   pasa «a veces» por Escorpio, Cástor está «una vez y media» más lejos que Pólux, la altura de la Polar vale «desde el hemisferio norte»).
 - Test nuevo: los textos de estrellas no dicen «años luz» ni «magnitud» (lo pone el cálculo). Pendientes: 135 estrellas y 88 constelaciones.
 - Consola: `--card Sirius` y `--card Polaris` muestran el texto con sus datos.
+- **Probado en el OPPO** (7 oct, de día, «¿qué es?» + VER FICHA):
+
+  | Prueba | Resultado |
+  |---|---|
+  | Vega, 17:29 (316 caracteres) | el texto y dos líneas de DATOS; la de la magnitud, cortada a media línea y **sin VER MÁS** |
+  | Estrella Polar, 17:35, con la corrección (378 caracteres) | plegada: el texto y dos líneas de DATOS, con VER MÁS; desplegada, entera con VER MENOS |
+
+  Corregido durante la prueba (`HudPage.FitCard`): la ficha medía su contenido con 2 dp de más de ancho, porque no descontaba el borde de 1 dp
+  a cada lado. Con un texto justo por encima del límite, la medida salía una línea corta: la ficha «cabía» sobre el papel, perdía la última línea
+  y no salía VER MÁS. Con el ancho bien descontado, la medida coincide con la altura real (441 dp en la Polar, comprobado con un registro temporal).
+  Las fichas de la Luna y los planetas no lo notaban: pasan del límite con mucho margen.
+  Captura: `docs/images/ficha-estrella-texto.png`.
 - `dotnet test` 794 tests; build Android 0 avisos.
 
 ## Mejoras fuera de fase
