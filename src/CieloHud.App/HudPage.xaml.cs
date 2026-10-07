@@ -31,6 +31,7 @@ public partial class HudPage : ContentPage
     private readonly CardBuilder _cards;
     private readonly GuidanceCalculator _guidance = new();
     private readonly HudDrawable _drawable = new();
+    private readonly CardDrawing _cardDrawing = new();
     private readonly Dictionary<SkyTarget, Button> _chips = new();
     private readonly Dictionary<float, Button> _brightnessChips = new();
     private Button _identifyChip = null!;
@@ -78,6 +79,7 @@ public partial class HudPage : ContentPage
         _cards = cards;
         _target = catalog.Targets[0];
         Canvas.Drawable = _drawable;
+        CardPictureView.Drawable = _cardDrawing;
         BuildTargetBar();
         BuildBrightnessBar();
         // In the constructor, not OnAppearing: a tap on an alert must reach the HUD also while diagnostics is on top.
@@ -130,11 +132,14 @@ public partial class HudPage : ContentPage
     private void ApplyPalette()
     {
         _drawable.Palette = _nightMode.Palette;
+        _cardDrawing.Palette = _nightMode.Palette;
+        CardPictureView.Invalidate();
         StyleChips();
         StyleChip(NightButton, _nightMode.IsOn);
         StyleChip(AlertsButton, _alerts.IsOn);
         StyleChip(LeaveNightButton, false);
         StyleChip(CloseCardButton, false);
+        StyleChip(CardMoreButton, false);
         StyleChip(ShowCardButton, true);
         foreach (var (brightness, chip) in _brightnessChips)
             StyleChip(chip, Math.Abs(brightness - _nightMode.Brightness) < 0.001f);
@@ -423,6 +428,10 @@ public partial class HudPage : ContentPage
 
         CardTitle.Text = view.Title;
         CardSubtitle.Text = view.Subtitle;
+        _cardDrawing.Picture = view.Picture;
+        CardPictureView.IsVisible = view.Picture is not null;
+        CardPictureView.HeightRequest = CardDrawing.HeightFor(view.Picture, CardContentWidth);
+        CardPictureView.Invalidate();
         CardBody.Text = view.Text;
         CardBody.IsVisible = view.Text is not null;
         CardNowHeader.IsVisible = view.Now.Count > 0;
@@ -435,6 +444,9 @@ public partial class HudPage : ContentPage
         }
 
         var opening = !CardPanel.IsVisible;
+        // A card always opens small, not to cover the guide; the 10 s refresh keeps it as the user left it.
+        if (opening || target != _cardTarget)
+            _cardExpanded = false;
         _cardTarget = target;
         _cardBuiltAt = now;
         NightPanel.IsVisible = false;
@@ -446,20 +458,43 @@ public partial class HudPage : ContentPage
     }
 
     /// <summary>
-    /// A ScrollView takes all the height it is allowed, which left a gap under CERRAR on short cards: give it the height of
-    /// its content instead, up to <see cref="CardMaxHeight"/>, and scroll beyond that (large system fonts).
+    /// A ScrollView takes all the height it is allowed, which left a gap under the footer on short cards: give it the height
+    /// of its content instead, up to <see cref="CardCollapsedHeight"/>. When that is not enough, VER MÁS shows and grows the
+    /// card up to the HUD's height; only beyond that (large system fonts) does it scroll. Nobody noticed a card could scroll.
     /// </summary>
     private void FitCard()
     {
-        const double horizontalChrome = 2 * 12 + 2 * 16; // card margins and padding, as in the XAML
-        var width = Width - horizontalChrome;
+        var width = CardContentWidth;
         if (width <= 0)
             return;
-        var content = CardContent.Measure(width, double.PositiveInfinity);
-        CardScroll.HeightRequest = Math.Min(content.Height, CardMaxHeight);
+        var content = CardContent.Measure(width, double.PositiveInfinity).Height;
+        var footer = CardFooter.Measure(width, double.PositiveInfinity).Height;
+        // The HUD's row less the card's margin, padding and border, the footer and its spacing, and a little air above.
+        var expanded = Math.Max(CardCollapsedHeight, Canvas.Height - (4 + 2 * 14 + 2 + 10 + 12) - footer);
+
+        var fits = content <= CardCollapsedHeight;
+        if (fits)
+            _cardExpanded = false;
+        CardMoreButton.IsVisible = !fits;
+        CardMoreButton.Text = _cardExpanded ? "VER MENOS" : "VER MÁS";
+        CardScroll.HeightRequest = Math.Min(content, _cardExpanded ? expanded : CardCollapsedHeight);
     }
 
-    private const double CardMaxHeight = 440;
+    /// <summary>Of the content above the footer: with the footer, about the 440 dp the card had before it (decision 038).</summary>
+    private const double CardCollapsedHeight = 400;
+
+    private bool _cardExpanded;
+
+    private void OnCardMoreClicked(object? sender, EventArgs e)
+    {
+        _cardExpanded = !_cardExpanded;
+        FitCard();
+        if (!_cardExpanded)
+            _ = CardScroll.ScrollToAsync(0, 0, false);
+    }
+
+    /// <summary>The page's width less the card's margins and padding, as in the XAML.</summary>
+    private double CardContentWidth => Width - (2 * 12 + 2 * 16);
 
     private void CloseCard()
     {

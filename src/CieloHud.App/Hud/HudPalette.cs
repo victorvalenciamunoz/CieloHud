@@ -19,6 +19,9 @@ public sealed record HudPalette(
     Color Alert,
     Color Star)
 {
+    /// <summary>Whether the card's drawings show each object in its own color (Mars orange…), or all in the palette's text color.</summary>
+    public bool TrueColors { get; init; }
+
     public static HudPalette Normal { get; } = new(
         Background: Color.FromArgb("#0B1218"),
         Text: Color.FromArgb("#E8EEF4"),
@@ -31,7 +34,10 @@ public sealed record HudPalette(
         Marker: Color.FromArgb("#FFC42E"),
         MarkerCore: Colors.White,
         Alert: Color.FromArgb("#FF5C5C"),
-        Star: Color.FromArgb("#E8EEF4"));
+        Star: Color.FromArgb("#E8EEF4"))
+    {
+        TrueColors = true,
+    };
 
     /// <summary>
     /// Pure black (an OLED pixel switched off) and levels of red with almost no green or blue. Red gives the eye about a fifth

@@ -18,15 +18,8 @@ public sealed class AstronomyEngineSolarSystemFactsService : ISolarSystemFactsSe
     public MoonFacts Moon(Observer observer, DateTimeOffset instant)
     {
         var time = new AstroTime(instant.UtcDateTime);
-        var aeObserver = ToAstronomyEngine(observer);
-
-        var moon = Astronomy.GeoVector(Body.Moon, time, Aberration.Corrected);
-        var sun = Astronomy.GeoVector(Body.Sun, time, Aberration.Corrected);
-        var here = Astronomy.ObserverVector(time, aeObserver, EquatorEpoch.J2000);
-        var moonToSun = sun - moon;
-        var moonToObserver = here - moon;
-        var phaseAngle = Astronomy.AngleBetween(moonToSun, moonToObserver);
-        var distanceKm = moonToObserver.Length() * Astronomy.KM_PER_AU;
+        var (toMoon, moonToSun) = Topocentric(Body.Moon, time, ToAstronomyEngine(observer));
+        var distanceKm = toMoon.Length() * Astronomy.KM_PER_AU;
 
         var phase = Astronomy.MoonPhase(time);
         var (previous, next) = SurroundingQuarters(time);
@@ -34,7 +27,7 @@ public sealed class AstronomyEngineSolarSystemFactsService : ISolarSystemFactsSe
         return new MoonFacts(
             DistanceKm: distanceKm,
             LightTime: LightTravel.Time(distanceKm),
-            IlluminatedFraction: (1 + Math.Cos(phaseAngle * Math.PI / 180)) / 2,
+            IlluminatedFraction: LitFraction(toMoon, moonToSun),
             PhaseDegrees: phase,
             Phase: MoonPhases.Name(phase, previous, next, instant),
             Next: next);
@@ -68,22 +61,14 @@ public sealed class AstronomyEngineSolarSystemFactsService : ISolarSystemFactsSe
         var emitted = time.AddDays(-distance / Astronomy.C_AUDAY);
         var moons = Astronomy.JupiterMoons(emitted);
         var sunToJupiter = Unit(Astronomy.HelioVector(Body.Jupiter, emitted));
-
-        // Plane-of-sky axes in EQJ, built in the horizontal frame (x north, y west, z zenith) and rotated back.
-        var toHorizontal = Astronomy.Rotation_EQJ_HOR(time, aeObserver);
-        var toEquatorial = Astronomy.InverseRotation(toHorizontal);
-        var line = Unit(Astronomy.RotateVector(toHorizontal, toJupiter));
-        var zenith = new AstroVector(0, 0, 1, time);
-        var right = Astronomy.RotateVector(toEquatorial, Unit(Cross(line, zenith)));
-        var up = Astronomy.RotateVector(toEquatorial, Unit(Cross(Cross(line, zenith), line)));
-        var depth = Astronomy.RotateVector(toEquatorial, line);
+        var sky = new SkyPlane(time, aeObserver, toJupiter);
 
         GalileanMoon Moon(GalileanMoonName name, StateVector state)
         {
             var m = new AstroVector(state.x, state.y, state.z, time);
             var along = Dot(m, sunToJupiter);
             var perpendicular = Math.Sqrt(Math.Max(0, Dot(m, m) - along * along));
-            var (r, u, d) = (Dot(m, right) / radiusAu, Dot(m, up) / radiusAu, Dot(m, depth) / radiusAu);
+            var (r, u, d) = (Dot(m, sky.Right) / radiusAu, Dot(m, sky.Up) / radiusAu, Dot(m, sky.Depth) / radiusAu);
             return new GalileanMoon(name, r, u, d,
                 GalileanMoons.State(r, u, d, GalileanMoons.InShadow(along / radiusAu, perpendicular / radiusAu)));
         }
@@ -130,6 +115,72 @@ public sealed class AstronomyEngineSolarSystemFactsService : ISolarSystemFactsSe
     {
         var pole = Astronomy.RotationAxis(Body.Saturn, time).north;
         return Math.Asin(-Dot(toSaturn, pole) / toSaturn.Length()) * 180 / Math.PI;
+    }
+
+    /// <summary>
+    /// The lit fraction from the observer (decision 036), the Sun's direction from the body's center for the bright limb, and the
+    /// IAU north pole, both projected on the plane of the sky with the HUD's axes. Jupiter and Saturn are never less than 99 % lit.
+    /// </summary>
+    public BodyDisc Disc(CelestialBody body, Observer observer, DateTimeOffset instant)
+    {
+        var time = new AstroTime(instant.UtcDateTime);
+        var aeObserver = ToAstronomyEngine(observer);
+        var aeBody = AstronomyEngineLocator.ToBody(body);
+        var (toBody, bodyToSun) = Topocentric(aeBody, time, aeObserver);
+        var sky = new SkyPlane(time, aeObserver, toBody);
+        return new BodyDisc(
+            body,
+            LitFraction(toBody, bodyToSun),
+            BrightLimbDegrees: sky.Direction(bodyToSun),
+            NorthPoleDegrees: sky.Direction(Astronomy.RotationAxis(aeBody, time).north));
+    }
+
+    /// <summary>
+    /// From the observer to the body, and from the body to the Sun, in EQJ (AU). Both from geocentric positions corrected for light
+    /// time and aberration: the Sun's own motion while the light travels is far below what a drawing or a percentage shows.
+    /// </summary>
+    private static (AstroVector ToBody, AstroVector BodyToSun) Topocentric(Body body, AstroTime time, AeObserver observer)
+    {
+        var target = Astronomy.GeoVector(body, time, Aberration.Corrected);
+        var sun = Astronomy.GeoVector(Body.Sun, time, Aberration.Corrected);
+        var here = Astronomy.ObserverVector(time, observer, EquatorEpoch.J2000);
+        return (target - here, sun - target);
+    }
+
+    /// <summary>Lit part of the disc, from the phase angle between the body's directions to the Sun and to the observer.</summary>
+    private static double LitFraction(AstroVector toBody, AstroVector bodyToSun)
+    {
+        var phaseAngle = Astronomy.AngleBetween(bodyToSun, new AstroVector(-toBody.x, -toBody.y, -toBody.z, toBody.t));
+        return (1 + Math.Cos(phaseAngle * Math.PI / 180)) / 2;
+    }
+
+    /// <summary>
+    /// The plane of the sky around a body, with the HUD's axes in EQJ: right (towards increasing azimuth), up (towards the zenith)
+    /// and depth (along the line of sight, away from the observer). Built in the horizontal frame (x north, y west, z zenith).
+    /// </summary>
+    private readonly struct SkyPlane
+    {
+        public SkyPlane(AstroTime time, AeObserver observer, AstroVector toBody)
+        {
+            var toHorizontal = Astronomy.Rotation_EQJ_HOR(time, observer);
+            var toEquatorial = Astronomy.InverseRotation(toHorizontal);
+            var line = Unit(Astronomy.RotateVector(toHorizontal, toBody));
+            var zenith = new AstroVector(0, 0, 1, time);
+            Right = Astronomy.RotateVector(toEquatorial, Unit(Cross(line, zenith)));
+            Up = Astronomy.RotateVector(toEquatorial, Unit(Cross(Cross(line, zenith), line)));
+            Depth = Astronomy.RotateVector(toEquatorial, line);
+        }
+
+        public AstroVector Right { get; }
+        public AstroVector Up { get; }
+        public AstroVector Depth { get; }
+
+        /// <summary>Where <paramref name="v"/> (EQJ) points on the plane of the sky: 0° up, 90° right, 0 to 360.</summary>
+        public double Direction(AstroVector v)
+        {
+            var degrees = Math.Atan2(Dot(v, Right), Dot(v, Up)) * 180 / Math.PI;
+            return degrees < 0 ? degrees + 360 : degrees;
+        }
     }
 
     private static double Dot(AstroVector a, AstroVector b) => a.x * b.x + a.y * b.y + a.z * b.z;

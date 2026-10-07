@@ -913,6 +913,60 @@ Hallazgo al revisar: el catálogo `BrightStars` no guarda la paralaje; se añadi
 - Probado en el móvil: pendiente. Saturno estaba bajo el horizonte (−30°), y entonces el HUD no guía (Fase 3). Esta noche, desde las 21:30, a 19-30° al E-SE.
 - `dotnet test` 666 tests; build Android 0 avisos.
 
+### Paso 6 — Dibujos calculados (2026-10-07)
+
+- Core `Cards/` (decisión 041):
+  - `ISolarSystemFactsService.Disc` → `BodyDisc`: fracción iluminada desde el observador (la misma de `MoonFacts`), y hacia dónde mira el borde iluminado
+    y el polo norte (IAU) en el plano del cielo, con los ejes del HUD (0° hacia el cénit, 90° a la derecha). Los ejes del plano del cielo, antes dentro de
+    `JupiterMoons`, son ahora un ayudante común.
+  - `PhaseShape.LitOutline`: contorno de la parte iluminada sobre un disco de radio 1 (medio limbo y media elipse de semieje |1 − 2f|).
+  - `SaturnShape`: globo achatado según la inclinación (polar 54 364 km, ecuatorial 60 268 km), anillos de 1,53 a 2,27 radios (borde interior de B y exterior
+    de A, hoja de datos de los anillos de la NASA) y el lado por el que pasan por delante del globo.
+- App: `CardDrawing` bajo el subtítulo de la ficha.
+  - Luna, Mercurio, Venus y Marte con su fase, Saturno con sus anillos y Júpiter **como con prismáticos**: campo oscuro, Júpiter a escala con sus lunas,
+    escala ajustada a la luna visible más lejana y las lunas con su nombre (si dos nombres chocan, uno pasa al otro lado del punto).
+  - Cada objeto con su color, volumen de esfera y halo; en modo noche, todo en rojo.
+  - **Pie fijo** con CERRAR y, si el contenido no cabe, VER MÁS / VER MENOS, que agranda la ficha hasta el alto del HUD.
+- Consola: `--card` añade la fracción, el borde iluminado y el polo en los ejes del HUD.
+- **Validación contra JPL Horizons** (Madrid, 7 oct): cantidades 27 (PsAng, dirección contraria al Sol vista desde el objeto) y 17 (NP.ang), que se miden desde
+  el norte celeste, pasadas a los ejes del HUD con el ángulo paraláctico calculado con la declinación y el ángulo horario (cantidades 2 y 42).
+
+  | Objeto y hora (UTC) | Iluminada CieloHud / Horizons | Borde iluminado CieloHud / Horizons | Polo |
+  |---|---|---|---|
+  | Luna, 8 oct 5:00 | 6,415 / 6,413 % | 200,74° / 200,77° | ≤ 0,01° |
+  | Luna, 14 oct 18:30 / 22 oct 21:00 / 29 oct 3:00 | 16,158 / 87,003 / 88,161 % (Horizons 16,160 / 87,000 / 88,164) | 112,0° / 106,2° / 296,8° (Horizons 111,8° / 106,1° / 297,0°) | ≤ 0,01° |
+  | Venus, 7 oct 12:00 y 17:00 | 9,314 / 9,321 % | 36,63° / 36,54° | ≤ 0,01° |
+  | Mercurio, Marte, Júpiter y Saturno (dos horas) | ≤ 0,01 puntos | ≤ 0,12° | ≤ 0,01° |
+
+  Quedan como tests de integración (fracción 0,05 puntos, ángulos 0,5°).
+- Tests unitarios: el área del contorno es la fracción, la parte iluminada mira al Sol, los cuernos de una creciente, el terminador de una gibosa y de media fase,
+  casos extremos; los anillos (proporción, lado de delante con cada cara, achatamiento del globo, radios).
+- **Probado en el OPPO** (Android 16, Debug, de día, 7 oct):
+
+  | Prueba | Resultado |
+  |---|---|
+  | Luna, 11:20 | creciente del 12 % abajo a la izquierda; la consola da el borde hacia 245° en ese instante |
+  | Ficha de la Luna con el dibujo | no cabía y nadie veía que se podía desplazar: pie fijo con CERRAR y VER MÁS / VER MENOS |
+  | Júpiter, 11:35 | el primer dibujo (escala fija de ±27 radios e iniciales) se veía diminuto y con las iniciales montadas; pasa a la vista de prismáticos |
+  | Júpiter, 11:51 | Europa e Ío a la izquierda, Ganímedes y Calisto a la derecha, como la consola (−2,8, −2,2, +9,2 y +14,8 radios) |
+  | Marte, 12:06 | anaranjado, iluminado al 90 % con la parte oscura abajo a la derecha (borde hacia 304°) |
+  | Venus, 12:11 | creciente del 9 % arriba y un poco a la derecha (borde hacia 18°) |
+  | NOCHE con la ficha abierta | la Luna y Venus en rojo sobre negro, sin blancos ni colores |
+
+- **Contraste con Stellarium Web** (reloj en pausa el 7 oct a las 12:30):
+
+  | Objeto | Stellarium | CieloHud |
+  |---|---|---|
+  | Luna | 12 %, az 205,37°, alt 56,38°, 371 666 km; creciente a la izquierda, cuernos arriba y abajo | 11,7 %, az 205,47°, alt 56,19°, 371 691 km; borde hacia 269° |
+  | Venus | creciente fina abierta hacia arriba y algo a la derecha; medido con la línea entre los cuernos, el centro del arco hacia ~20° | 9,4 %; borde hacia 21° |
+  | Marte | casi lleno; la franja menos iluminada en el borde derecho, algo hacia abajo | 90 %; borde hacia 306°, la franja oscura hacia 126° |
+  | Júpiter y sus lunas | Europa e Ío a la izquierda y algo arriba; Ganímedes y Calisto a la derecha y abajo. Medido en la captura desde Júpiter: pendiente de la fila −0,27 a −0,31; distancias relativas a Ganímedes, Ío 0,14, Europa 0,36, Calisto 1,59 | pendiente −0,28 a −0,30; Ío 0,15, Europa 0,35, Calisto 1,58 |
+
+  Las diferencias de posición y distancia de la Luna vienen de la ubicación (Stellarium, la del usuario; la consola, el centro de Madrid).
+- Pendiente: Saturno en el móvil y en Stellarium (inclinación y giro de los anillos), esta noche desde las 21:30, con la prueba del paso 5.
+- Capturas: `docs/images/ficha-jupiter.png`, `ficha-venus.png` y `ficha-marte-dibujo.png` (también en el README).
+- `dotnet test` 708 tests; build Android 0 avisos.
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.

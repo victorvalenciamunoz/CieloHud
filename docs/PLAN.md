@@ -101,3 +101,13 @@ dotnet run --project src/CieloHud.Console -- [--lat 40.4168] [--lon -3.7038] [--
   con su fase, Júpiter con sus lunas en su sitio y Saturno con la inclinación de sus anillos de ese día. Contrastable con Stellarium y en rojo de noche.
 - Textos: uno por objeto (7 objetivos, 155 estrellas, 88 constelaciones), en el repo como datos. Se pueden redactar con ayuda
   de IA durante el desarrollo, pero se revisan uno a uno antes de subirlos. La app no usa IA ni red para esto. Decisión 020.
+
+## Fase 6 — Efemérides (idea apuntada el 2026-10-07, sin planificar)
+
+- «Tal día como hoy…»: un descubrimiento, una misión o una persona, contado para el público general. Decisión 042.
+- Solo las ligadas a lo que la app enseña (la Luna, los planetas, la ISS, las estrellas y las constelaciones del catálogo), para que lleven al cielo.
+  Una persona entra si descubrió o estudió algo que se puede ver, no por ser relevante en general.
+- Pocas y buenas, no una por día: el día que no hay, no sale nada.
+- Escritas y revisadas como los textos de las fichas: un Markdown por efeméride, con su fuente, revisado uno a uno. Sin red y sin IA en la app.
+- Dónde: en la ficha del objeto (preferencia del usuario). No en EVENTOS, que es lo que se va a poder ver, ni como aviso.
+- Por decidir: la ventana (el día exacto, la semana o el mes). Con el día exacto y en la ficha de su objeto, casi nunca coincidirían.
