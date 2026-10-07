@@ -61,8 +61,8 @@ public class StarColorsTests
     [InlineData(0.42, "0,4")]
     [InlineData(2.02, "2,0")]
     [InlineData(-0.05, "−0,1")]
-    public void MagnitudeText_ExplainsTheBackwardsScale(double magnitude, string number)
+    public void MagnitudeText_OneDecimalWithTrueMinus(double magnitude, string number)
     {
-        Assert.Equal($"Brillo: magnitud {number} (cuanto menor, más brilla; desde ciudad se ven hasta la 3)", FactsText.StarMagnitude(magnitude));
+        Assert.Equal($"Brillo: magnitud {number}", FactsText.StarMagnitude(magnitude));
     }
 }

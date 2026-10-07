@@ -1074,6 +1074,8 @@ Espiga, Pólux, Fomalhaut, Deneb y Régulo) y 5 conocidas por algo concreto (Cá
   y no salía VER MÁS. Con el ancho bien descontado, la medida coincide con la altura real (441 dp en la Polar, comprobado con un registro temporal).
   Las fichas de la Luna y los planetas no lo notaban: pasan del límite con mucho margen.
   Captura: `docs/images/ficha-estrella-texto.png`.
+- Cambio pedido por el usuario al ver las fichas: el brillo va solo con el número, «Brillo: magnitud 2,0», sin la coletilla «(cuanto menor, más brilla;
+  desde ciudad se ven hasta la 3)» (decisión 046, corrige 044).
 - `dotnet test` 794 tests; build Android 0 avisos.
 
 ## Mejoras fuera de fase
