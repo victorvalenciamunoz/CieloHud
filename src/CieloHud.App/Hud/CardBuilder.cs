@@ -30,6 +30,9 @@ public sealed class CardBuilder(ISolarSystemFactsService facts)
             case BodyTarget { Body: CelestialBody.Moon }:
                 var moon = facts.Moon(observer, now);
                 return [FactsText.MoonPhase(moon), FactsText.NextQuarter(moon.Next, now, TimeZoneInfo.Local), FactsText.MoonDistance(moon)];
+            case BodyTarget { Body: CelestialBody.Jupiter }:
+                var jupiter = facts.Planet(CelestialBody.Jupiter, observer, now);
+                return [FactsText.PlanetDistance(jupiter), FactsText.PlanetLight(jupiter), .. FactsText.JupiterMoons(facts.JupiterMoons(observer, now))];
             case BodyTarget planet:
                 var p = facts.Planet(planet.Body, observer, now);
                 return [FactsText.PlanetDistance(p), FactsText.PlanetLight(p)];

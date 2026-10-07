@@ -99,6 +99,63 @@ public class FactsTextTests
         Assert.Equal(expected, FactsText.Duration(TimeSpan.FromSeconds(seconds)));
     }
 
+    private static GalileanMoon Moon(GalileanMoonName name, double right, double up, GalileanMoonState state = GalileanMoonState.Visible) =>
+        new(name, right, up, 0, state);
+
+    private static JupiterMoonsFacts Jupiter(params GalileanMoon[] moons) => new(moons, 17);
+
+    [Fact]
+    public void JupiterMoons_FlatRow_LeftToRightWithJupiterInItsPlace()
+    {
+        var lines = FactsText.JupiterMoons(Jupiter(
+            Moon(GalileanMoonName.Io, -5, 0.5),
+            Moon(GalileanMoonName.Europa, 8, -1),
+            Moon(GalileanMoonName.Ganymede, 14, -2),
+            Moon(GalileanMoonName.Callisto, -24, 3)));
+
+        Assert.Equal(["Con prismáticos, de izquierda a derecha: Calisto, Ío, Júpiter, Europa y Ganímedes"], lines);
+    }
+
+    [Fact]
+    public void JupiterMoons_UprightRow_TopToBottom()
+    {
+        // Jupiter rising in the east, 2026-10-08 06:00 local time from Madrid.
+        var lines = FactsText.JupiterMoons(Jupiter(
+            Moon(GalileanMoonName.Io, 1.2, 4.0),
+            Moon(GalileanMoonName.Europa, -2.8, -8.8),
+            Moon(GalileanMoonName.Ganymede, 4.3, 13.9),
+            Moon(GalileanMoonName.Callisto, 6.1, 19.5)));
+
+        Assert.Equal(["Con prismáticos, de arriba abajo: Calisto, Ganímedes, Ío, Júpiter y Europa"], lines);
+    }
+
+    [Fact]
+    public void JupiterMoons_HiddenMoons_SaidApart()
+    {
+        var lines = FactsText.JupiterMoons(Jupiter(
+            Moon(GalileanMoonName.Io, 0.4, 0.1, GalileanMoonState.BehindJupiter),
+            Moon(GalileanMoonName.Europa, -0.5, 0, GalileanMoonState.InFrontOfJupiter),
+            Moon(GalileanMoonName.Ganymede, 3, 0.5, GalileanMoonState.InJupitersShadow),
+            Moon(GalileanMoonName.Callisto, -20, -2)));
+
+        Assert.Equal(
+            [
+                "Con prismáticos, de izquierda a derecha: Calisto y Júpiter",
+                "Ío está detrás de Júpiter",
+                "Europa pasa por delante de Júpiter",
+                "Ganímedes está en la sombra de Júpiter",
+            ],
+            lines);
+    }
+
+    [Fact]
+    public void JupiterMoons_NoneVisible()
+    {
+        var lines = FactsText.JupiterMoons(Jupiter(Moon(GalileanMoonName.Io, 0.1, 0, GalileanMoonState.BehindJupiter)));
+
+        Assert.Equal(["Ahora no se ve ninguna de sus cuatro lunas grandes", "Ío está detrás de Júpiter"], lines);
+    }
+
     [Fact]
     public void Duration_Negative_Throws()
     {

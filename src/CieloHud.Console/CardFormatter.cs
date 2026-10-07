@@ -41,6 +41,24 @@ public static class CardFormatter
         return sb.ToString();
     }
 
+    /// <summary>The moons' lines as the card shows them, then each moon's offset in Jupiter radii and arcseconds.</summary>
+    public static string JupiterMoons(JupiterMoonsFacts moons)
+    {
+        var sb = new StringBuilder();
+        foreach (var line in FactsText.JupiterMoons(moons))
+            sb.AppendLine($"  {line}");
+        sb.AppendLine();
+        sb.AppendLine($"  Radio aparente de Júpiter: {moons.JupiterRadiusArcseconds.ToString("F2", Culture)}\"");
+        sb.AppendLine($"  {"Luna",-10} {"derecha",9} {"arriba",9} {"(radios)",-10} {"derecha",9} {"arriba",9} {"(\")",-4} estado");
+        foreach (var m in moons.Moons)
+        {
+            var k = moons.JupiterRadiusArcseconds;
+            sb.AppendLine($"  {FactsText.MoonName(m.Name),-10} {m.RightRadii.ToString("F3", Culture),9} {m.UpRadii.ToString("F3", Culture),9} {"",-10} " +
+                $"{(m.RightRadii * k).ToString("F2", Culture),9} {(m.UpRadii * k).ToString("F2", Culture),9} {"",-4} {m.State}");
+        }
+        return sb.ToString();
+    }
+
     /// <summary>The written text, wrapped, then a blank line; a note when it is not written yet.</summary>
     private static void AppendText(StringBuilder sb, CardText? text)
     {
