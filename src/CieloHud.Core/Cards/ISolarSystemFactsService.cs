@@ -10,4 +10,7 @@ public interface ISolarSystemFactsService
 
     /// <summary>Any <see cref="CelestialBody"/> but the Moon, which has <see cref="Moon"/>.</summary>
     PlanetFacts Planet(CelestialBody planet, Observer observer, DateTimeOffset instant);
+
+    /// <summary>Where Io, Europa, Ganymede and Callisto are next to Jupiter, as the observer sees them.</summary>
+    JupiterMoonsFacts JupiterMoons(Observer observer, DateTimeOffset instant);
 }

@@ -97,5 +97,7 @@ dotnet run --project src/CieloHud.Console -- [--lat 40.4168] [--lon -3.7038] [--
   - Planetas: distancia y tiempo que tarda su luz en llegar.
   - Estrellas: años que tarda su luz en llegar, desde la paralaje de SIMBAD (la misma fuente que el catálogo).
   - ISS: altura y velocidad.
+- Un dibujo de cada objetivo calculado en el momento, no una foto (añadido el 2026-10-07 a petición del usuario): la Luna y los planetas
+  con su fase, Júpiter con sus lunas en su sitio y Saturno con la inclinación de sus anillos de ese día. Contrastable con Stellarium y en rojo de noche.
 - Textos: uno por objeto (7 objetivos, 155 estrellas, 88 constelaciones), en el repo como datos. Se pueden redactar con ayuda
   de IA durante el desarrollo, pero se revisan uno a uno antes de subirlos. La app no usa IA ni red para esto. Decisión 020.

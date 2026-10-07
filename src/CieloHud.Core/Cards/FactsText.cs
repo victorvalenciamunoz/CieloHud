@@ -64,6 +64,59 @@ public static class FactsText
     public static string PlanetLight(PlanetFacts planet) =>
         $"Esta luz salió de {ConjunctionAlertText.PlanetName(planet.Body)} hace {Duration(planet.LightTime)}";
 
+    public static string MoonName(GalileanMoonName moon) => moon switch
+    {
+        GalileanMoonName.Io => "Ío",
+        GalileanMoonName.Europa => "Europa",
+        GalileanMoonName.Ganymede => "Ganímedes",
+        GalileanMoonName.Callisto => "Calisto",
+        _ => throw new ArgumentOutOfRangeException(nameof(moon), moon, null),
+    };
+
+    /// <summary>
+    /// Jupiter's moons as binoculars show them (NASA: "Most binoculars will show at least one or two moons"): the visible ones
+    /// and Jupiter in a row, "de izquierda a derecha", or "de arriba abajo" when the row stands more upright than flat (Jupiter
+    /// low in the east or west); then a line for each moon that cannot be seen: "Ío está detrás de Júpiter".
+    /// </summary>
+    public static IReadOnlyList<string> JupiterMoons(JupiterMoonsFacts facts)
+    {
+        ArgumentNullException.ThrowIfNull(facts);
+        var flat = facts.Moons.Sum(m => Math.Abs(m.RightRadii)) >= facts.Moons.Sum(m => Math.Abs(m.UpRadii));
+        var visible = facts.Moons.Where(m => m.State == GalileanMoonState.Visible).ToList();
+
+        var lines = new List<string>();
+        if (visible.Count == 0)
+        {
+            lines.Add("Ahora no se ve ninguna de sus cuatro lunas grandes");
+        }
+        else
+        {
+            var row = visible
+                .Select(m => (Name: MoonName(m.Name), Position: flat ? m.RightRadii : -m.UpRadii))
+                .Append((Name: "Júpiter", Position: 0.0))
+                .OrderBy(x => x.Position)
+                .Select(x => x.Name)
+                .ToList();
+            lines.Add($"Con prismáticos, {(flat ? "de izquierda a derecha" : "de arriba abajo")}: {List(row)}");
+        }
+
+        foreach (var moon in facts.Moons.Where(m => m.State != GalileanMoonState.Visible))
+        {
+            lines.Add(moon.State switch
+            {
+                GalileanMoonState.BehindJupiter => $"{MoonName(moon.Name)} está detrás de Júpiter",
+                GalileanMoonState.InFrontOfJupiter => $"{MoonName(moon.Name)} pasa por delante de Júpiter",
+                GalileanMoonState.InJupitersShadow => $"{MoonName(moon.Name)} está en la sombra de Júpiter",
+                _ => throw new ArgumentOutOfRangeException(nameof(facts), moon.State, null),
+            });
+        }
+        return lines;
+    }
+
+    /// <summary>"A", "A y B", "A, B y C".</summary>
+    private static string List(IReadOnlyList<string> items) =>
+        items.Count == 1 ? items[0] : $"{string.Join(", ", items.Take(items.Count - 1))} y {items[^1]}";
+
     /// <summary>
     /// A light travel time in the words people use: "2 min y 40 s" under 10 minutes (Venus, Mercury, the Sun), whole minutes
     /// up to the hour ("49 minutos"), then hours and minutes ("1 h y 10 min", "2 horas").

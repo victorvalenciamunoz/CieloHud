@@ -143,5 +143,7 @@ int PrintCard(CelestialBody body)
     System.Console.WriteLine(body == CelestialBody.Moon
         ? CardFormatter.Moon(facts.Moon(options.Observer, options.Instant), CardTexts.Find(CardKey.Body(body)), options.Instant, TimeZoneInfo.Local)
         : CardFormatter.Planet(SkyTableFormatter.Name(body), facts.Planet(body, options.Observer, options.Instant), CardTexts.Find(CardKey.Body(body))));
+    if (body == CelestialBody.Jupiter)
+        System.Console.WriteLine(CardFormatter.JupiterMoons(facts.JupiterMoons(options.Observer, options.Instant)));
     return 0;
 }

@@ -771,6 +771,9 @@ Plan acordado (2026-10-06): los datos del momento se calculan en Core con tests 
 Pasos: 1) Luna y planetas: datos; 2) formato de los textos y los 7 objetivos; 3) la ficha en la app para los 7 objetivos; 4) lunas galileanas;
 5) anillos de Saturno; 6) altura y velocidad de la ISS; 7) estrellas: paralaje en el catálogo, años luz y ficha en «¿qué es?»; 8) textos de las estrellas por lotes;
 9) constelaciones: ficha en «¿qué es?» y textos por lotes.
+Ampliado el 2026-10-07 (el usuario eligió dibujos calculados frente a fotos, tras ver un boceto): un paso de **dibujos** después del 5, y los siguientes
+se corren: 6) dibujos de la Luna y los planetas con su fase, Júpiter con sus lunas y Saturno con sus anillos; 7) ISS; 8) estrellas: datos; 9) textos de las
+estrellas; 10) constelaciones.
 Elegido por el usuario: al llegar a AQUÍ la ficha se abre sola tras ~1,5 s, una vez por objetivo; en «¿qué es?», con un botón «VER FICHA».
 Se cierra con «CERRAR», con Atrás o al cambiar de objetivo; en modo noche, panel propio en rojo. Estrellas con paralaje dudosa: «unos…» con 2 cifras,
 e intervalo si el error relativo pasa del 20 %. Los textos, un Markdown por objeto con sus fuentes; si falta, la ficha sale solo con datos.
@@ -852,6 +855,41 @@ Hallazgo al revisar: el catálogo `BrightStars` no guarda la paralaje; se añadi
   Bastó con borrar `bin/` y `obj/` de la app e instalar encima, **sin desinstalar**: se conservaron los ajustes (AVISOS) y las alarmas.
 - Captura: `docs/images/ficha-marte.png`.
 - `dotnet test` 608 tests; build Android 0 avisos.
+
+### Paso 4 — Lunas galileanas (2026-10-07)
+
+- Core `Cards/`: `ISolarSystemFactsService.JupiterMoons` → `JupiterMoonsFacts` (las cuatro lunas y el radio aparente de Júpiter). Decisión 039.
+  - Cada luna, **vista desde el observador** en el plano del cielo, en radios ecuatoriales de Júpiter: a la derecha (hacia acimut creciente) y arriba
+    (hacia el cénit), los mismos ejes que el HUD, más la profundidad (delante o detrás de Júpiter).
+  - Posiciones de `JupiterMoons` de Astronomy Engine en el instante en que salió la luz de Júpiter (la función no corrige el tiempo de luz).
+  - **Estado** (`GalileanMoons`): detrás de Júpiter (ocultada), en su sombra (eclipsada, con la sombra como un cilindro de su radio en dirección contraria
+    al Sol), por delante (tránsito, perdida en el brillo) o visible. Por el centro de la luna frente al radio ecuatorial.
+- `FactsText.JupiterMoons`: «Con prismáticos, de izquierda a derecha: Calisto, Ío, Júpiter, Europa y Ganímedes», o «de arriba abajo» cuando la fila
+  está más de pie que tumbada (con Júpiter bajo al este o al oeste, como el 8 oct de madrugada); y una línea por cada luna que no se ve:
+  «Ío está detrás de Júpiter», «Europa pasa por delante de Júpiter», «Ganímedes está en la sombra de Júpiter».
+  «Con prismáticos», según la NASA: «Most binoculars will show at least one or two moons orbiting the planet» («Spot the King of Planets», Night Sky Network).
+- App: la ficha de Júpiter añade esas líneas a «AHORA». Consola: `--card jupiter` las muestra con cada luna en radios y en segundos de arco.
+- **Validación contra JPL Horizons** (Madrid; consultas desde un script de .NET en el scratchpad):
+  - Posiciones: acimut y altura sin refracción de Júpiter y de las cuatro lunas, proyectados con los mismos ejes; 12 posiciones (8 oct 6:00 y 7:30, 16 nov 7:25,
+    hora local) a **≤ 0,02 radios** (≤ 0,35″, con Júpiter de 17-19″ de radio). Radio aparente de Júpiter a < 0,1 %.
+  - Sucesos: los del 8 al 13 oct, minuto a minuto, aplicando las mismas reglas a los datos de Horizons (distancia de cada cuerpo para delante o detrás;
+    vectores de la luna y del Sol desde Júpiter para la sombra):
+
+    | Suceso (UTC) | Horizons | CieloHud |
+    |---|---|---|
+    | Ío entra en la sombra, 8 oct | 07:07 | 07:07 |
+    | Ío pasa de la sombra a detrás de Júpiter | 08:09 | 08:09 |
+    | Ío reaparece | 10:28 | 10:27 |
+    | Europa empieza a pasar por delante / termina | 22:19 / 01:13 | 22:19 / 01:13 |
+    | Ganímedes entra en la sombra / sale, 9-10 oct | 23:25 / 03:04 | 23:24 / 03:03 |
+    | Calisto entra en la sombra, 13 oct | 14:50 | 14:49 |
+
+  - Error encontrado en la propia comparación: los eclipses salían 1-2 min antes que en Horizons, al entrar y al salir. No era el cálculo: las tablas de vectores
+    de Horizons leen las horas en TDB salvo que se pida `TIME_TYPE='UT'` (69 s de diferencia). Con UT, todo coincide al minuto.
+  - Quedan como tests de integración (posiciones 0,05 radios, radio 0,5 %, cada suceso con su estado 2 min antes y 2 min después).
+- Probado en el OPPO: la ficha de Júpiter dice «Con prismáticos, de izquierda a derecha: Ío, Europa, Júpiter, Ganímedes y Calisto», lo mismo que la consola
+  en ese instante (7 oct 10:39).
+- `dotnet test` 646 tests; build Android 0 avisos.
 
 ## Mejoras fuera de fase
 
