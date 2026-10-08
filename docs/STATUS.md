@@ -1267,6 +1267,20 @@ Plan acordado con el usuario (2026-10-08), en PR separadas:
 - Pega conocida: los nombres no evitan los trazos, solo otros nombres y estrellas (en Orión, «Betelgeuse» cruza dos líneas); se lee bien.
 - `dotnet test` 908 tests; build Android 0 avisos.
 
+**10.4 — Textos, lote 1 (2026-10-08)**: las 18 más conocidas: Orión, la Osa Mayor, la Osa Menor, Casiopea, el Cisne, la Lira, el Águila, Escorpio,
+Sagitario, Leo, Tauro, Géminis, el Can Mayor, Pegaso, Andrómeda, Perseo, la Cruz del Sur y Centauro. De 323 a 400 caracteres, en
+`Cards/Texts/es/constellations/<símbolo IAU>.md`.
+- Criterios en la decisión 050, aprobados por el usuario con tres borradores (Orión, Casiopea y la Cruz del Sur): historia y origen de la figura, cómo reconocerla
+  y lo notable que contiene; nada de lo que calcula DATOS ni de lo que cuentan los textos de sus estrellas; cada mito compartido, en un solo texto.
+- Fuentes: *Star Tales* de Ian Ridpath, una página por constelación (dos en Orión, la Osa Mayor y Tauro); NASA para la galaxia de Andrómeda, la nebulosa del
+  Cangrejo y las Perseidas; Kaler para Alfa Centauri.
+- Sin dar lo que las fuentes no fijan: la supernova de 1054 se vio de día «tres semanas» según Ridpath y «casi un mes» según la NASA: el texto dice «durante
+  semanas». La galaxia de Andrómeda, «a simple vista incluso con algo de contaminación lumínica» (NASA); la nebulosa de Orión, «en noches despejadas» (Ridpath).
+  Las Perseidas, «se ven mejor desde el hemisferio norte» (NASA, decisión 046).
+- Test nuevo: `ConstellationTexts_DoNotRepeatTheComputedFacts` (ni tamaño, ni visibilidad, ni «magnitud»). Pendientes: 70 constelaciones.
+- Consola: `--card Cru` muestra el texto con sus datos.
+- `dotnet test` 909 tests; build Android 0 avisos. Sin prueba en el móvil: la ficha ya muestra el texto si existe (paso 10.2) y los textos pasan las mismas reglas.
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.

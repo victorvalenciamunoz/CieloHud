@@ -134,6 +134,20 @@ public class CardTextsTests
             Assert.DoesNotMatch(new Regex(@"años luz|magnitud", RegexOptions.IgnoreCase), card.Body.Replace(NoBreakSpace, ' '));
     }
 
+    /// <summary>
+    /// A constellation's card already computes its size, whether it can be seen from the observer's latitude and its
+    /// brightest stars (decision 047): its text tells the story, the shape and what it contains instead (decision 050).
+    /// </summary>
+    [Fact]
+    public void ConstellationTexts_DoNotRepeatTheComputedFacts()
+    {
+        var computed = new Regex(@"% del cielo|por tamaño|\bde las 88\b|\bmagnitud|se puede ver entera|no se pone nunca|no sale nunca",
+            RegexOptions.IgnoreCase);
+        Assert.Contains(CardTexts.All.Keys, k => k.Kind == CardKind.Constellation);
+        foreach (var (key, card) in CardTexts.All.Where(c => c.Key.Kind == CardKind.Constellation))
+            Assert.False(computed.IsMatch(card.Body.Replace(NoBreakSpace, ' ')), $"{key} repeats a computed fact.");
+    }
+
     /// <summary>All 155 stars got their text in step 9 (decision 046): a star added to the catalog needs one too.</summary>
     [Fact]
     public void EveryStar_HasAText()
@@ -145,6 +159,6 @@ public class CardTextsTests
     [Fact]
     public void PendingTexts()
     {
-        Assert.Equal(88, ConstellationFigures.All.Count(c => CardTexts.Find(CardKey.Constellation(c.Symbol)) is null));
+        Assert.Equal(70, ConstellationFigures.All.Count(c => CardTexts.Find(CardKey.Constellation(c.Symbol)) is null));
     }
 }
