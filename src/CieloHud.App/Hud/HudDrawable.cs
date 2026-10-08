@@ -25,6 +25,8 @@ public sealed class HudDrawable : IDrawable
     {
         canvas.SaveState();
         canvas.Antialias = true;
+        NameZone = null;
+        DetailZone = null;
 
         if (Frame.Pointing is { } pointing)
         {
@@ -226,7 +228,20 @@ public sealed class HudDrawable : IDrawable
         }
     }
 
-    /// <summary>"What is that?": the name of what sits under the reticle, or a nudge towards the nearest known object.</summary>
+    /// <summary>
+    /// Where the names that open a card were drawn in identify mode (decision 048): the big name, and the line under it. Null when
+    /// they are not on screen or do not open anything. Each is a full-width band of the text panel, at least 48 dp high, whatever
+    /// the length of the text.
+    /// </summary>
+    public RectF? NameZone { get; private set; }
+
+    /// <inheritdoc cref="NameZone"/>
+    public RectF? DetailZone { get; private set; }
+
+    /// <summary>
+    /// "What is that?": the name of what sits under the reticle, or a nudge towards the nearest known object. The names that open a
+    /// card carry an ⓘ: the recognized object, and its constellation on the line under it; with nothing recognized, "Hacia Orión".
+    /// </summary>
     private void DrawIdentify(ICanvas canvas, RectF r)
     {
         var y = r.Bottom - 150;
@@ -237,23 +252,31 @@ public sealed class HudDrawable : IDrawable
         }
 
         DrawTextPanel(canvas, r, y);
+        // The text panel (DrawTextPanel), split under the name.
+        var nameZone = new RectF(r.Left + 12, y - 14, r.Width - 24, 54);
+        var detailZone = new RectF(r.Left + 12, y + 40, r.Width - 24, 58);
 
-        // Where the reticle is, in words: always available, even in empty sky or below the horizon.
-        var looking = Frame.PointingConstellation is { } c ? $"Hacia {c}" : "";
-        var belowHorizon = Frame.Pointing.Value.AltitudeDegrees < 0 ? "bajo el horizonte · " : "";
-
-        if (Frame.Identified is not { } found)
+        if (Frame.Shown is { } shown)
         {
-            DrawCenteredText(canvas, r, looking, y, 22, Palette.Text, FontBold);
-            DrawCenteredText(canvas, r, belowHorizon + "nada conocido sobre el horizonte", y + 44, 13, Palette.TextMuted, FontRegular, lines: 2);
+            DrawWithInfo(canvas, r, shown.Name.ToUpperInvariant(), y - 6, 30, 18, Palette.Locked, FontBold);
+            var sub = $"{shown.Kind} · altura {shown.Position.AltitudeDegrees.ToString("F0", Culture)}° · en {shown.Constellation}";
+            DrawWithInfo(canvas, r, sub, y + 44, 13, 10, Palette.TextMuted, FontRegular);
+            (NameZone, DetailZone) = (nameZone, detailZone);
             return;
         }
 
-        if (found.IsMatch)
+        // Where the reticle is, in words: always available, even in empty sky or below the horizon. Only this line opens a card
+        // here: the one under it names something else ("cerca: Bellatrix").
+        var belowHorizon = Frame.Pointing.Value.AltitudeDegrees < 0 ? "bajo el horizonte · " : "";
+        if (Frame.PointingConstellation is { } c)
         {
-            DrawCenteredText(canvas, r, found.Name.ToUpperInvariant(), y - 6, 30, Palette.Locked, FontBold);
-            var sub = $"{found.Kind} · en {found.Constellation} · altura {found.Position.AltitudeDegrees.ToString("F0", Culture)}°";
-            DrawCenteredText(canvas, r, sub, y + 44, 13, Palette.TextMuted, FontRegular, lines: 2);
+            DrawWithInfo(canvas, r, $"Hacia {c}", y, 22, 14, Palette.Text, FontBold);
+            NameZone = nameZone;
+        }
+
+        if (Frame.Identified is not { } found)
+        {
+            DrawCenteredText(canvas, r, belowHorizon + "nada conocido sobre el horizonte", y + 44, 13, Palette.TextMuted, FontRegular, lines: 2);
             return;
         }
 
@@ -266,9 +289,51 @@ public sealed class HudDrawable : IDrawable
         var horizontal = Math.Abs(g.AzimuthDeltaDegrees) < 1.5 ? null : g.AzimuthDeltaDegrees > 0 ? "derecha" : "izquierda";
         var vertical = Math.Abs(g.AltitudeDeltaDegrees) < 1.5 ? null : g.AltitudeDeltaDegrees > 0 ? "arriba" : "abajo";
         var where = string.Join(" y ", new[] { horizontal, vertical }.Where(s => s is not null));
-        DrawCenteredText(canvas, r, looking, y, 22, Palette.Text, FontBold);
         DrawCenteredText(canvas, r, $"{belowHorizon}cerca: {found.Name}, {found.AngularDistanceDegrees.ToString("F0", Culture)}° {where}", y + 44, 13, Palette.TextMuted, FontRegular, lines: 2);
     }
+
+    /// <summary>
+    /// One line, centered, followed by an ⓘ that says it opens a card. The text shrinks, down to <paramref name="minSize"/>, until the
+    /// two fit in the width ("Hacia la Cabellera de Berenice"); if they still do not, the line is cut at the edges, never wrapped.
+    /// The ⓘ is drawn, not a character: the HUD's font may not have it, and the system's could be a blue emoji, at night too.
+    /// </summary>
+    private void DrawWithInfo(ICanvas canvas, RectF r, string text, float y, float size, float minSize, Color color, string fontName)
+    {
+        var font = new Microsoft.Maui.Graphics.Font(fontName);
+        var available = r.Width - 40;
+        float Radius(float s) => Math.Max(7, s * 0.36f);
+        float Gap(float s) => s * 0.3f;
+
+        var textWidth = canvas.GetStringSize(text, font, size).Width;
+        while (size > minSize && textWidth + Gap(size) + 2 * Radius(size) > available)
+        {
+            size -= 1;
+            textWidth = canvas.GetStringSize(text, font, size).Width;
+        }
+
+        var radius = Radius(size);
+        var total = textWidth + Gap(size) + 2 * radius;
+        var left = r.Center.X - total / 2;
+        canvas.FontColor = color;
+        canvas.FontSize = size;
+        canvas.Font = font;
+        // A little wider than measured, so rounding never wraps the last word.
+        canvas.DrawString(text, left, y, textWidth + 8, size + 12, HorizontalAlignment.Left, VerticalAlignment.Top);
+
+        // Centered on the lowercase letters' height, roughly half the size below the top of the line box.
+        var cx = left + textWidth + Gap(size) + radius;
+        var cy = y + size * 0.62f;
+        canvas.StrokeColor = color;
+        canvas.StrokeSize = Math.Max(1.2f, radius * 0.16f);
+        canvas.DrawCircle(cx, cy, radius);
+        canvas.FillColor = color;
+        canvas.FillCircle(cx, cy - radius * 0.45f, radius * 0.14f);
+        canvas.StrokeSize = radius * 0.22f;
+        canvas.StrokeLineCap = LineCap.Round;
+        canvas.DrawLine(cx, cy - radius * 0.12f, cx, cy + radius * 0.5f);
+        canvas.StrokeLineCap = LineCap.Butt;
+    }
+
 
     /// <summary>Dark backing for the bottom text block, so the altitude ladder and star labels never run through it.</summary>
     private void DrawTextPanel(ICanvas canvas, RectF r, float y)

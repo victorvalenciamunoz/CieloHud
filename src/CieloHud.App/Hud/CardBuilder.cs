@@ -1,4 +1,5 @@
 using CieloHud.Core.Cards;
+using CieloHud.Core.Constellations;
 using CieloHud.Core.Sky;
 using CieloHud.Core.SolarSystem;
 
@@ -19,7 +20,7 @@ public sealed record CardView(string Title, string Subtitle, CardPicture? Pictur
 /// </summary>
 public sealed class CardBuilder(ISolarSystemFactsService facts, ISatelliteFactsService satellites)
 {
-    /// <summary>The seven targets and the stars have cards; constellations get theirs in a later step.</summary>
+    /// <summary>The seven targets and the stars; a constellation is not a <see cref="SkyTarget"/> and has its own <see cref="Build(Constellation, Observer)"/>.</summary>
     public static bool HasCard(SkyTarget target) => target is BodyTarget or SatelliteTarget or StarTarget;
 
     /// <param name="constellation">Where it is, with article ("la Ballena"), or null without a location.</param>
@@ -30,6 +31,20 @@ public sealed class CardBuilder(ISolarSystemFactsService facts, ISatelliteFactsS
         var star = target is StarTarget;
         return new CardView(target.Name.ToUpperInvariant(), subtitle, picture, CardTexts.Find(target.Card)?.Body, star ? "DATOS" : "AHORA", lines,
             FactsFirst: star);
+    }
+
+    /// <summary>
+    /// A constellation's card, from «¿qué es?»: its size, how much of it rises from here and its brightest stars, under «DATOS»
+    /// and before its text, as on a star's card (decision 047). No drawing yet.
+    /// </summary>
+    public static CardView Build(Constellation constellation, Observer observer)
+    {
+        ArgumentNullException.ThrowIfNull(constellation);
+        var facts = ConstellationFacts.Of(constellation.Symbol, observer);
+        var lines = FactsText.Constellation(facts, facts.BrightestStars?.Select(s => SpanishNames.Star(s)).ToList());
+        var title = SpanishNames.WithoutArticle(SpanishNames.Constellation(constellation)).ToUpperInvariant();
+        return new CardView(title, "constelación", null, CardTexts.Find(CardKey.Constellation(constellation.Symbol))?.Body, "DATOS", lines,
+            FactsFirst: true);
     }
 
     private (CardPicture? Picture, IReadOnlyList<string> Lines) Now(SkyTarget target, Observer observer, DateTimeOffset now)
