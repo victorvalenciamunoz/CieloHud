@@ -87,8 +87,11 @@ public static class HudProjection
         return new HudPoint(cx + dx, cy - dy, inView, direction);
     }
 
-    /// <summary>Components of the target direction along the camera axes: right, up (towards the zenith) and forward.</summary>
-    private static (double Right, double Up, double Forward) CameraComponents(PointingDirection pointing, double azimuthDegrees, double altitudeDegrees)
+    /// <summary>
+    /// Components of the target direction along the camera axes: right, up (towards the zenith) and forward. Also the axes of the
+    /// constellation drawings on the cards (<see cref="Cards.ConstellationShape"/>), so card and HUD agree.
+    /// </summary>
+    internal static (double Right, double Up, double Forward) CameraComponents(PointingDirection pointing, double azimuthDegrees, double altitudeDegrees)
     {
         var az0 = pointing.AzimuthDegrees * Math.PI / 180;
         var alt0 = pointing.AltitudeDegrees * Math.PI / 180;

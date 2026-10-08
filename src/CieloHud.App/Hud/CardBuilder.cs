@@ -20,7 +20,7 @@ public sealed record CardView(string Title, string Subtitle, CardPicture? Pictur
 /// </summary>
 public sealed class CardBuilder(ISolarSystemFactsService facts, ISatelliteFactsService satellites)
 {
-    /// <summary>The seven targets and the stars; a constellation is not a <see cref="SkyTarget"/> and has its own <see cref="Build(Constellation, Observer)"/>.</summary>
+    /// <summary>The seven targets and the stars; a constellation is not a <see cref="SkyTarget"/> and has its own <see cref="Build(Constellation, Observer, DateTimeOffset)"/>.</summary>
     public static bool HasCard(SkyTarget target) => target is BodyTarget or SatelliteTarget or StarTarget;
 
     /// <param name="constellation">Where it is, with article ("la Ballena"), or null without a location.</param>
@@ -35,16 +35,18 @@ public sealed class CardBuilder(ISolarSystemFactsService facts, ISatelliteFactsS
 
     /// <summary>
     /// A constellation's card, from «¿qué es?»: its size, how much of it rises from here and its brightest stars, under «DATOS»
-    /// and before its text, as on a star's card (decision 047). No drawing yet.
+    /// and before its text, as on a star's card (decision 047), under its figure as it looks now (decision 049).
     /// </summary>
-    public static CardView Build(Constellation constellation, Observer observer)
+    public static CardView Build(Constellation constellation, Observer observer, DateTimeOffset now)
     {
         ArgumentNullException.ThrowIfNull(constellation);
         var facts = ConstellationFacts.Of(constellation.Symbol, observer);
         var lines = FactsText.Constellation(facts, facts.BrightestStars?.Select(s => SpanishNames.Star(s)).ToList());
         var title = SpanishNames.WithoutArticle(SpanishNames.Constellation(constellation)).ToUpperInvariant();
-        return new CardView(title, "constelación", null, CardTexts.Find(CardKey.Constellation(constellation.Symbol))?.Body, "DATOS", lines,
-            FactsFirst: true);
+        var shape = ConstellationShape.Of(constellation.Symbol, observer, now);
+        var labels = shape.Stars.Where(s => s.Labelled).ToDictionary(s => s.Star.Designation, s => SpanishNames.Star(s.Star));
+        return new CardView(title, "constelación", new ConstellationPicture(shape, labels), CardTexts.Find(CardKey.Constellation(constellation.Symbol))?.Body,
+            "DATOS", lines, FactsFirst: true);
     }
 
     private (CardPicture? Picture, IReadOnlyList<string> Lines) Now(SkyTarget target, Observer observer, DateTimeOffset now)

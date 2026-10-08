@@ -189,5 +189,6 @@ int PrintConstellationCard(string symbol)
     System.Console.WriteLine(SkyTableFormatter.Header(options.Observer, options.Instant));
     System.Console.WriteLine(CardFormatter.Constellation(ConstellationFacts.Of(symbol, options.Observer), ConstellationExtents.Get(symbol)!,
         CardTexts.Find(CardKey.Constellation(symbol))));
+    System.Console.WriteLine(CardFormatter.ConstellationDrawing(ConstellationShape.Of(symbol, options.Observer, options.Instant)));
     return 0;
 }

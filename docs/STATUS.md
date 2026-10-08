@@ -1232,6 +1232,41 @@ Plan acordado con el usuario (2026-10-08), en PR separadas:
   En la guía, VER FICHA sigue centrado. Capturas: `docs/images/que-es-info.png` y `docs/images/ficha-constelacion.png`.
 - `dotnet test` 883 tests; build Android 0 avisos.
 
+**10.3 — El dibujo de la constelación (2026-10-08)**
+- Core `Cards/ConstellationShape` (decisión 049): la figura de d3-celestial y sus estrellas como se ven en ese momento, en grados de cielo con los ejes del HUD
+  (arriba, el cénit; derecha, hacia donde crece el acimut). Los ejes son los de la cámara de `HudProjection`, ahora compartidos.
+  - **Proyección estereográfica** centrada en el círculo más pequeño del cielo que contiene la figura (Bădoiu–Clarkson). En la Hidra, 47,7° de radio
+    (con la media de los vértices, 67,6°): sus 95,5° de punta a punta se dibujan como 101°; con la gnomónica del HUD serían 126°, con los extremos estirados ×2,2.
+  - **Estrellas**: las del catálogo dentro de los límites (`ConstellationStars.In`, también las que no están en la figura: Hatysa, Lesath, Alcyone) y las de una
+    vecina en un vértice de la figura (a < 0,05°): Alpheratz en Pegaso, Elnath en Auriga, Sabik y Yed Prior en la Serpiente, Naos en la Brújula y γ² Vel en la Popa
+    y la Quilla. **Rótulo** para las tres más brillantes de las suyas, las mismas que nombra DATOS (con la regla del HUD, magnitud < 1,7, solo 14 de 88 tendrían alguno).
+  - **Vértices sin estrella del catálogo** (más débiles que la magnitud 3), un punto tenue cada uno: 42 de 88 constelaciones no tienen ninguna estrella en el catálogo.
+  - **Horizonte**: sin línea; los trazos se cortan donde lo cruzan y lo que no ha salido se marca para pintarlo apagado.
+- App: `ConstellationPicture` y `CardDrawing.DrawConstellation`. Ancho de la ficha y alto según la forma (110-170 dp), sin escala común entre constelaciones
+  (el tamaño lo dice DATOS). Trazos como en el HUD, estrellas como puntos de luz de su color con el radio del HUD según su magnitud, nombres debajo (o encima si
+  chocan, o ninguno); lo que está bajo el horizonte, apagado. En modo noche, todo en rojo. `CardBuilder.Build(Constellation, Observer, DateTimeOffset)`: se recalcula
+  cada 10 s, así que la figura gira a lo largo de la noche.
+- Consola: `--card <símbolo>` añade el centro del dibujo (acimut y altura), su tamaño, cada estrella en grados desde el centro y la dirección desde la más brillante
+  a las rotuladas.
+- **Contraste con Stellarium Web** (montura acimutal, Humanes; comprobado por el usuario el 8 oct: «cuadra»):
+
+  | Constelación y hora (local) | Centro | CieloHud (0° hacia el cénit, 90° a la derecha) |
+  |---|---|---|
+  | Orión, 9 oct 7:00 | S (186°), 55° | de pie: de Rigel a Betelgeuse hacia 331,3°, a Bellatrix hacia 353,7° |
+  | Osa Mayor, 8 oct 22:30 | N (343°), 8° | baja, con el mango a la izquierda: de Alioth a Dubhe hacia 98,3°, a Alkaid hacia 277,3° |
+  | Hidra, 9 oct 7:30 | E (111°), 0° | saliendo, casi de pie: de Alphard a γ Hya hacia 207,6°, la cola sin salir |
+  | Serpiente, 8 oct 20:45 | SO (235°), 46° | los dos trozos; de Sabik a Unukalhai hacia 82,6° |
+
+  Quedan como test de integración (0,5°).
+- Tests unitarios: la distancia al centro es la estereográfica (2·tan(θ/2)); cerca del centro, grados de cielo (±3 %); cada estrella en la misma dirección que en el HUD
+  apuntando al centro (Orión de pie y tumbado, Lira cerca del cénit, Osa Mayor, Pegaso); Betelgeuse a la izquierda y más alta que Rigel al salir; la Hidra acotada;
+  las 88 desde Humanes, el polo norte, el ecuador y Sídney sin `NaN`; la Serpiente en dos trozos; los cortes en el horizonte; qué estrellas entran y cuáles llevan rótulo.
+- **Probado en el OPPO** (8 oct, 13:31, de día, «¿qué es?» hacia Orión, casi todo bajo el horizonte): «Hacia Orión ⓘ» abre la ficha con la figura igual que la del HUD
+  en ese momento, Betelgeuse anaranjada, Rigel azulada, Rigel, Betelgeuse y Bellatrix rotuladas; solo la maza, ya salida, con el trazo normal. En NOCHE, todo en rojo.
+  Captura: `docs/images/ficha-constelacion-dibujo.png`.
+- Pega conocida: los nombres no evitan los trazos, solo otros nombres y estrellas (en Orión, «Betelgeuse» cruza dos líneas); se lee bien.
+- `dotnet test` 908 tests; build Android 0 avisos.
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.

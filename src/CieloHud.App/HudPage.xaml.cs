@@ -519,7 +519,7 @@ public partial class HudPage : ContentPage
         var other = constellation != _cardConstellation;
         _cardTarget = null;
         _cardConstellation = constellation;
-        Present(CardBuilder.Build(constellation, observer), other, now);
+        Present(CardBuilder.Build(constellation, observer, now), other, now);
     }
 
     /// <param name="other">A card about something else than the one open (or none): it opens small.</param>
