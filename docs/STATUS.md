@@ -1373,3 +1373,4 @@ Priorizadas por el usuario aunque la fase actual sea la 4.
 - Sin instalarla en el móvil (decidido por el usuario): se sigue probando con la build de Debug.
 - Publicada el 8 oct como *pre-release* `v0.5.0` (desde `main` tras la PR #46): `CieloHud-0.5.0.apk`, firma verificada (`CN=CieloHud`),
   SHA-256 `a5706575e8f78f850bbabcbcda2361d80e5462a8695d1b4c22f9cce0b5feff25`.
+- La release `v0.4.0` se retiró de GitHub el mismo día a petición del usuario, para que no se descargara por error; queda su etiqueta.
