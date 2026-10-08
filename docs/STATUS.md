@@ -1111,6 +1111,15 @@ Tejat y Mebsuta), Auriga (Menkalinan, Mahasim, Hassaleh y Almaaz), el Can Menor 
 - Aprobados por el usuario sin cambios. Pendientes: 95 estrellas y 88 constelaciones.
 - `dotnet test` 794 tests; build Android 0 avisos. Sin prueba en el móvil: la ficha no cambia y los textos pasan las mismas reglas.
 
+**Lote 4 (2026-10-08)**: 15 estrellas del Can Mayor (Adhara, Wezen, Mirzam, Aludra, Furud y Ómicron 2), la Popa (Naos, Pi y Tureis), la Vela (Gamma 2,
+Suhail y Mu), la Paloma (Phact) y Erídano (Cursa y Zaurak). De 229 a 371 caracteres.
+- Fuentes: las páginas *Stars* de Jim Kaler, una por estrella.
+- Sin dar lo que las fuentes no fijan: la masa de Naos (de 22 a 60 soles según el estudio; Kaler revisó su distancia en 2008); quién apodó Regor
+  a Gamma 2 de la Vela (Kaler solo cuenta el homenaje a Roger Chaffee). Mu de la Vela no se ve al norte de los 40° (Humanes está a 40,25°): el texto lo dice.
+- Revisión con el usuario: en Phact, «la paloma» en vez de «la paloma de collar». Kaler da «the Ring Dove» y Wikipedia en español, «la paloma» sin fuente;
+  «la paloma» es cierto con las dos y no obliga a elegir la especie. El resto, aprobados sin cambios. Pendientes: 80 estrellas y 88 constelaciones.
+- `dotnet test` 794 tests; build Android 0 avisos. Sin prueba en el móvil, como el lote 3.
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.
