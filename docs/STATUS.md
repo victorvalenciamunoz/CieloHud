@@ -1291,6 +1291,8 @@ Acuario, Capricornio, el Pez Austral, el Escultor, el Horno, el Caballito, el De
   «se aprecia mejor con prismáticos» (NASA), sin decir que se vea a simple vista.
 - Las inventadas en los siglos XVI-XVIII (la Jirafa, el Lagarto, el Escultor, el Horno, el Fénix, la Grulla) cuentan quién y por qué, y que no tienen leyenda
   cuando la fuente lo dice. El Horno corrige un tópico con Ridpath: no se dedicó a Lavoisier, que tenía 13 años.
+- Capricornio: Ridpath atribuye la palabra inglesa *panic* al grito de Pan; la RAE (comprobada por el usuario) da para «pánico» los ruidos sin causa conocida
+  de montes y cuevas que se atribuían a Pan, y el texto dice eso.
 - Pendientes: 53 constelaciones.
 - `dotnet test` 909 tests; build Android 0 avisos.
 
