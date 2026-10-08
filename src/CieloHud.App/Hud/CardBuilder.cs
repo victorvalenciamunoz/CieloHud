@@ -9,10 +9,14 @@ namespace CieloHud.App.Hud;
 /// What a card shows: name, what it is and where, its drawing (null if it has none), its written text (null if not written
 /// yet), and its facts under <paramref name="FactsHeader"/>: "AHORA" when they change with the moment, "DATOS" for a star.
 /// <paramref name="FactsFirst"/>: a star's facts are three short lines and go before its text, so the folded card shows
-/// them all (decision 046); the other cards keep the text first.
+/// them all (decision 046); the other cards keep the text first. <paramref name="History"/>: the dated events of the object,
+/// oldest first, listed at the end under HISTORIA (decision 052); empty when it has none.
 /// </summary>
 public sealed record CardView(string Title, string Subtitle, CardPicture? Picture, string? Text, string FactsHeader, IReadOnlyList<string> Now,
-    bool FactsFirst);
+    bool FactsFirst, IReadOnlyList<HistoryLine> History);
+
+/// <summary>An entry of HISTORIA as the card lists it: "7 oct 1959" and what happened.</summary>
+public sealed record HistoryLine(string Date, string Text);
 
 /// <summary>
 /// Puts a card together from Core: the reviewed text (<see cref="CardTexts"/>), the facts of the moment, already in
@@ -30,8 +34,11 @@ public sealed class CardBuilder(ISolarSystemFactsService facts, ISatelliteFactsS
         var (picture, lines) = Now(target, observer, now);
         var star = target is StarTarget;
         return new CardView(target.Name.ToUpperInvariant(), subtitle, picture, CardTexts.Find(target.Card)?.Body, star ? "DATOS" : "AHORA", lines,
-            FactsFirst: star);
+            FactsFirst: star, History(target.Card));
     }
+
+    private static IReadOnlyList<HistoryLine> History(CardKey key) =>
+        CardHistory.For(key).Select(e => new HistoryLine(FactsText.HistoryDate(e.Date), e.Text.Body)).ToList();
 
     /// <summary>
     /// A constellation's card, from «¿qué es?»: its size, how much of it rises from here and its brightest stars, under «DATOS»
@@ -45,8 +52,9 @@ public sealed class CardBuilder(ISolarSystemFactsService facts, ISatelliteFactsS
         var title = SpanishNames.WithoutArticle(SpanishNames.Constellation(constellation)).ToUpperInvariant();
         var shape = ConstellationShape.Of(constellation.Symbol, observer, now);
         var labels = shape.Stars.Where(s => s.Labelled).ToDictionary(s => s.Star.Designation, s => SpanishNames.Star(s.Star));
-        return new CardView(title, "constelación", new ConstellationPicture(shape, labels), CardTexts.Find(CardKey.Constellation(constellation.Symbol))?.Body,
-            "DATOS", lines, FactsFirst: true);
+        var key = CardKey.Constellation(constellation.Symbol);
+        return new CardView(title, "constelación", new ConstellationPicture(shape, labels), CardTexts.Find(key)?.Body,
+            "DATOS", lines, FactsFirst: true, History(key));
     }
 
     private (CardPicture? Picture, IReadOnlyList<string> Lines) Now(SkyTarget target, Observer observer, DateTimeOffset now)
