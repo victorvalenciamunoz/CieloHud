@@ -1295,6 +1295,19 @@ Acuario, Capricornio, el Pez Austral, el Escultor, el Horno, el Caballito, el De
   de montes y cuevas que se atribuían a Pan, y el texto dice eso.
 - Pendientes: 53 constelaciones.
 - `dotnet test` 909 tests; build Android 0 avisos.
+- Aprobados por el usuario (PR #45), con un cambio: «pánico» se explica como la RAE (comprobada por el usuario), no como Ridpath.
+
+**10.6 — Textos, lote 3 (2026-10-08)**: invierno y primavera (18): Auriga, el Can Menor, el Unicornio, la Liebre, la Paloma, Erídano, el Cincel, la Popa,
+el Lince, Cáncer, la Hidra, el Sextante, la Copa, el Cuervo, Leo Menor, la Brújula, la Máquina Neumática y la Vela. De 306 a 388 caracteres.
+- Fuentes: *Star Tales* de Ian Ridpath (la Copa y el Cuervo comparten página; la Popa usa también la del Argo).
+- Mitos repartidos: la Hidra, Hércules y Yolao; Cáncer, el cangrejo de esa lucha; la Copa y el Cuervo, el castigo de Apolo, cada una con su parte; la Popa,
+  el Argo y su división; la Vela, las letras de Lacaille y la Falsa Cruz; la Brújula, que no es parte del Argo.
+- Sin repetir DATOS: la Hidra no dice que sea la más grande (ni la más larga, como Alphard); Erídano no da su extensión de norte a sur.
+- **Dos textos de estrellas corregidos**, porque sus fechas chocaban con Ridpath, la fuente de la historia (decisión 050): Naos decía que el Argo se dividió
+  «en el siglo XIX» (Kaler) y Ridpath da Lacaille, 1756; Phact, que la Paloma era «del siglo XVII» (Kaler) y Ridpath, finales del XVI. Ahora sin fecha
+  («con el tiempo», «una constelación moderna»), con las dos fuentes citadas.
+- Pendientes: 35 constelaciones.
+- `dotnet test` 909 tests; build Android 0 avisos.
 
 ## Mejoras fuera de fase
 
@@ -1358,3 +1371,5 @@ Priorizadas por el usuario aunque la fase actual sea la 4.
   sin desinstalar.
 - README: «Instalar en tu móvil» dice qué trae la 0.5.0, y la fila de Fichas, cuántas constelaciones tienen ya texto.
 - Sin instalarla en el móvil (decidido por el usuario): se sigue probando con la build de Debug.
+- Publicada el 8 oct como *pre-release* `v0.5.0` (desde `main` tras la PR #46): `CieloHud-0.5.0.apk`, firma verificada (`CN=CieloHud`),
+  SHA-256 `a5706575e8f78f850bbabcbcda2361d80e5462a8695d1b4c22f9cce0b5feff25`.
