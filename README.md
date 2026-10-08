@@ -152,7 +152,7 @@ docs/                   Visión, plan por fases, estado y decisiones (en españo
 ## Instalar en tu móvil
 
 Descarga el APK de la [última versión](https://github.com/victorvalenciamunoz/CieloHud/releases) desde el propio móvil (Android 8.0 o posterior) y ábrelo.
-La 0.5.0 trae las fichas: la Luna, los planetas, la ISS, las 155 estrellas y las 88 constelaciones, 35 de ellas con su texto (las demás llegarán en la próxima versión).
+La 0.5.1 trae las fichas completas (Fase 5): la Luna, los planetas, la ISS, las 155 estrellas y las 88 constelaciones, cada una con su texto.
 Android pedirá permiso para instalar apps de origen desconocido, y Play Protect puede avisar de que no la conoce: es normal en una app que no está en Google Play.
 
 Al abrirla pedirá la **ubicación** (para calcular tu cielo; no sale del móvil). Si activas **AVISOS**, también las **notificaciones** y, para que el aviso

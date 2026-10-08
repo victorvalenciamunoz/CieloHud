@@ -1417,3 +1417,10 @@ Priorizadas por el usuario aunque la fase actual sea la 4.
 - Publicada el 8 oct como *pre-release* `v0.5.0` (desde `main` tras la PR #46): `CieloHud-0.5.0.apk`, firma verificada (`CN=CieloHud`),
   SHA-256 `a5706575e8f78f850bbabcbcda2361d80e5462a8695d1b4c22f9cce0b5feff25`.
 - La release `v0.4.0` se retiró de GitHub el mismo día a petición del usuario, para que no se descargara por error; queda su etiqueta.
+
+### Versión descargable 0.5.1, la primera que no es pre-release (2026-10-08)
+
+- A petición del usuario, al cerrar la Fase 5: las fichas con los 250 textos (la 0.5.0 llevaba 35 de las 88 constelaciones).
+- **Versión** 0.5.1, `ApplicationVersion` 501. Compilada desde `main` con `scripts/publish-apk.ps1` y la misma clave: actualiza la 0.5.0 sin desinstalar.
+- **Versión normal, no *pre-release***: la decisión 032 reserva *pre-release* para cuando la fase está abierta, y la 5 está cerrada. Así GitHub la marca como *Latest*.
+- README: «Instalar en tu móvil» dice qué trae la 0.5.1.
