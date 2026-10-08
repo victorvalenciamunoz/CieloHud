@@ -1139,6 +1139,15 @@ y Sagitario (Kaus Australis, Nunki, Ascella, Kaus Media, Kaus Borealis, Albaldah
 - Aprobados por el usuario sin cambios. Pendientes: 42 estrellas y 88 constelaciones.
 - `dotnet test` 794 tests; build Android 0 avisos. Sin prueba en el móvil, como los lotes 3 a 5.
 
+**Lote 7 (2026-10-08)**: 22 estrellas de Ofiuco (Rasalhague, Sabik, Zeta, Cebalrai y Yed Prior), la Serpiente (Unukalhai), Hércules (Kornephoros y Zeta),
+el Águila (Tarazed y Okab), el Cisne (Sadr, Aljanah y Fawaris), Centauro (Menkent, Gamma, Eta, Zeta e Iota), el Lobo (Alfa, Beta y Gamma) y el Altar (Alfa).
+De 250 a 344 caracteres.
+- Fuentes: las páginas *Stars* de Jim Kaler, una por estrella. Okab es «Deneb al Okab Australis» en Kaler (la «Borealis» es Épsilon del Águila).
+- Kaler se contradice sobre cuál de las alas del Cisne está al este; comprobado con las coordenadas (Aljanah, al este), los textos dicen «una de las alas».
+- Gamma de Centauro, Gamma del Lobo y el Altar dicen desde qué latitud se ven (decisión 046).
+- Aprobados por el usuario sin cambios. Pendientes: 20 estrellas y 88 constelaciones.
+- `dotnet test` 794 tests; build Android 0 avisos. Sin prueba en el móvil, como los lotes 3 a 6.
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.
