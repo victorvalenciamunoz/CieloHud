@@ -170,6 +170,26 @@ public static class CardFormatter
         return sb.ToString();
     }
 
+    /// <summary>The HISTORIA section as the card lists it (decision 052), oldest first; nothing when the object has none.</summary>
+    public static string History(IReadOnlyList<HistoryEntry> entries)
+    {
+        if (entries.Count == 0)
+            return "";
+        var sb = new StringBuilder();
+        sb.AppendLine("  HISTORIA");
+        foreach (var entry in entries)
+        {
+            var date = FactsText.HistoryDate(entry.Date).Replace(' ', ' ');
+            var first = true;
+            foreach (var line in Wrap(entry.Text.Body, 86))
+            {
+                sb.AppendLine($"  {(first ? date : ""),-12}  {line.Replace(' ', ' ')}");
+                first = false;
+            }
+        }
+        return sb.ToString();
+    }
+
     /// <summary>The written text, wrapped, then a blank line; a note when it is not written yet.</summary>
     private static void AppendText(StringBuilder sb, CardText? text)
     {

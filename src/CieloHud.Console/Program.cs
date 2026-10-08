@@ -155,6 +155,7 @@ int PrintCard(CelestialBody body)
     if (body == CelestialBody.Saturn)
         System.Console.WriteLine(CardFormatter.SaturnRings(facts.SaturnRings(options.Instant), options.Instant));
     System.Console.WriteLine(CardFormatter.Disc(facts.Disc(body, options.Observer, options.Instant)));
+    System.Console.Write(CardFormatter.History(CardHistory.For(CardKey.Body(body))));
     return 0;
 }
 
@@ -175,12 +176,14 @@ async Task<int> PrintIssCardAsync()
     System.Console.WriteLine(SkyTableFormatter.Header(options.Observer, options.Instant));
     System.Console.WriteLine(CardFormatter.Iss(facts.Satellite(tle, options.Observer, options.Instant), CardTexts.Find(CardKey.Iss)));
     System.Console.WriteLine(SkyTableFormatter.TleInfo(tle, options.Instant));
+    System.Console.Write(CardFormatter.History(CardHistory.For(CardKey.Iss)));
     return 0;
 }
 
 int PrintStarCard(CieloHud.Core.Stars.Star star)
 {
     System.Console.WriteLine(CardFormatter.Star(star, CardTexts.Find(CardKey.Star(star))));
+    System.Console.Write(CardFormatter.History(CardHistory.For(CardKey.Star(star))));
     return 0;
 }
 
@@ -190,5 +193,6 @@ int PrintConstellationCard(string symbol)
     System.Console.WriteLine(CardFormatter.Constellation(ConstellationFacts.Of(symbol, options.Observer), ConstellationExtents.Get(symbol)!,
         CardTexts.Find(CardKey.Constellation(symbol))));
     System.Console.WriteLine(CardFormatter.ConstellationDrawing(ConstellationShape.Of(symbol, options.Observer, options.Instant)));
+    System.Console.Write(CardFormatter.History(CardHistory.For(CardKey.Constellation(symbol))));
     return 0;
 }

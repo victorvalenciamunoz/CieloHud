@@ -1,6 +1,6 @@
 # Estado
 
-Fase actual: 6, sin planificar (ver PLAN.md). Fases 1 y 2 completadas el 2026-10-02; fase 3 el 2026-10-05; fase 4 el 2026-10-06; fase 5 el 2026-10-08.
+Fase actual: 6, efemérides: la historia de cada objeto (plan acordado el 2026-10-08; ver PLAN.md y la sección de la fase). Fases 1 y 2 completadas el 2026-10-02; fase 3 el 2026-10-05; fase 4 el 2026-10-06; fase 5 el 2026-10-08.
 
 ## Hecho
 
@@ -1351,6 +1351,38 @@ o atribuciones (Naos, Phact, Cor Caroli e Izar).
   Hipparcos y SIMBAD (estrellas); Levin, Ridpath y el CDS (áreas y límites de las constelaciones); Stellarium Web (dibujos, comprobado por el usuario); el OPPO.
 - 909 tests en verde, también en el CI. Decisiones 036-050.
 - Fuera de la fase, a petición del usuario: la versión descargable 0.5.0.
+
+## Fase 6 — Efemérides: la historia de cada objeto
+
+Plan acordado con el usuario (2026-10-08). Primero se propuso «tal día como hoy» con una ventana de ±7 días y una línea de aviso en la ficha; el usuario
+propuso en su lugar mostrar siempre todas las fechas de cada objeto, y se adoptó (decisión 052, corrige la 042): una sección **HISTORIA** al final de la ficha,
+de la más antigua a la más reciente, sin frases que dependan del día. Nombre provisional, pendiente de que el usuario compruebe «efeméride» en el DLE.
+Criterios de los textos: decisión 051 (como mucho 200 caracteres y 4 entradas por objeto; lo que pasa a HISTORIA sale del texto de la ficha).
+Pasos, en PR separadas:
+- **6.1, Core**: formato, reglas con tests, consola y tres entradas de ejemplo (Luna 3, la estrella de Kepler y Galileo en Júpiter).
+- **6.2, la ficha en la app**: la sección HISTORIA al final, también en rojo de noche.
+- **6.3 a 6.5, las entradas por lotes**, cada uno en su PR con una casilla por texto: 1) Luna, Mercurio, Venus e ISS; 2) Marte, Júpiter y Saturno;
+  3) estrellas y constelaciones. Unas 40 en total. Fuentes: NASA y ESA para misiones y fechas, *Star Tales* de Ian Ridpath para la historia, las páginas
+  *Stars* de Jim Kaler para las estrellas.
+
+### Paso 1 — HISTORIA en Core (2026-10-08)
+
+- **Formato** (decisión 052): un Markdown por entrada en `src/CieloHud.Core/Cards/Texts/es/history/<targets|stars|constellations>/<aaaa-mm-dd>-<id>.md`,
+  con el formato de los textos de las fichas (`# Título`, el texto y `## Fuentes`). La fecha y el objeto salen del nombre del fichero.
+- Core `Cards/CardHistory`: `All`, `For(CardKey)` (de la más antigua a la más reciente; vacía si no hay) y `FromPath`. `CardTexts` comparte el lector y salta
+  la carpeta `history/`. `FactsText.HistoryDate`: «7 oct 1959», con espacios de no separación.
+- **Reglas comprobadas por los tests** (decisión 051): nombre de fichero válido (carpeta, fecha que existe, objeto), objeto existente, como mucho
+  200 caracteres y un solo párrafo, como mucho 4 entradas por objeto, fecha pasada, texto plano, nada que dependa del día en que se lee («hace N años»,
+  «se cumplen», «aniversario», «hoy»…), el año en alguna fuente y «juliano» en las fechas anteriores al 15 oct 1582.
+- **Tres entradas de ejemplo**, con el tono aprobado por el usuario y recortadas a 200 caracteres:
+  - Luna, 7 oct 1959: Luna 3 fotografía por primera vez la cara oculta (NASA NSSDCA y NASA Science).
+  - Júpiter, 7 ene 1610: Galileo ve tres «estrellas» junto a Júpiter (NASA, *415 Years Ago*).
+  - Ofiuco, 9 oct 1604: aparece la estrella de Kepler (NASA, *420 Years Ago*; Ridpath).
+- Retocados los textos de **Júpiter** (sin «Galileo descubrió en 1610 sus cuatro lunas mayores…») y **Ofiuco** (sin la estrella de Kepler), que ahora
+  cuenta su HISTORIA. Sus fuentes, sin las citas que ya no usan.
+- Consola: `--card` termina con la sección HISTORIA cuando el objeto tiene entradas (`--card jupiter`, `--card Oph`).
+- La app aún no muestra HISTORIA (paso 6.2).
+- `dotnet test` 933 tests; build Android 0 avisos.
 
 ## Mejoras fuera de fase
 

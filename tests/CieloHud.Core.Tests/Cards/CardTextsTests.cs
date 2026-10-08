@@ -95,16 +95,7 @@ public class CardTextsTests
     public void EveryText_IsForAKnownObject()
     {
         foreach (var key in CardTexts.All.Keys)
-        {
-            var known = key.Kind switch
-            {
-                CardKind.Target => key.Id == CardKey.IssId || Enum.TryParse<CelestialBody>(key.Id, out _),
-                CardKind.Star => BrightStars.All.Any(s => s.Designation == key.Id),
-                CardKind.Constellation => ConstellationFigures.Get(key.Id) is not null,
-                _ => false,
-            };
-            Assert.True(known, $"No object for card {key}.");
-        }
+            Assert.True(KnownCards.Exists(key), $"No object for card {key}.");
     }
 
     /// <summary>Written for the HUD: short, plain text, with sources, and nothing that changes with the date (that is computed).</summary>
