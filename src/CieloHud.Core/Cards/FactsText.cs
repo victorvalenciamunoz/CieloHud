@@ -267,6 +267,12 @@ public static class FactsText
         };
     }
 
+    /// <summary>
+    /// The date of an entry of HISTORIA, as the card lists it: "7 oct 1959", "4 jul 1054". Non-breaking spaces keep it on one line.
+    /// </summary>
+    public static string HistoryDate(DateOnly date) =>
+        $"{date.Day.ToString(Culture)}{Space}{Months[date.Month - 1]}{Space}{date.Year.ToString(Culture)}";
+
     /// <summary>8.64 → 8.6, 432.6 → 430, 1157 → 1200 (or 1100 rounding down).</summary>
     private static double TwoFigures(double x, bool roundDown = false)
     {

@@ -277,4 +277,14 @@ public class FactsTextTests
         Assert.Throws<ArgumentException>(() => FactsText.Constellation(Constellation(stars: [rigel]), null));
         Assert.Throws<ArgumentException>(() => FactsText.Constellation(Constellation(stars: [rigel]), ["Rigel", "Saiph"]));
     }
+
+    [Theory]
+    [InlineData(1959, 10, 7, "7 oct 1959")]
+    [InlineData(1054, 7, 4, "4 jul 1054")]
+    [InlineData(2000, 11, 2, "2 nov 2000")]
+    [InlineData(1610, 1, 17, "17 ene 1610")]
+    public void HistoryDate_DayMonthAndYear_OnOneLine(int year, int month, int day, string expected)
+    {
+        Assert.Equal(expected.Replace(' ', Space), FactsText.HistoryDate(new DateOnly(year, month, day)));
+    }
 }

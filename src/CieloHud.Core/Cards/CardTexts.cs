@@ -47,7 +47,7 @@ public static partial class CardTexts
     /// <summary>Two or three sentences: what fits under the HUD on a phone without scrolling. Checked by the tests.</summary>
     public const int MaxBodyLength = 400;
 
-    private const string ResourcePrefix = "cards/es/";
+    internal const string ResourcePrefix = "cards/es/";
     private const char NoBreakSpace = ' ';
 
     private static readonly Lazy<IReadOnlyDictionary<CardKey, CardText>> Loaded = new(Load);
@@ -146,7 +146,11 @@ public static partial class CardTexts
             var path = name.Replace('\\', '/');
             if (!path.StartsWith(ResourcePrefix, StringComparison.Ordinal))
                 continue;
-            var key = KeyFromPath(path[ResourcePrefix.Length..]);
+            var relative = path[ResourcePrefix.Length..];
+            // The dated entries of an object's history are read by CardHistory (decision 052).
+            if (relative.StartsWith(CardHistory.Folder, StringComparison.Ordinal))
+                continue;
+            var key = KeyFromPath(relative);
             try
             {
                 cards.Add(key, Parse(Read(assembly, name)));
@@ -164,17 +168,19 @@ public static partial class CardTexts
         var parts = path.Split('/');
         if (parts.Length != 2 || !parts[1].EndsWith(".md", StringComparison.Ordinal))
             throw new FormatException($"Card '{path}' is not '<folder>/<id>.md'.");
-        var kind = parts[0] switch
-        {
-            "targets" => CardKind.Target,
-            "stars" => CardKind.Star,
-            "constellations" => CardKind.Constellation,
-            _ => throw new FormatException($"Unknown card folder '{parts[0]}'."),
-        };
-        return new CardKey(kind, parts[1][..^3].Replace('-', ' '));
+        return new CardKey(KindOfFolder(parts[0]), parts[1][..^3].Replace('-', ' '));
     }
 
-    private static string Read(Assembly assembly, string name)
+    /// <summary>The folder of each kind of card, here and under <see cref="CardHistory.Folder"/>.</summary>
+    internal static CardKind KindOfFolder(string folder) => folder switch
+    {
+        "targets" => CardKind.Target,
+        "stars" => CardKind.Star,
+        "constellations" => CardKind.Constellation,
+        _ => throw new FormatException($"Unknown card folder '{folder}'."),
+    };
+
+    internal static string Read(Assembly assembly, string name)
     {
         using var stream = assembly.GetManifestResourceStream(name)!;
         using var reader = new StreamReader(stream, Encoding.UTF8);
