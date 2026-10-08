@@ -1424,3 +1424,5 @@ Priorizadas por el usuario aunque la fase actual sea la 4.
 - **Versión** 0.5.1, `ApplicationVersion` 501. Compilada desde `main` con `scripts/publish-apk.ps1` y la misma clave: actualiza la 0.5.0 sin desinstalar.
 - **Versión normal, no *pre-release***: la decisión 032 reserva *pre-release* para cuando la fase está abierta, y la 5 está cerrada. Así GitHub la marca como *Latest*.
 - README: «Instalar en tu móvil» dice qué trae la 0.5.1.
+- Publicada el 8 oct como `v0.5.1`, versión normal y *Latest* (desde `main` tras la PR #50): `CieloHud-0.5.1.apk`, firma verificada (`CN=CieloHud`),
+  SHA-256 `0f6aa2cb30d09fb86c102123ccbe3048c6fed8df853d87f310b2cabe6eb88d82`. La release `v0.5.0` se retiró a la vez, a petición del usuario; queda su etiqueta.
