@@ -1332,7 +1332,7 @@ el Octante, la Mesa, el Camaleón, el Pez Volador, el Pintor, el Dorado, el Ret�
 - Casi todas son modernas (los navegantes holandeses o Lacaille) y cuentan quién las inventó y por qué; varias dicen que no tienen leyenda porque Ridpath lo dice.
 
 **Paso 10 cerrado (2026-10-08)**: las 88 constelaciones tienen ficha en «¿qué es?», con sus datos, su dibujo del momento y su texto, en 5 lotes y 5 PR
-(#44, #45, #47, #48 y la de este lote), revisados uno a uno por el usuario. El test de pendientes pasa a ser una regla: `EveryConstellation_HasAText`, que falla
+(#44, #45, #47, #48 y #49), revisados uno a uno por el usuario. El test de pendientes pasa a ser una regla: `EveryConstellation_HasAText`, que falla
 nombrando la constelación si alguna se queda sin texto. Al contrastar con Ridpath se corrigieron cuatro textos de estrellas que seguían a Kaler en fechas
 o atribuciones (Naos, Phact, Cor Caroli e Izar).
 - `dotnet test` 909 tests; build Android 0 avisos.
