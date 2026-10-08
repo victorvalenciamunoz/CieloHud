@@ -1156,7 +1156,7 @@ Aries (Hamal y Sheratan), la Ballena (Diphda y Menkar), Acuario (Sadalmelik y Sa
 - Las esquinas del Gran Cuadrado de Pegaso, sin orientación («una de las esquinas»).
 - Aprobados por el usuario sin cambios.
 
-**Paso 9 cerrado (2026-10-08)**: las 155 estrellas tienen su texto, en 8 lotes y 8 PR (#32, #33, #35-#39 y la del lote 8), todos revisados uno a uno
+**Paso 9 cerrado (2026-10-08)**: las 155 estrellas tienen su texto, en 8 lotes y 8 PR (#32, #33 y #35-#40), todos revisados uno a uno
 por el usuario. El test de pendientes de estrellas pasa a ser una regla: `EveryStar_HasAText`, que falla nombrando la estrella si alguna del catálogo
 se queda sin texto. Quedan los 88 textos de las constelaciones (paso 10).
 - `dotnet test` 795 tests; build Android 0 avisos.
