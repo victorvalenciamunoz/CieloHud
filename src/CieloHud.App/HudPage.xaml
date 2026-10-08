@@ -47,7 +47,8 @@
             <Grid RowDefinitions="Auto,Auto" RowSpacing="10">
                 <!-- Height set in code to fit the content (a ScrollView alone takes all the height it is allowed). -->
                 <ScrollView x:Name="CardScroll">
-                    <VerticalStackLayout x:Name="CardContent" Spacing="8">
+                    <!-- Right padding: the gutter of the scroll bar, which is always shown while the content does not fit (decision 052). -->
+                    <VerticalStackLayout x:Name="CardContent" Spacing="8" Padding="0,0,10,0">
                         <Label x:Name="CardTitle" FontFamily="ChakraPetchBold" FontSize="20" CharacterSpacing="1"
                                TextColor="{DynamicResource HudLocked}" />
                         <Label x:Name="CardSubtitle" FontFamily="OpenSansRegular" FontSize="12" Margin="0,-6,0,0"
@@ -59,6 +60,10 @@
                         <Label x:Name="CardNowHeader" Text="AHORA" FontFamily="ChakraPetchBold" FontSize="11" CharacterSpacing="1"
                                Margin="0,4,0,0" TextColor="{DynamicResource HudTextSoft}" />
                         <VerticalStackLayout x:Name="CardNow" Spacing="3" />
+                        <!-- The object's dated events, always, oldest first (decision 052); hidden when it has none. -->
+                        <Label x:Name="CardHistoryHeader" Text="HISTORIA" FontFamily="ChakraPetchBold" FontSize="11" CharacterSpacing="1"
+                               Margin="0,4,0,0" TextColor="{DynamicResource HudTextSoft}" />
+                        <VerticalStackLayout x:Name="CardHistoryList" Spacing="6" />
                     </VerticalStackLayout>
                 </ScrollView>
                 <Grid Grid.Row="1" x:Name="CardFooter" ColumnDefinitions="Auto,*,Auto">

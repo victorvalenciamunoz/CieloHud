@@ -1383,6 +1383,31 @@ Pasos, en PR separadas:
 - Consola: `--card` termina con la sección HISTORIA cuando el objeto tiene entradas (`--card jupiter`, `--card Oph`).
 - La app aún no muestra HISTORIA (paso 6.2).
 - `dotnet test` 933 tests; build Android 0 avisos.
+- Aprobado por el usuario (PR #52).
+
+### Paso 2 — HISTORIA en la ficha (2026-10-08)
+
+- `Hud/CardBuilder`: la ficha lleva las entradas de su objeto (`HistoryLine`: fecha corta y texto), en los 7 objetivos, las estrellas y las constelaciones.
+- `HudPage`: al final de la ficha, el título **HISTORIA** (como AHORA o DATOS) y un párrafo por entrada: «7 oct 1959 · La sonda Luna 3…», la fecha en
+  seminegrita y en el color suave de los títulos. Sin entradas, no sale nada. En las fichas con DATOS primero (estrellas y constelaciones), el texto queda
+  entre DATOS y HISTORIA.
+- **Barra de desplazamiento siempre visible** cuando el contenido no cabe (`Platforms/Android/CardScrollBar`), con el color de la paleta y un margen
+  a la derecha del contenido para no pisar el texto (decisión 052). Antes de Android 10, con el gris del sistema.
+- Corregido al probarlo: el texto de las entradas salía más apretado y en otra letra; en una etiqueta con tramos, Android toma la fuente y el interlineado
+  de cada tramo, no de la etiqueta.
+- Validado en el OPPO (Android 16, Debug, de día):
+
+  | Prueba | Resultado |
+  |---|---|
+  | Luna, VER FICHA | HISTORIA al final; con VER MÁS hay que desplazar, y la barra lo indica desde que se abre; «7 oct 1959 · La sonda Luna 3…» con la letra del texto |
+  | Júpiter, VER FICHA | el texto ya sin Galileo; AHORA con sus lunas y HISTORIA con «7 ene 1610 · Galileo ve con su telescopio…» |
+  | NOCHE con la ficha de Júpiter abierta | HISTORIA, la fecha y la barra en rojo; al salir, vuelven los colores |
+  | «¿QUÉ ES?», Cáncer | DATOS, luego su texto, y sin HISTORIA (no tiene entradas) |
+
+- Sin probar en el móvil: la ficha de Ofiuco con su HISTORIA (en «¿qué es?» hay que encontrarla apuntando, y ese modo no guía). Usa el mismo código
+  que la de Cáncer y que la sección de la Luna; la consola la muestra (`--card Oph`).
+- Captura: `docs/images/ficha-historia.png`.
+- `dotnet test` 933 tests; build Android 0 avisos.
 
 ## Mejoras fuera de fase
 

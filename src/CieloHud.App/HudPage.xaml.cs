@@ -142,6 +142,9 @@ public partial class HudPage : ContentPage
         _drawable.Palette = _nightMode.Palette;
         _cardDrawing.Palette = _nightMode.Palette;
         CardPictureView.Invalidate();
+#if ANDROID
+        Platforms.Android.CardScrollBar.Apply(CardScroll, _nightMode.Palette.TextMuted);
+#endif
         StyleChips();
         StyleChip(NightButton, _nightMode.IsOn);
         StyleChip(AlertsButton, _alerts.IsOn);
@@ -529,7 +532,7 @@ public partial class HudPage : ContentPage
         CardSubtitle.Text = view.Subtitle;
         _cardDrawing.Picture = view.Picture;
         CardPictureView.IsVisible = view.Picture is not null;
-        CardPictureView.HeightRequest = CardDrawing.HeightFor(view.Picture, CardContentWidth);
+        CardPictureView.HeightRequest = CardDrawing.HeightFor(view.Picture, CardContentWidth - CardContent.Padding.HorizontalThickness);
         CardPictureView.Invalidate();
         CardBody.Text = view.Text;
         CardBody.IsVisible = view.Text is not null;
@@ -543,6 +546,10 @@ public partial class HudPage : ContentPage
             label.SetDynamicResource(Label.TextColorProperty, "HudText");
             CardNow.Children.Add(label);
         }
+        CardHistoryHeader.IsVisible = view.History.Count > 0;
+        CardHistoryList.Children.Clear();
+        foreach (var entry in view.History)
+            CardHistoryList.Children.Add(HistoryLabel(entry));
 
         var opening = !CardPanel.IsVisible;
         // A card always opens small, not to cover the guide; the 10 s refresh keeps it as the user left it.
@@ -552,6 +559,9 @@ public partial class HudPage : ContentPage
         NightPanel.IsVisible = false;
         ShowCardButton.IsVisible = false;
         FitCard();
+#if ANDROID
+        Platforms.Android.CardScrollBar.Apply(CardScroll, _nightMode.Palette.TextMuted);
+#endif
         CardPanel.IsVisible = true;
         if (opening)
             _ = CardScroll.ScrollToAsync(0, 0, false);
@@ -586,16 +596,25 @@ public partial class HudPage : ContentPage
     /// </summary>
     private void PlaceCardBody(bool factsFirst)
     {
-        var last = CardContent.IndexOf(CardBody) == CardContent.Count - 1;
-        if (last == factsFirst)
+        var afterFacts = CardContent.IndexOf(CardBody) > CardContent.IndexOf(CardNow);
+        if (afterFacts == factsFirst)
             return;
         CardContent.Remove(CardBody);
-        if (factsFirst)
-            CardContent.Add(CardBody);
-        else
-            CardContent.Insert(CardContent.IndexOf(CardNowHeader), CardBody);
+        // HISTORIA stays last either way.
+        CardContent.Insert(CardContent.IndexOf(factsFirst ? CardHistoryHeader : CardNowHeader), CardBody);
         // After the facts, the same extra air the header has above it.
         CardBody.Margin = factsFirst ? new Thickness(0, 4, 0, 0) : new Thickness(0);
+    }
+
+    /// <summary>"7 oct 1959 · La sonda Luna 3…": the date in a softer, heavier type, then what happened, wrapping under the date.</summary>
+    private static Label HistoryLabel(HistoryLine entry)
+    {
+        // On Android a formatted label takes its font and line height from the spans, not from the label.
+        var date = new Span { Text = $"{entry.Date} · ", FontFamily = "OpenSansSemibold", FontSize = 14, LineHeight = 1.15 };
+        date.SetDynamicResource(Span.TextColorProperty, "HudTextSoft");
+        var text = new Span { Text = entry.Text, FontFamily = "OpenSansRegular", FontSize = 14, LineHeight = 1.15 };
+        text.SetDynamicResource(Span.TextColorProperty, "HudText");
+        return new Label { FormattedText = new FormattedString { Spans = { date, text } } };
     }
 
     /// <summary>Of the content above the footer: with the footer, about the 440 dp the card had before it (decision 038).</summary>
