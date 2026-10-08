@@ -1101,6 +1101,16 @@ y Delta). De 276 a 390 caracteres. Primeros textos de estrellas sin nombre IAU: 
   Para encontrarla hubo que calcular dónde estaba (Kochab, al N a 52°; Gamma de Casiopea, al NE a 24°): justo el caso de la idea de guiar a las estrellas (PLAN).
 - `dotnet test` 794 tests; build Android 0 avisos.
 
+**Lote 3 (2026-10-08)**: 18 estrellas de Orión (Bellatrix, Alnitak, Saiph, Mintaka y Hatysa), Tauro (Elnath, Alcyone y Tianguan), Géminis (Alhena,
+Tejat y Mebsuta), Auriga (Menkalinan, Mahasim, Hassaleh y Almaaz), el Can Menor (Gomeisa) y la Liebre (Arneb y Nihal). De 225 a 380 caracteres.
+- Fuentes: las páginas *Stars* de Jim Kaler, una por estrella.
+- Kaler desfasado, y no se usa: Alhena como «la estrella más brillante ocultada por un asteroide» (1991), superada en diciembre de 2023 por Betelgeuse,
+  ocultada por el asteroide Leona; el «próximo eclipse» de Almaaz (2009-2011), ya pasado: el texto dice «cada 27 años».
+- Revisión antes de enseñarlos: fuera «unos segundos» en Alhena (la fuente no da la duración); en Almaaz, «su brillo baja a menos de la mitad» en vez de
+  «se apaga» (Kaler: alrededor de una magnitud). Hatysa, Tianguan y Mahasim son nombres de la IAU que Kaler no explica: los textos no dicen qué significan.
+- Aprobados por el usuario sin cambios. Pendientes: 95 estrellas y 88 constelaciones.
+- `dotnet test` 794 tests; build Android 0 avisos. Sin prueba en el móvil: la ficha no cambia y los textos pasan las mismas reglas.
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.
