@@ -1350,3 +1350,11 @@ Priorizadas por el usuario aunque la fase actual sea la 4.
 - **Acerca de** (botón ACERCA DE en el pie, en lugar de DIAGNÓSTICO): qué es, privacidad, enlace al repositorio, datos y licencias, y el acceso a Diagnóstico.
   Los textos de `LICENSE`, `THIRD-PARTY-NOTICES.md` y `licenses/*` van dentro del APK (BSD y OFL piden acompañar al binario) y se muestran ahí.
 - README: sección «Instalar en tu móvil» (origen desconocido, Play Protect, permisos, batería); fila del modo nocturno y número de tests al día.
+
+### Segunda versión descargable: 0.5.0 (2026-10-08)
+
+- A petición del usuario, con las fichas de la Fase 5 (aún abierta: faltan 53 textos de constelaciones). *Pre-release*, como la 0.4.0 (decisión 032).
+- **Versión** 0.5.0, `ApplicationVersion` 500. Compilada desde `main` con `scripts/publish-apk.ps1`, la misma clave (`CN=CieloHud`): actualiza la 0.4.0
+  sin desinstalar.
+- README: «Instalar en tu móvil» dice qué trae la 0.5.0, y la fila de Fichas, cuántas constelaciones tienen ya texto.
+- Sin instalarla en el móvil (decidido por el usuario): se sigue probando con la build de Debug.

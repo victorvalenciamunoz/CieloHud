@@ -15,8 +15,8 @@
 		<ApplicationTitle>CieloHud</ApplicationTitle>
 		<ApplicationId>com.cielohud.app</ApplicationId>
 		<!-- ApplicationVersion is major*10000 + minor*100 + patch: Android installs an update only if it grows (decision 032). -->
-		<ApplicationDisplayVersion>0.4.0</ApplicationDisplayVersion>
-		<ApplicationVersion>400</ApplicationVersion>
+		<ApplicationDisplayVersion>0.5.0</ApplicationDisplayVersion>
+		<ApplicationVersion>500</ApplicationVersion>
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">26.0</SupportedOSPlatformVersion>
 	</PropertyGroup>
