@@ -1280,6 +1280,19 @@ Sagitario, Leo, Tauro, Géminis, el Can Mayor, Pegaso, Andrómeda, Perseo, la Cr
 - Test nuevo: `ConstellationTexts_DoNotRepeatTheComputedFacts` (ni tamaño, ni visibilidad, ni «magnitud»). Pendientes: 70 constelaciones.
 - Consola: `--card Cru` muestra el texto con sus datos.
 - `dotnet test` 909 tests; build Android 0 avisos. Sin prueba en el móvil: la ficha ya muestra el texto si existe (paso 10.2) y los textos pasan las mismas reglas.
+- Aprobados por el usuario sin cambios.
+
+**10.5 — Textos, lote 2 (2026-10-08)**: el norte y el otoño (17): Cefeo, el Dragón, la Jirafa, el Lagarto, el Triángulo, Aries, Piscis, la Ballena,
+Acuario, Capricornio, el Pez Austral, el Escultor, el Horno, el Caballito, el Delfín, el Fénix y la Grulla. De 297 a 395 caracteres.
+- Fuentes: *Star Tales* de Ian Ridpath, una página por constelación; NASA para la galaxia del Triángulo.
+- Sin repetir a sus estrellas: el polo futuro de Alderamin, la aberración de Eltanin, el equinoccio de Hamal (Piscis cuenta dónde está el punto ahora
+  que no está en Aries), el Pez Austral en la Grulla (Alnair, Aldhanab), Ganímedes, ya contado en el Águila.
+- Sin contradecir al lote 1: Andrómeda es «lo más lejano que se puede ver sin instrumentos» (Ridpath); la galaxia del Triángulo, a unos 3 millones de años luz,
+  «se aprecia mejor con prismáticos» (NASA), sin decir que se vea a simple vista.
+- Las inventadas en los siglos XVI-XVIII (la Jirafa, el Lagarto, el Escultor, el Horno, el Fénix, la Grulla) cuentan quién y por qué, y que no tienen leyenda
+  cuando la fuente lo dice. El Horno corrige un tópico con Ridpath: no se dedicó a Lavoisier, que tenía 13 años.
+- Pendientes: 53 constelaciones.
+- `dotnet test` 909 tests; build Android 0 avisos.
 
 ## Mejoras fuera de fase
 
