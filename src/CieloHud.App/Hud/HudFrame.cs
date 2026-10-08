@@ -29,9 +29,17 @@ public sealed record HudFrame
 
     /// <summary>True when the user asked "what is that?" instead of picking a target.</summary>
     public bool IdentifyMode { get; init; }
+
+    /// <summary>What the reticle is on right now, or the nearest thing: lights the reticle and says which way to look.</summary>
     public IdentifyResult? Identified { get; init; }
 
-    /// <summary>Spanish constellation the reticle is on, with article ("Orión", "la Osa Mayor").</summary>
+    /// <summary>
+    /// The recognized object whose name is shown, kept a little after the reticle leaves it so it does not change under the finger
+    /// (decision 048); null when nothing was recognized.
+    /// </summary>
+    public IdentifyResult? Shown { get; init; }
+
+    /// <summary>Spanish constellation the reticle is on, with article ("Orión", "la Osa Mayor"); steadied at the boundaries in identify mode.</summary>
     public string? PointingConstellation { get; init; }
 
     /// <summary>Spanish constellation the selected target is in, with article.</summary>

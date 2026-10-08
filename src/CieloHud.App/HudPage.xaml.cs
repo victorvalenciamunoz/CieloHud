@@ -55,13 +55,20 @@ public partial class HudPage : ContentPage
     private DateTimeOffset _figureComputedAt = DateTimeOffset.MinValue;
     private IReadOnlyList<IReadOnlyList<HorizontalPosition>> _figure = [];
 
-    // The object card (decision 038): opened by itself on AQUÍ, or offered with VER FICHA in identify mode.
+    // The object card: VER FICHA in guide mode (decision 045), a tap on its name in identify mode (decision 048).
     private static readonly TimeSpan CardRefreshInterval = TimeSpan.FromSeconds(10);
-    /// <summary>Whether VER FICHA is filled: in identify mode, and in guide mode on AQUÍ. Null until first styled.</summary>
+    /// <summary>Whether VER FICHA is filled: on AQUÍ. Null until first styled.</summary>
     private bool? _cardButtonLit;
     private readonly RecentMatch<SkyTarget> _cardOffer = new();
     private SkyTarget? _offered;
+    // In identify mode, the constellation the reticle is in, steadied at its boundaries, and what a tap on each name opens (decision 048).
+    private readonly StickyMatch<Constellation> _constellationOffer = new();
+    private Constellation? _offeredConstellation;
+    private CardSubject? _nameOpens;
+    private CardSubject? _detailOpens;
+    // What the open card is about: a target or star, or a constellation; null with the card closed.
     private SkyTarget? _cardTarget;
+    private Constellation? _cardConstellation;
     private DateTimeOffset _cardBuiltAt;
 
     public HudPage(IPointingSource pointing, ILocationSource location, TargetCatalog catalog,
@@ -276,6 +283,7 @@ public partial class HudPage : ContentPage
         _skyComputedAt = DateTimeOffset.MinValue;
         CloseCard();
         _cardOffer.Clear();
+        _constellationOffer.Clear();
         StyleChips();
         await PrepareSatellitesAsync();
     }
@@ -339,7 +347,10 @@ public partial class HudPage : ContentPage
         var underReticle = pointing is { } aim && _observer is { } observer
             ? _constellations.Locate(aim.AzimuthDegrees, aim.AltitudeDegrees, observer, now)
             : null;
-        UpdateFigure(underReticle?.Symbol, now);
+        // In identify mode, the constellation steadied at its boundaries, the same for the figure and for the name that opens its card.
+        _offeredConstellation = _target is null ? _constellationOffer.Update(underReticle, now) : null;
+        var pointed = _target is null ? _offeredConstellation : underReticle;
+        UpdateFigure(pointed?.Symbol, now);
 
         HorizontalPosition? targetPosition = _target is null ? null : _sky.FirstOrDefault(s => s.Target == _target) is { Target: not null } hit ? hit.Position : null;
 
@@ -371,26 +382,33 @@ public partial class HudPage : ContentPage
             NeedsCalibration = _pointing.Accuracy.NeedsCalibration(),
             IdentifyMode = _target is null,
             Identified = identified,
-            PointingConstellation = underReticle is { } c ? SpanishNames.Constellation(c) : null,
+            Shown = Shown(now),
+            PointingConstellation = pointed is { } c ? SpanishNames.Constellation(c) : null,
             TargetConstellation = _targetConstellation,
             ConstellationFigure = _figure,
-            ConstellationFigureName = underReticle is { } n ? SpanishNames.WithoutArticle(SpanishNames.Constellation(n)) : null,
+            ConstellationFigureName = pointed is { } n ? SpanishNames.WithoutArticle(SpanishNames.Constellation(n)) : null,
         };
         Canvas.Invalidate();
     }
 
     /// <summary>
-    /// Every frame: VER FICHA is offered for the chosen target all along in guide mode, filled on AQUÍ; in identify mode, for
-    /// what the reticle is on, kept a little while the reticle wobbles. The card never opens by itself (decision 045): it
-    /// covered the end of the guide and, once closed, could not be opened again. An open card stays open and its facts are
-    /// refreshed now and then.
+    /// Every frame. In guide mode, VER FICHA is offered for the chosen target all along, filled on AQUÍ; the card never opens by itself
+    /// (decision 045): it covered the end of the guide and, once closed, could not be opened again. In identify mode there is no
+    /// button: the names on the HUD open the cards (decision 048). The recognized object is kept a little while the reticle wobbles,
+    /// and the constellation is steadied at its boundaries, so a name does not change under the finger. An open card stays open and
+    /// its facts are refreshed now and then.
     /// </summary>
     private void UpdateCard(Guidance? guidance, IdentifyResult? identified, DateTimeOffset now)
     {
         if (CardPanel.IsVisible)
         {
-            if (_cardTarget is { } open && now - _cardBuiltAt > CardRefreshInterval)
-                ShowCard(open, now);
+            if (now - _cardBuiltAt > CardRefreshInterval)
+            {
+                if (_cardTarget is { } open)
+                    ShowCard(open, now);
+                else if (_cardConstellation is { } constellation)
+                    ShowConstellationCard(constellation, now);
+            }
             return;
         }
 
@@ -405,10 +423,33 @@ public partial class HudPage : ContentPage
                 ? _catalog.All.FirstOrDefault(t => t.Name == m.Name && CardBuilder.HasCard(t))
                 : null;
             _offered = _cardOffer.Update(matched, now);
-            LightCardButton(true);
         }
         // The brightness panel lives at the bottom too.
-        ShowCardButton.IsVisible = _offered is not null && !NightPanel.IsVisible;
+        ShowCardButton.IsVisible = _target is not null && _offered is not null && !NightPanel.IsVisible;
+    }
+
+    /// <summary>
+    /// In identify mode, the recognized object the HUD names (kept while <see cref="_offered"/> is) and the constellation it is in;
+    /// and what a tap on each line opens: the object and its constellation, or, with nothing recognized, the constellation the
+    /// reticle is in, on the first line only (the second names the nearest object, which is not under the reticle).
+    /// </summary>
+    private IdentifyResult? Shown(DateTimeOffset now)
+    {
+        _nameOpens = _detailOpens = null;
+        if (_target is not null)
+            return null;
+
+        if (_offered is { } target && _sky.FirstOrDefault(s => s.Target == target) is { Target: not null } hit && _observer is { } observer)
+        {
+            var constellation = _constellations.Locate(hit.Position.AzimuthDegrees, hit.Position.AltitudeDegrees, observer, now);
+            _nameOpens = new ObjectSubject(target);
+            _detailOpens = new ConstellationSubject(constellation);
+            return new IdentifyResult(target.Name, target.Kind, hit.Position, 0, IsMatch: true, SpanishNames.Constellation(constellation));
+        }
+
+        if (_offeredConstellation is { } pointed)
+            _nameOpens = new ConstellationSubject(pointed);
+        return null;
     }
 
     private void LightCardButton(bool lit)
@@ -425,6 +466,34 @@ public partial class HudPage : ContentPage
             ShowCard(target, DateTimeOffset.UtcNow);
     }
 
+    /// <summary>In identify mode, a tap on a name the HUD shows opens its card (decision 048).</summary>
+    private void OnCanvasTapped(object? sender, TappedEventArgs e)
+    {
+        if (_target is not null || CardPanel.IsVisible || NightPanel.IsVisible || e.GetPosition(Canvas) is not { } at)
+            return;
+        var point = new PointF((float)at.X, (float)at.Y);
+        var subject = _drawable.NameZone is { } name && name.Contains(point) ? _nameOpens
+            : _drawable.DetailZone is { } detail && detail.Contains(point) ? _detailOpens
+            : null;
+        var now = DateTimeOffset.UtcNow;
+        switch (subject)
+        {
+            case ObjectSubject { Target: var target }:
+                ShowCard(target, now);
+                break;
+            case ConstellationSubject { Constellation: var constellation }:
+                ShowConstellationCard(constellation, now);
+                break;
+        }
+    }
+
+    /// <summary>What a name on the HUD opens when tapped: an object's card or a constellation's.</summary>
+    private abstract record CardSubject;
+
+    private sealed record ObjectSubject(SkyTarget Target) : CardSubject;
+
+    private sealed record ConstellationSubject(Constellation Constellation) : CardSubject;
+
     private void OnCloseCardClicked(object? sender, EventArgs e) => CloseCard();
 
     private void ShowCard(SkyTarget target, DateTimeOffset now)
@@ -436,8 +505,26 @@ public partial class HudPage : ContentPage
         var constellation = located.Target is null
             ? null
             : ConstellationAt(located.Position.AzimuthDegrees, located.Position.AltitudeDegrees, now);
-        var view = _cards.Build(target, constellation, observer, now);
+        var other = target != _cardTarget;
+        _cardTarget = target;
+        _cardConstellation = null;
+        Present(_cards.Build(target, constellation, observer, now), other, now);
+    }
 
+    private void ShowConstellationCard(Constellation constellation, DateTimeOffset now)
+    {
+        if (_observer is not { } observer)
+            return;
+
+        var other = constellation != _cardConstellation;
+        _cardTarget = null;
+        _cardConstellation = constellation;
+        Present(CardBuilder.Build(constellation, observer), other, now);
+    }
+
+    /// <param name="other">A card about something else than the one open (or none): it opens small.</param>
+    private void Present(CardView view, bool other, DateTimeOffset now)
+    {
         CardTitle.Text = view.Title;
         CardSubtitle.Text = view.Subtitle;
         _cardDrawing.Picture = view.Picture;
@@ -459,9 +546,8 @@ public partial class HudPage : ContentPage
 
         var opening = !CardPanel.IsVisible;
         // A card always opens small, not to cover the guide; the 10 s refresh keeps it as the user left it.
-        if (opening || target != _cardTarget)
+        if (opening || other)
             _cardExpanded = false;
-        _cardTarget = target;
         _cardBuiltAt = now;
         NightPanel.IsVisible = false;
         ShowCardButton.IsVisible = false;
@@ -535,6 +621,7 @@ public partial class HudPage : ContentPage
     {
         CardPanel.IsVisible = false;
         _cardTarget = null;
+        _cardConstellation = null;
     }
 
     /// <summary>Back closes the card first, as it would a dialog.</summary>

@@ -1168,6 +1168,7 @@ Plan acordado con el usuario (2026-10-08), en PR separadas:
   estirado», que queda para más adelante.
 - **10.2, la ficha en la app**: en «¿qué es?», junto a VER FICHA, un botón con el nombre de la constelación hacia la que se mira (ORIÓN), siempre visible
   en ese modo y con el mismo margen de 2 s de `RecentMatch` en los límites. No se abre desde la guía, y las constelaciones no son destino de la guía.
+  Cambiado al probarlo (decisión 048): en «¿qué es?» no hay botones; los nombres del HUD, con una ⓘ, abren las fichas.
 - **10.3, el dibujo**: la figura como se ve en ese momento, con los ejes del HUD (arriba, el cénit), las estrellas del catálogo con su color y su brillo,
   y en rojo de noche. Sin línea del horizonte. Contrastado con Stellarium Web en montura acimutal.
 - **10.4 a 10.8, los textos en 5 lotes**: 1) las más conocidas (18): Orión, la Osa Mayor, la Osa Menor, Casiopea, el Cisne, la Lira, el Águila, Escorpio,
@@ -1207,6 +1208,29 @@ Plan acordado con el usuario (2026-10-08), en PR separadas:
   Quedan como tests una muestra de cada comparación (12 áreas, 15 puestos, 9 rangos de declinación, 3 latitudes de Ridpath), la visibilidad desde Humanes, Sídney
   y el ecuador, y las frases.
 - `dotnet test` 877 tests; build Android 0 avisos (la app aún no usa estos datos: paso 10.2).
+
+**10.2 — La ficha de la constelación en «¿qué es?» (2026-10-08)**
+- App: `CardBuilder.Build(Constellation, Observer)`: título sin artículo («OSA MAYOR»), «constelación», DATOS con las líneas del 10.1 (los nombres de las estrellas,
+  en español) y antes del texto, como en las estrellas. Sin dibujo todavía (10.3). Se recalcula cada 10 s como las demás.
+- **Primera versión, con botones**, probada en el OPPO (12:22-12:25, de día): un botón con el nombre de la constelación junto a VER FICHA. Las fichas salían bien
+  (Erídano: «2,8 % del cielo, la 6.ª», «solo se ve una parte», sin línea de estrellas; Auriga: «1,6 %, la 21.ª», «se puede ver entera», «Capella, Menkalinan
+  y Mahasim», igual que la consola), pero salieron dos problemas:
+  - Al desaparecer VER FICHA (2 s después de perder la estrella) el otro botón saltaba al centro, y al reaparecer, otra vez a su sitio: un toque en PERSEO abrió
+    la ficha de Hassaleh.
+  - El usuario vio raro que VER FICHA fuera relleno y el de la constelación solo con borde: parecía que uno se podía pulsar y el otro no.
+- **Cambio propuesto por el usuario** (decisión 048): en «¿qué es?», **el nombre es el botón**. El nombre grande abre la ficha de lo reconocido; el subtítulo
+  («estrella · altura 12° · en Perseo»), la de su constelación; sin nada reconocido, «Hacia Erídano» abre la de Erídano, y la línea «cerca: …» no abre nada.
+  - Una **ⓘ dibujada** (círculo, punto y trazo, en el color del texto) detrás de cada nombre que abre una ficha; no el carácter, que la fuente del HUD puede no tener
+    y el del sistema podría ser un emoji azul. El texto se encoge hasta que cabe con ella («DELTA DE PERSEO ⓘ», «Hacia la Cabellera de Berenice ⓘ»).
+  - Cada nombre es una **franja de toque** del panel de texto, de lado a lado: 54 y 58 dp de alto, más que el texto.
+  - El objeto reconocido se mantiene 2 s (`RecentMatch`), y la **constelación se estabiliza** en sus límites con `StickyMatch` (Core, con tests): la que se muestra
+    sigue mientras se haya visto en el último segundo. La figura y su rótulo usan la misma, para que no digan otra cosa que el texto.
+  - VER FICHA queda solo para la guía, centrado y relleno en AQUÍ (decisión 045). El usuario no descarta cambiar también la guía más adelante.
+- **Probado en el OPPO** (12:57-13:05), con una captura justo antes de cada toque: «CAPELLA ⓘ · estrella · altura 23° · en Auriga ⓘ»; el subtítulo abre Auriga.
+  «Hacia Tauro ⓘ» con «cerca: Zeta de Perseo, 34°…»: la línea «cerca» no abre nada; el título abrió Erídano, en la que la retícula acababa de entrar (la figura ya decía ERÍDANO y el texto aún
+  «Hacia Tauro», por el segundo de margen: por eso la figura usa ahora la constelación estabilizada). En modo noche, las ⓘ en rojo.
+  En la guía, VER FICHA sigue centrado. Capturas: `docs/images/que-es-info.png` y `docs/images/ficha-constelacion.png`.
+- `dotnet test` 883 tests; build Android 0 avisos.
 
 ## Mejoras fuera de fase
 

@@ -12,7 +12,12 @@
             <HorizontalStackLayout x:Name="TargetBar" Padding="12,8" Spacing="8" />
         </ScrollView>
 
-        <GraphicsView Grid.Row="1" x:Name="Canvas" />
+        <!-- In identify mode a tap on a name opens its card (decision 048). -->
+        <GraphicsView Grid.Row="1" x:Name="Canvas">
+            <GraphicsView.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnCanvasTapped" />
+            </GraphicsView.GestureRecognizers>
+        </GraphicsView>
 
         <!-- Night options, opened by NOCHE when night mode is on: brightness and leaving it. Our own panel in the palette,
              not a system dialog, which would be white. Buttons are styled in code, like the chips. -->
@@ -67,8 +72,8 @@
             </Grid>
         </Border>
 
-        <!-- The card of the chosen target in guide mode (filled on AQUÍ), or of what the reticle is on in identify mode.
-             Styled in code, like the chips. -->
+        <!-- The card of the chosen target in guide mode, filled on AQUÍ. In identify mode the names on the HUD open the cards instead
+             (decision 048). Styled in code, like the chips. -->
         <Button Grid.Row="1" x:Name="ShowCardButton" Text="VER FICHA" IsVisible="False"
                 VerticalOptions="End" HorizontalOptions="Center" Margin="0,0,0,8"
                 FontFamily="ChakraPetchBold" FontSize="12" BorderWidth="1" CornerRadius="14" Padding="14,6"
