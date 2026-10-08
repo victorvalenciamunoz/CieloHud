@@ -1120,6 +1120,15 @@ Suhail y Mu), la Paloma (Phact) y Erídano (Cursa y Zaurak). De 229 a 371 caract
   «la paloma» es cierto con las dos y no obliga a elegir la especie. El resto, aprobados sin cambios. Pendientes: 80 estrellas y 88 constelaciones.
 - `dotnet test` 794 tests; build Android 0 avisos. Sin prueba en el móvil, como el lote 3.
 
+**Lote 5 (2026-10-08)**: 19 estrellas de Leo (Denebola, Algieba, Zosma y Épsilon), la Hidra (Alphard y Gamma), Virgo (Porrima y Vindemiatrix), el Boyero
+(Izar, Muphrid y Seginus), el Cuervo (Gienah, Kraz, Algorab y Épsilon), la Corona Boreal (Alphecca), Libra (Zubeneschamali y Zubenelgenubi) y los Perros
+de Caza (Cor Caroli). De 250 a 354 caracteres.
+- Fuentes: las páginas *Stars* de Jim Kaler, una por estrella.
+- No se usa de Kaler: el planeta de Algieba (anunciado en 2010; su masa depende de la de la estrella, incierta) ni la fecha de la última tormenta de las
+  Leónidas (1998): el texto da la regla de los 33 años y la de 1833. En Izar, Kaler escribe «Pulcherima»: el texto dice «la llamó en latín "la más bella"».
+- Aprobados por el usuario sin cambios. Pendientes: 61 estrellas y 88 constelaciones.
+- `dotnet test` 794 tests; build Android 0 avisos. Sin prueba en el móvil, como los lotes 3 y 4.
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.
