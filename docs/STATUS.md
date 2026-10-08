@@ -1129,6 +1129,16 @@ de Caza (Cor Caroli). De 250 a 354 caracteres.
 - Aprobados por el usuario sin cambios. Pendientes: 61 estrellas y 88 constelaciones.
 - `dotnet test` 794 tests; build Android 0 avisos. Sin prueba en el móvil, como los lotes 3 y 4.
 
+**Lote 6 (2026-10-08)**: 19 estrellas de Escorpio (Shaula, Sargas, Kappa, Lesath, Larawag, Dschubba, Acrab, Fang, Paikauhale, Alniyat, Xamidimura e Iota 1)
+y Sagitario (Kaus Australis, Nunki, Ascella, Kaus Media, Kaus Borealis, Albaldah y Alnasl). De 205 a 374 caracteres.
+- Fuentes: las páginas *Stars* de Jim Kaler, una por estrella. Kaler llama Girtab a Theta de Escorpio, que en el catálogo es Sargas; su texto no menciona Girtab.
+- Shaula: la ficha da «unos 570 años» (Hipparcos) y Kaler cita medidas más recientes de la mitad; el texto dice que su distancia se conoce mal, sin cifra,
+  como en Betelgeuse.
+- Revisión antes de enseñarlos: fuera «la de abajo» de Kaler (Paikauhale, Kaus Australis), que depende de la hora; fuera «hoy» en Acrab y Xamidimura
+  (lo detectó la comprobación del scratchpad, con las mismas reglas que el test).
+- Aprobados por el usuario sin cambios. Pendientes: 42 estrellas y 88 constelaciones.
+- `dotnet test` 794 tests; build Android 0 avisos. Sin prueba en el móvil, como los lotes 3 a 5.
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.
