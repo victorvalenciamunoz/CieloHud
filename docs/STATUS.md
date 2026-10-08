@@ -911,7 +911,8 @@ Hallazgo al revisar: el catálogo `BrightStars` no guarda la paralaje; se añadi
   - Desde el Sol (cantidad 15, mensual): máximo de 26,73° en abril de 2032 (CieloHud: 12 abr, 26,74°); de canto entre el 1 ene y el 1 feb de 2039 (CieloHud: 22 ene)
     y entre el 1 may y el 1 jun de 2025 (CieloHud: 6 may, el equinoccio de Saturno); diferencia ≤ 0,006°.
   - Quedan como tests de integración (0,05°, y el extremo dentro del intervalo de Horizons).
-- Probado en el móvil: pendiente. Saturno estaba bajo el horizonte (−30°), y entonces el HUD no guía (Fase 3). Esta noche, desde las 21:30, a 19-30° al E-SE.
+- **Probado en el OPPO** (8 oct, 5:45, Saturno al OSO a 25°): la ficha dice «Con un telescopio pequeño, sus anillos se ven inclinados 7°» y «Se irán abriendo
+  hasta 2032, cuando llegarán a 27°», como la consola a esa hora (−7,32°, cara sur; 26,74° el 11 abr 2032). Comprobado por el usuario.
 - `dotnet test` 666 tests; build Android 0 avisos.
 
 ### Paso 6 — Dibujos calculados (2026-10-07)
@@ -964,7 +965,9 @@ Hallazgo al revisar: el catálogo `BrightStars` no guarda la paralaje; se añadi
   | Júpiter y sus lunas | Europa e Ío a la izquierda y algo arriba; Ganímedes y Calisto a la derecha y abajo. Medido en la captura desde Júpiter: pendiente de la fila −0,27 a −0,31; distancias relativas a Ganímedes, Ío 0,14, Europa 0,36, Calisto 1,59 | pendiente −0,28 a −0,30; Ío 0,15, Europa 0,35, Calisto 1,58 |
 
   Las diferencias de posición y distancia de la Luna vienen de la ubicación (Stellarium, la del usuario; la consola, el centro de Madrid).
-- Pendiente: Saturno en el móvil y en Stellarium (inclinación y giro de los anillos), esta noche desde las 21:30, con la prueba del paso 5.
+- **Saturno en el OPPO y en Stellarium** (8 oct, 5:45, al OSO a 25°): la consola da el polo norte hacia 42,4° (0° = cénit, 90° = derecha), así que los anillos
+  cruzan de arriba a la izquierda hacia abajo a la derecha, a unos 42° de la horizontal, casi cerrados y por la cara sur; en la captura del usuario, unos 42°.
+  Stellarium Web a la misma hora, con montura acimutal: igual (comprobado por el usuario).
 - Capturas: `docs/images/ficha-jupiter.png`, `ficha-venus.png` y `ficha-marte-dibujo.png` (también en el README).
 - `dotnet test` 708 tests; build Android 0 avisos.
 
