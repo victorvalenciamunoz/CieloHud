@@ -1081,6 +1081,23 @@ Espiga, Pólux, Fomalhaut, Deneb y Régulo) y 5 conocidas por algo concreto (Cá
   la Luna, abierta a continuación, sigue con el texto antes de AHORA. La captura `docs/images/ficha-estrella-texto.png` es la de Vega.
 - `dotnet test` 794 tests; build Android 0 avisos.
 
+Reparto de las 135 restantes en 7 lotes por zonas del cielo (acordado con el usuario el 2026-10-07): 2) circumpolares; 3) Orión, Tauro, Géminis, Auriga,
+el Can Menor y la Liebre; 4) el Can Mayor, la Popa, la Vela, la Paloma y Erídano; 5) Leo, Virgo, el Boyero, el Cuervo, la Hidra, la Corona Boreal, Libra
+y los Perros de Caza; 6) Escorpio y Sagitario; 7) Ofiuco, Hércules, la Serpiente, el Águila, el Cisne, el Lobo, Centauro y el Altar; 8) Andrómeda, Pegaso,
+Aries, la Ballena, el Triángulo, Acuario, Capricornio, el Fénix y la Grulla.
+
+**Lote 2 (2026-10-07)**: las 22 circumpolares. La Osa Mayor (Dubhe, Merak, Phecda, Alioth, Alkaid, Tania Australis y Psi), la Osa Menor (Kochab
+y Pherkad), Casiopea (Schedar, Caph, Gamma y Ruchbah), Cefeo (Alderamin), el Dragón (Eltanin, Athebyne y Rastaban) y Perseo (Mirfak, Zeta, Épsilon, Gamma
+y Delta). De 276 a 390 caracteres. Primeros textos de estrellas sin nombre IAU: el título es el que muestra el HUD («Gamma de Casiopea»).
+- Fuentes: las páginas *Stars* de Jim Kaler, una por estrella.
+- Revisión antes de enseñarlos: fuera «abajo» y «bajo el Carro» (Phecda, Tania Australis), que dependen de la hora (decisión 046); Psi de la Osa Mayor,
+  «lo corriente a veces es una ventaja» como dice Kaler, no «sirve de referencia»; el «próximo eclipse» de Gamma de Perseo que da Kaler (2019) no se usa.
+  Athebyne: Kaler la llama Al Dhibain y no explica el nombre IAU; el texto solo dice que los árabes llamaban «las dos hienas» a la pareja que forma con Zeta.
+- Aprobados por el usuario sin cambios. Pendientes: 113 estrellas y 88 constelaciones.
+- Probado en el OPPO (18:29, de día, «¿qué es?» hacia el norte): la ficha de Kochab con DATOS (130 años, anaranjada, magnitud 2,1) y su texto debajo.
+  Para encontrarla hubo que calcular dónde estaba (Kochab, al N a 52°; Gamma de Casiopea, al NE a 24°): justo el caso de la idea de guiar a las estrellas (PLAN).
+- `dotnet test` 794 tests; build Android 0 avisos.
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.

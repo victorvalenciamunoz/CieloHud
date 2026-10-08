@@ -138,7 +138,7 @@ public class CardTextsTests
     [Fact]
     public void PendingTexts()
     {
-        Assert.Equal(135, BrightStars.All.Count(s => CardTexts.Find(CardKey.Star(s)) is null));
+        Assert.Equal(113, BrightStars.All.Count(s => CardTexts.Find(CardKey.Star(s)) is null));
         Assert.Equal(88, ConstellationFigures.All.Count(c => CardTexts.Find(CardKey.Constellation(c.Symbol)) is null));
     }
 }
