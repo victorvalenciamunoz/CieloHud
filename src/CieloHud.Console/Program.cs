@@ -3,6 +3,7 @@ using CieloHud.Core.Alerts;
 using CieloHud.Core.Apparitions;
 using CieloHud.Core.Cards;
 using CieloHud.Core.Conjunctions;
+using CieloHud.Core.Constellations;
 using CieloHud.Core.Passes;
 using CieloHud.Core.Satellites;
 using CieloHud.Core.SolarSystem;
@@ -39,6 +40,8 @@ if (options.MercuryDays is { } mercuryDays)
     return PrintMercury(mercuryDays);
 if (options.CardStar is { } cardStar)
     return PrintStarCard(cardStar);
+if (options.CardConstellation is { } cardConstellation)
+    return PrintConstellationCard(cardConstellation);
 if (options.CardIss)
     return await PrintIssCardAsync();
 if (options.CardBody is { } cardBody)
@@ -178,5 +181,13 @@ async Task<int> PrintIssCardAsync()
 int PrintStarCard(CieloHud.Core.Stars.Star star)
 {
     System.Console.WriteLine(CardFormatter.Star(star, CardTexts.Find(CardKey.Star(star))));
+    return 0;
+}
+
+int PrintConstellationCard(string symbol)
+{
+    System.Console.WriteLine(SkyTableFormatter.Header(options.Observer, options.Instant));
+    System.Console.WriteLine(CardFormatter.Constellation(ConstellationFacts.Of(symbol, options.Observer), ConstellationExtents.Get(symbol)!,
+        CardTexts.Find(CardKey.Constellation(symbol))));
     return 0;
 }

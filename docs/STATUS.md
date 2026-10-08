@@ -1161,6 +1161,53 @@ por el usuario. El test de pendientes de estrellas pasa a ser una regla: `EveryS
 se queda sin texto. Quedan los 88 textos de las constelaciones (paso 10).
 - `dotnet test` 795 tests; build Android 0 avisos.
 
+### Paso 10 — Constelaciones: ficha en «¿qué es?» y sus 88 textos (desde el 2026-10-08)
+
+Plan acordado con el usuario (2026-10-08), en PR separadas:
+- **10.1, datos en Core**: tamaño, visibilidad desde la latitud del móvil y estrellas más brillantes (decisión 047). Sin la línea de los «puños con el brazo
+  estirado», que queda para más adelante.
+- **10.2, la ficha en la app**: en «¿qué es?», junto a VER FICHA, un botón con el nombre de la constelación hacia la que se mira (ORIÓN), siempre visible
+  en ese modo y con el mismo margen de 2 s de `RecentMatch` en los límites. No se abre desde la guía, y las constelaciones no son destino de la guía.
+- **10.3, el dibujo**: la figura como se ve en ese momento, con los ejes del HUD (arriba, el cénit), las estrellas del catálogo con su color y su brillo,
+  y en rojo de noche. Sin línea del horizonte. Contrastado con Stellarium Web en montura acimutal.
+- **10.4 a 10.8, los textos en 5 lotes**: 1) las más conocidas (18): Orión, la Osa Mayor, la Osa Menor, Casiopea, el Cisne, la Lira, el Águila, Escorpio,
+  Sagitario, Leo, Tauro, Géminis, el Can Mayor, Pegaso, Andrómeda, Perseo, la Cruz del Sur y Centauro; 2) norte y otoño (17): Cefeo, el Dragón, la Jirafa,
+  el Lagarto, el Triángulo, Aries, Piscis, la Ballena, Acuario, Capricornio, el Pez Austral, el Escultor, el Horno, el Caballito, el Delfín, el Fénix y la Grulla;
+  3) invierno y primavera (18): Auriga, el Can Menor, el Unicornio, la Liebre, la Paloma, Erídano, el Cincel, la Popa, el Lince, Cáncer, la Hidra, el Sextante,
+  la Copa, el Cuervo, Leo Menor, la Brújula, la Máquina Neumática y la Vela; 4) primavera y verano (18): Virgo, la Cabellera de Berenice, los Perros de Caza,
+  el Boyero, la Corona Boreal, Libra, Hércules, Ofiuco, la Serpiente, el Escudo, la Flecha, la Zorra, el Lobo, el Altar, la Corona Austral, la Escuadra,
+  el Telescopio y el Microscopio; 5) el sur lejano (17): la Quilla, la Mosca, el Compás, el Triángulo Austral, el Ave del Paraíso, el Pavo, el Indio, el Octante,
+  la Mesa, el Camaleón, el Pez Volador, el Pintor, el Dorado, el Retículo, el Reloj, la Hidra Macho y el Tucán. Criterios en una decisión nueva con el primer lote;
+  fuentes: *Star Tales* de Ian Ridpath para la historia, las páginas *Stars* de Jim Kaler para las estrellas, NASA y ESA para los objetos.
+
+**10.1 — Datos de las constelaciones (2026-10-08)**
+- Core `Constellations/` (decisión 047):
+  - `ConstellationExtents`: área y declinación más al sur y más al norte de las 88, **generadas** (`ConstellationExtents.Data.cs`) desde los límites de la IAU
+    de Astronomy Engine con una malla de 0,02° en J2000; el puesto por tamaño (`SizeRank`) y el cielo entero (41 252,96 grados cuadrados).
+  - `ConstellationStars`: las estrellas del catálogo dentro de cada constelación, por brillo, y si el catálogo la cubre entera (al norte de −50°: 60 de 88).
+    `BrightStars.SouthernLimitDegrees` = −50.
+- Core `Cards/`: `ConstellationFacts` (porcentaje del cielo, puesto, `ConstellationSight` desde la latitud y estrellas) y sus frases en `FactsText`:
+  «Ocupa el 1,4 % del cielo: la 26.ª de 88 por tamaño», «Desde aquí se puede ver entera» (o «solo se ve una parte: el resto no llega a salir», «no sale nunca»,
+  «no se pone nunca») y «Sus estrellas más brillantes: Rigel, Betelgeuse y Bellatrix» o «Ninguna de sus estrellas llega a la magnitud 3: desde ciudad cuesta verla».
+- Corregido de paso: las listas decían «Júpiter y Ío»; ahora «e» ante el sonido /i/ («Júpiter e Ío»).
+- Consola: `--card <símbolo IAU>` («Ori», «UMa») con las frases de la ficha y los valores en bruto (área, declinaciones, latitudes desde las que sale entera,
+  estrellas con su magnitud).
+- **Validación** (scripts del scratchpad):
+
+  | Dato | Fuente | Resultado |
+  |---|---|---|
+  | Área de las 88 | Levin (1935), en la tabla de las constelaciones de Ian Ridpath | todas a ≤ 0,15 grados cuadrados; suman el cielo entero |
+  | Puesto por tamaño | Ridpath | el mismo en las 88, también en los pares apretados (el Tucán 294,6 y el Indio 294,0) |
+  | Declinaciones extremas | límites en J2000 del CDS (VI/49, Davenhall y Leggett 1989) | las 88 a ≤ 0,012° |
+  | Latitudes desde las que sale entera | Ridpath | a menos de 1° salvo Leo: 83,3° N frente a 82° N; el CDS da lo mismo que CieloHud (−6,69°) |
+  | Constelación de cada estrella | designación de Bayer (SIMBAD) | las 155 dentro de la suya |
+
+  Desde Humanes (consola): Orión «se puede ver entera», la Osa Menor «no se pone nunca», Centauro «solo se ve una parte» (sin línea de estrellas: el catálogo
+  no llega a Alfa Centauri), la Cruz del Sur «no sale nunca», la Hidra «la más grande de las 88», Cáncer sin ninguna estrella de magnitud 3.
+  Quedan como tests una muestra de cada comparación (12 áreas, 15 puestos, 9 rangos de declinación, 3 latitudes de Ridpath), la visibilidad desde Humanes, Sídney
+  y el ecuador, y las frases.
+- `dotnet test` 877 tests; build Android 0 avisos (la app aún no usa estos datos: paso 10.2).
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.
