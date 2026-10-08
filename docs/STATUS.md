@@ -1309,6 +1309,19 @@ el Lince, Cáncer, la Hidra, el Sextante, la Copa, el Cuervo, Leo Menor, la Brú
 - Pendientes: 35 constelaciones.
 - `dotnet test` 909 tests; build Android 0 avisos.
 
+**10.7 — Textos, lote 4 (2026-10-08)**: primavera y verano (18): Virgo, la Cabellera de Berenice, los Perros de Caza, el Boyero, la Corona Boreal, Libra,
+Hércules, Ofiuco, la Serpiente, el Escudo, la Flecha, la Zorra, el Lobo, el Altar, la Corona Austral, la Escuadra, el Telescopio y el Microscopio.
+De 313 a 398 caracteres. Montado sobre el lote 3 (PR #47), que toca las mismas líneas.
+- Fuentes: *Star Tales* de Ian Ridpath (dos páginas en Hércules).
+- Sin repetir a sus estrellas: Asclepio y el símbolo de la medicina (Rasalhague), el Arrodillado (Kornephoros), la Serpiente partida (Unukalhai, que
+  dice que lo está; su texto cuenta quién la partió y cuándo), las pinzas de Escorpio en Libra (Zubenelgenubi, Zubeneschamali y Escorpio).
+- Sin cosas que cambian: la Estrella Llameante de la Corona Boreal se cuenta por sus erupciones de 1866 y 1946, sin decir cuándo se espera la siguiente.
+- **Dos textos de estrellas corregidos** con Ridpath, como Naos y Phact en el lote 3: Cor Caroli no lo nombró Halley por Carlos II (lo dice Kaler, y Ridpath
+  explica que es un error de Bode, 1801, repetido por Smyth), sino en honor de Carlos I; Struve no descubrió que Izar era doble (fue William Herschel, en 1779),
+  solo la llamó «la más bella». Revisados de paso los demás textos de estrellas que dan fechas o autores: no hay más choques.
+- Pendientes: 17 constelaciones.
+- `dotnet test` 909 tests; build Android 0 avisos.
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.
