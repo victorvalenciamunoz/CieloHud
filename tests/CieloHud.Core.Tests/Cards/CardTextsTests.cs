@@ -155,10 +155,10 @@ public class CardTextsTests
         Assert.Empty(BrightStars.All.Where(s => CardTexts.Find(CardKey.Star(s)) is null).Select(s => s.Designation));
     }
 
-    /// <summary>Texts still to write; update when a batch is committed. Their cards show only the facts.</summary>
+    /// <summary>All 88 constellations got their text in step 10 (decision 050): none may be left without one.</summary>
     [Fact]
-    public void PendingTexts()
+    public void EveryConstellation_HasAText()
     {
-        Assert.Equal(17, ConstellationFigures.All.Count(c => CardTexts.Find(CardKey.Constellation(c.Symbol)) is null));
+        Assert.Empty(ConstellationFigures.All.Where(c => CardTexts.Find(CardKey.Constellation(c.Symbol)) is null).Select(c => c.Symbol));
     }
 }
