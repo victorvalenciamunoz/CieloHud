@@ -1356,7 +1356,8 @@ o atribuciones (Naos, Phact, Cor Caroli e Izar).
 
 Plan acordado con el usuario (2026-10-08). Primero se propuso «tal día como hoy» con una ventana de ±7 días y una línea de aviso en la ficha; el usuario
 propuso en su lugar mostrar siempre todas las fechas de cada objeto, y se adoptó (decisión 052, corrige la 042): una sección **HISTORIA** al final de la ficha,
-de la más antigua a la más reciente, sin frases que dependan del día. Nombre provisional, pendiente de que el usuario compruebe «efeméride» en el DLE.
+de la más antigua a la más reciente, sin frases que dependan del día. El nombre se confirmó al consultar el usuario el DLE (2026-10-08): «efeméride» es
+un aniversario y «efemérides astronómicas», tablas de coordenadas.
 Criterios de los textos: decisión 051 (como mucho 200 caracteres y 4 entradas por objeto; lo que pasa a HISTORIA sale del texto de la ficha).
 Pasos, en PR separadas:
 - **6.1, Core**: formato, reglas con tests, consola y tres entradas de ejemplo (Luna 3, la estrella de Kepler y Galileo en Júpiter).
@@ -1408,6 +1409,25 @@ Pasos, en PR separadas:
   que la de Cáncer y que la sección de la Luna; la consola la muestra (`--card Oph`).
 - Captura: `docs/images/ficha-historia.png`.
 - `dotnet test` 933 tests; build Android 0 avisos.
+- Aprobado por el usuario (PR #53).
+
+### Paso 3 — Lote 1: Luna, Mercurio, Venus e ISS (2026-10-08)
+
+- Lista y borradores propuestos al usuario con sus citas y aprobados antes de escribir los ficheros. 12 entradas nuevas en `history/targets/`:
+  - Luna (4 con Luna 3): Luna 2 toca la Luna (13 sep 1959), el Apolo 8 en órbita lunar (24 dic 1968), el Apolo 11 se posa (20 jul 1969).
+  - Mercurio: Gassendi ve el primer tránsito (7 nov 1631), Mariner 10 (29 mar 1974), MESSENGER en órbita (18 mar 2011; su final va en el mismo texto).
+  - Venus: Horrocks ve el primer tránsito (4 dic 1639, gregoriano; 24 nov en el juliano de Inglaterra), Mariner 2 (14 dic 1962), Venera 7 (15 dic 1970),
+    Venera 9 (22 oct 1975).
+  - ISS: Zarya queda en órbita (20 nov 1998), llega la Expedición 1 (2 nov 2000).
+- Descartadas: Magellan (no es una primera vez, y Venus ya tiene 4), Columbus (un hito regional, como los de un país, que deja fuera la 051) y el final de
+  MESSENGER como entrada aparte.
+- Fechas en UTC, contrastadas con NASA NSSDCA, NASA, NASA Science y ESA: Luna 2 era ya el 14 en Moscú, y MESSENGER el 17 en EE. UU. Las fichas de NSSDCA de
+  Luna 2 y de las Venera dan error; Luna 2 se cita con otras dos páginas de NASA, y Venera 7 con su ficha de NSSDCA leída en web.archive.org (copia de 2024),
+  aprobado por el usuario. Que el mar de la Tranquilidad está en la cara que vemos se deduce de su longitud (23° E), y se dice en la fuente.
+- Retocado el texto de la **ISS**: sin «habitada sin interrupción desde noviembre de 2000», que ahora cuenta su HISTORIA (decisión 051).
+- Decisiones: la 051 fija la fecha gregoriana desde 1582 aunque el país siguiera con la juliana; la 052 registra la consulta del DLE.
+- Comprobado con la consola: `--card moon`, `mercury`, `venus` e `iss` terminan con su HISTORIA en orden; la ficha de la ISS empieza «…una casa en órbita.».
+- `dotnet test` 933 tests (las reglas recorren todas las entradas); build Android 0 avisos.
 
 ## Mejoras fuera de fase
 
