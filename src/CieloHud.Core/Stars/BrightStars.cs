@@ -13,6 +13,9 @@ namespace CieloHud.Core.Stars;
 /// </summary>
 public static class BrightStars
 {
+    /// <summary>The catalog stops here: nothing further south rises above 40° north (decision 015).</summary>
+    public const double SouthernLimitDegrees = -50;
+
     public static IReadOnlyList<Star> All { get; } =
     [
         new("Sirius", "alf CMa", 101.28715533333335, -16.71611586111111, -1.46, 32349, 379.21, 1.58, "A0mA1Va"),

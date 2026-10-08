@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using CieloHud.Core.Cards;
+using CieloHud.Core.Constellations;
 
 namespace CieloHud.Console;
 
@@ -102,6 +103,32 @@ public static class CardFormatter
         sb.AppendLine($"  Distancia: {light.Years.ToString("F1", Culture)} años luz, de {light.NearYears.ToString("F1", Culture)} a " +
             $"{(double.IsInfinity(light.FarYears) ? "∞" : light.FarYears.ToString("F1", Culture))} · {light.Certainty}");
         return sb.ToString();
+    }
+
+    /// <summary>
+    /// The constellation's lines as the card shows them (with the stars' IAU names; the app uses the Spanish ones), then its raw
+    /// extent and the latitudes from which it rises whole, to compare with Ridpath's table.
+    /// </summary>
+    public static string Constellation(ConstellationFacts facts, ConstellationExtent extent, CardText? text)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine(facts.Symbol);
+        AppendText(sb, text);
+        foreach (var line in FactsText.Constellation(facts, facts.BrightestStars?.Select(s => s.Name).ToList()))
+            sb.AppendLine($"  {line}");
+        sb.AppendLine();
+        sb.AppendLine($"  Área: {extent.AreaSquareDegrees.ToString("F2", Culture)} grados cuadrados " +
+            $"({(facts.SkyFraction * 100).ToString("F3", Culture)} % del cielo), puesto {facts.SizeRank} de 88");
+        sb.AppendLine($"  Declinación (J2000): de {extent.MinDeclinationDegrees.ToString("F2", Culture)}° a {extent.MaxDeclinationDegrees.ToString("F2", Culture)}°");
+        sb.AppendLine($"  Sale entera desde latitudes entre {Latitude(Math.Max(-90, extent.MaxDeclinationDegrees - 90))} y " +
+            $"{Latitude(Math.Min(90, extent.MinDeclinationDegrees + 90))} · {facts.Sight}");
+        sb.AppendLine(facts.BrightestStars is { } stars
+            ? $"  Estrellas del catálogo: {(stars.Count == 0 ? "ninguna" : string.Join(", ", stars.Select(s => $"{s.Name} {s.Magnitude.ToString("F2", Culture)}")))}"
+            : "  Estrellas del catálogo: no cubre esta constelación (llega al sur de -50°)");
+        return sb.ToString();
+
+        static string Latitude(double degrees) =>
+            degrees == 0 ? "0°" : $"{Math.Abs(degrees).ToString("F1", Culture)}° {(degrees > 0 ? "N" : "S")}";
     }
 
     /// <summary>What the drawing uses: lit fraction, bright limb and north pole, in the HUD's axes.</summary>

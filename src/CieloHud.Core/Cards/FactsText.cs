@@ -206,6 +206,67 @@ public static class FactsText
         return $"Brillo: magnitud {(rounded < 0 ? "−" : "")}{number}";
     }
 
+    /// <summary>
+    /// A constellation's card: its size, how much of it rises from the observer's latitude and, when the catalog can tell, its
+    /// brightest stars (decision 047).
+    /// </summary>
+    /// <param name="starNames">Names of <see cref="ConstellationFacts.BrightestStars"/> as the app shows them, in the same order.</param>
+    public static IReadOnlyList<string> Constellation(ConstellationFacts facts, IReadOnlyList<string>? starNames)
+    {
+        ArgumentNullException.ThrowIfNull(facts);
+        if ((facts.BrightestStars is null) != (starNames is null) || starNames is not null && starNames.Count != facts.BrightestStars!.Count)
+            throw new ArgumentException("One name per star of the facts.", nameof(starNames));
+
+        List<string> lines = [ConstellationSize(facts), ConstellationVisibility(facts.Sight)];
+        if (starNames is not null)
+            lines.Add(ConstellationBrightest(starNames));
+        return lines;
+    }
+
+    /// <summary>"Ocupa el 1,4 % del cielo: la 26.ª de 88 por tamaño"; the first and the last, "la más grande" and "la más pequeña".</summary>
+    public static string ConstellationSize(ConstellationFacts facts)
+    {
+        ArgumentNullException.ThrowIfNull(facts);
+        var percent = (facts.SkyFraction * 100).ToString("0.0", Culture).Replace('.', ',');
+        var place = facts.SizeRank switch
+        {
+            1 => $"la más grande de las {ConstellationCount}",
+            ConstellationCount => $"la más pequeña de las {ConstellationCount}",
+            var rank => $"la {rank.ToString(Culture)}.ª de {ConstellationCount} por tamaño",
+        };
+        return $"Ocupa el {percent}{Space}% del cielo: {place}";
+    }
+
+    private const int ConstellationCount = 88;
+
+    /// <summary>
+    /// "Desde aquí se puede ver entera": whether every part of it rises at some time of the night and the year (geometry only,
+    /// as Ridpath's table of the constellations has it).
+    /// </summary>
+    public static string ConstellationVisibility(ConstellationSight sight) => sight switch
+    {
+        ConstellationSight.Whole => "Desde aquí se puede ver entera",
+        ConstellationSight.Partly => "Desde aquí solo se ve una parte: el resto no llega a salir",
+        ConstellationSight.NeverRises => "Desde aquí no sale nunca",
+        ConstellationSight.NeverSets => "Desde aquí no se pone nunca",
+        _ => throw new ArgumentOutOfRangeException(nameof(sight), sight, null),
+    };
+
+    /// <summary>
+    /// "Sus estrellas más brillantes: Rigel, Betelgeuse y Bellatrix" (up to three), "Su estrella más brillante: Vega", or, with none
+    /// in the catalog, that none reaches magnitude 3: the city limit (decision 015).
+    /// </summary>
+    public static string ConstellationBrightest(IReadOnlyList<string> starNames)
+    {
+        ArgumentNullException.ThrowIfNull(starNames);
+        return starNames.Count switch
+        {
+            0 => "Ninguna de sus estrellas llega a la magnitud 3: desde ciudad cuesta verla",
+            1 => $"Su estrella más brillante: {starNames[0]}",
+            _ => $"Sus estrellas más brillantes: {List([.. starNames.Take(3)])}",
+        };
+    }
+
     /// <summary>8.64 → 8.6, 432.6 → 430, 1157 → 1200 (or 1100 rounding down).</summary>
     private static double TwoFigures(double x, bool roundDown = false)
     {
@@ -217,9 +278,23 @@ public static class FactsText
     private static string Figures(double x) =>
         x < 10 ? x.ToString("0.#", Culture).Replace('.', ',') : Grouped((int)Math.Round(x));
 
-    /// <summary>"A", "A y B", "A, B y C".</summary>
+    /// <summary>"A", "A y B", "A, B y C"; "Júpiter e Ío".</summary>
     private static string List(IReadOnlyList<string> items) =>
-        items.Count == 1 ? items[0] : $"{string.Join(", ", items.Take(items.Count - 1))} y {items[^1]}";
+        items.Count == 1 ? items[0] : $"{string.Join(", ", items.Take(items.Count - 1))} {And(items[^1])} {items[^1]}";
+
+    /// <summary>
+    /// "e" before a word that starts with the sound /i/ ("Júpiter e Ío", "e Izar"), as Spanish writes it; "y" otherwise, also when
+    /// that i starts a diphthong ("y hielo").
+    /// </summary>
+    private static string And(string next)
+    {
+        var word = next.ToLowerInvariant();
+        if (word.StartsWith('h'))
+            word = word[1..];
+        var i = word.Length > 0 && (word[0] == 'i' || word[0] == 'í');
+        var diphthong = word.Length > 1 && word[0] == 'i' && "aeoáéó".Contains(word[1]);
+        return i && !diphthong ? "e" : "y";
+    }
 
     /// <summary>
     /// A light travel time in the words people use: "2 min y 40 s" under 10 minutes (Venus, Mercury, the Sun), whole minutes

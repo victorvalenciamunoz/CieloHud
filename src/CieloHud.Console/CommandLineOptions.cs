@@ -1,4 +1,5 @@
 using System.Globalization;
+using CieloHud.Core.Constellations;
 using CieloHud.Core.Sky;
 using CieloHud.Core.SolarSystem;
 using CieloHud.Core.Stars;
@@ -11,7 +12,7 @@ namespace CieloHud.Console;
 /// </summary>
 public sealed record CommandLineOptions(
     Observer Observer, DateTimeOffset Instant, int? PassesDays, int? ConjunctionsDays = null, int? MercuryDays = null, CelestialBody? CardBody = null,
-    bool CardIss = false, Star? CardStar = null)
+    bool CardIss = false, Star? CardStar = null, string? CardConstellation = null)
 {
     public const string Usage = """
         Usage: CieloHud.Console [--lat <degrees>] [--lon <degrees>] [--alt <meters>] [--time <ISO-8601>]
@@ -29,7 +30,8 @@ public sealed record CommandLineOptions(
                     for this many days from --time (1-1100).
           --card    Instead of the sky table, the facts of the moment on an object's card at --time:
                     moon, mercury, venus, mars, jupiter, saturn, iss (it needs its orbit, from the network or the cache),
-                    or a star by its IAU name or Bayer designation ("Betelgeuse", "gam Cas").
+                    or a star by its IAU name or Bayer designation ("Betelgeuse", "gam Cas"),
+                    or a constellation by its IAU symbol ("Ori", "UMa").
           --help    Show this text
 
         Numbers use a decimal point regardless of system locale.
@@ -45,6 +47,7 @@ public sealed record CommandLineOptions(
         CelestialBody? cardBody = null;
         var cardIss = false;
         Star? cardStar = null;
+        string? cardConstellation = null;
 
         for (var i = 0; i < args.Length; i++)
         {
@@ -66,6 +69,8 @@ public sealed record CommandLineOptions(
                 case "--mercury": mercuryDays = ParseDays(key, value, 1100); break;
                 case "--card" when value.Equals("iss", StringComparison.OrdinalIgnoreCase): cardIss = true; break;
                 case "--card" when BrightStars.All.Any(s => Is(s, value)): cardStar = BrightStars.Get(value); break;
+                case "--card" when ConstellationExtents.All.FirstOrDefault(c => c.Symbol.Equals(value, StringComparison.OrdinalIgnoreCase)) is { } c:
+                    cardConstellation = c.Symbol; break;
                 case "--card": cardBody = ParseBody(value); break;
                 default: throw new UsageException($"Unknown option {key}.");
             }
@@ -73,9 +78,9 @@ public sealed record CommandLineOptions(
 
         try
         {
-            if (new[] { passesDays, conjunctionsDays, mercuryDays }.Count(d => d is not null) + (cardBody is null && !cardIss && cardStar is null ? 0 : 1) > 1)
+            if (new[] { passesDays, conjunctionsDays, mercuryDays }.Count(d => d is not null) + (cardBody is null && !cardIss && cardStar is null && cardConstellation is null ? 0 : 1) > 1)
                 throw new UsageException("Use only one of --passes, --conjunctions, --mercury and --card.");
-            return new CommandLineOptions(new Observer(lat, lon, alt), instant, passesDays, conjunctionsDays, mercuryDays, cardBody, cardIss, cardStar);
+            return new CommandLineOptions(new Observer(lat, lon, alt), instant, passesDays, conjunctionsDays, mercuryDays, cardBody, cardIss, cardStar, cardConstellation);
         }
         catch (ArgumentOutOfRangeException ex)
         {
@@ -96,7 +101,7 @@ public sealed record CommandLineOptions(
     private static CelestialBody ParseBody(string value) =>
         Enum.TryParse<CelestialBody>(value, ignoreCase: true, out var body) && Enum.IsDefined(body) && !int.TryParse(value, out _)
             ? body
-            : throw new UsageException($"--card expects moon, mercury, venus, mars, jupiter, saturn, iss or a star of the catalog, got '{value}'.");
+            : throw new UsageException($"--card expects moon, mercury, venus, mars, jupiter, saturn, iss, a star of the catalog or a constellation symbol, got '{value}'.");
 
     private static bool Is(Star star, string value) =>
         string.Equals(star.ProperName, value, StringComparison.OrdinalIgnoreCase) || string.Equals(star.Designation, value, StringComparison.OrdinalIgnoreCase);

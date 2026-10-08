@@ -224,4 +224,57 @@ public class FactsTextTests
     {
         Assert.Equal(expected, FactsText.SatelliteVisibility(Iss(sight: sight)));
     }
+
+    [Fact]
+    public void JupiterMoons_EBeforeIo()
+    {
+        var lines = FactsText.JupiterMoons(Jupiter(
+            Moon(GalileanMoonName.Io, 5, 0),
+            Moon(GalileanMoonName.Europa, -0.5, 0, GalileanMoonState.InFrontOfJupiter)));
+        Assert.Equal("Con prismáticos, de izquierda a derecha: Júpiter e Ío", lines[0]);
+    }
+
+    private static ConstellationFacts Constellation(double fraction = 0.0144, int rank = 26, IReadOnlyList<Core.Stars.Star>? stars = null) =>
+        new("Ori", fraction, rank, ConstellationSight.Whole, stars);
+
+    [Theory]
+    [InlineData(0.01440, 26, "Ocupa el 1,4 % del cielo: la 26.ª de 88 por tamaño")]
+    [InlineData(0.03158, 1, "Ocupa el 3,2 % del cielo: la más grande de las 88")]
+    [InlineData(0.00166, 88, "Ocupa el 0,2 % del cielo: la más pequeña de las 88")]
+    [InlineData(0.02571, 9, "Ocupa el 2,6 % del cielo: la 9.ª de 88 por tamaño")]
+    public void ConstellationSize_ShareOfTheSkyAndPlace(double fraction, int rank, string expected)
+    {
+        Assert.Equal(expected.Replace(" %", $"{Space}%"), FactsText.ConstellationSize(Constellation(fraction, rank)));
+    }
+
+    [Theory]
+    [InlineData(ConstellationSight.Whole, "Desde aquí se puede ver entera")]
+    [InlineData(ConstellationSight.Partly, "Desde aquí solo se ve una parte: el resto no llega a salir")]
+    [InlineData(ConstellationSight.NeverRises, "Desde aquí no sale nunca")]
+    [InlineData(ConstellationSight.NeverSets, "Desde aquí no se pone nunca")]
+    public void ConstellationVisibility_FromTheObserversLatitude(ConstellationSight sight, string expected)
+    {
+        Assert.Equal(expected, FactsText.ConstellationVisibility(sight));
+    }
+
+    [Fact]
+    public void ConstellationBrightest_UpToThree()
+    {
+        Assert.Equal("Ninguna de sus estrellas llega a la magnitud 3: desde ciudad cuesta verla", FactsText.ConstellationBrightest([]));
+        Assert.Equal("Su estrella más brillante: Vega", FactsText.ConstellationBrightest(["Vega"]));
+        Assert.Equal("Sus estrellas más brillantes: Alphard y Gamma de la Hidra", FactsText.ConstellationBrightest(["Alphard", "Gamma de la Hidra"]));
+        Assert.Equal("Sus estrellas más brillantes: Arturo e Izar", FactsText.ConstellationBrightest(["Arturo", "Izar"]));
+        Assert.Equal("Sus estrellas más brillantes: Rigel, Betelgeuse y Bellatrix",
+            FactsText.ConstellationBrightest(["Rigel", "Betelgeuse", "Bellatrix", "Alnilam", "Alnitak"]));
+    }
+
+    [Fact]
+    public void Constellation_StarsLineOnlyWhenTheCatalogCanTell()
+    {
+        var rigel = Core.Stars.BrightStars.Get("Rigel");
+        Assert.Equal(3, FactsText.Constellation(Constellation(stars: [rigel]), ["Rigel"]).Count);
+        Assert.Equal(2, FactsText.Constellation(Constellation(stars: null), null).Count);
+        Assert.Throws<ArgumentException>(() => FactsText.Constellation(Constellation(stars: [rigel]), null));
+        Assert.Throws<ArgumentException>(() => FactsText.Constellation(Constellation(stars: [rigel]), ["Rigel", "Saiph"]));
+    }
 }
