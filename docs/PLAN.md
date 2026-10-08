@@ -1,6 +1,6 @@
 # Plan
 
-**Fase actual: 5**
+**Fase actual: 6** (sin planificar: el plan se acuerda con el usuario antes de empezar). La 5 se cerró el 2026-10-08.
 
 ---
 

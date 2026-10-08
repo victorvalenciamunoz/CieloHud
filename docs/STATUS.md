@@ -1,6 +1,6 @@
 # Estado
 
-Fase actual: 5 (ver PLAN.md). Fases 1 y 2 completadas el 2026-10-02; fase 3 el 2026-10-05; fase 4 el 2026-10-06.
+Fase actual: 6, sin planificar (ver PLAN.md). Fases 1 y 2 completadas el 2026-10-02; fase 3 el 2026-10-05; fase 4 el 2026-10-06; fase 5 el 2026-10-08.
 
 ## Hecho
 
@@ -1321,6 +1321,36 @@ De 313 a 398 caracteres. Montado sobre el lote 3 (PR #47), que toca las mismas l
   solo la llamó «la más bella». Revisados de paso los demás textos de estrellas que dan fechas o autores: no hay más choques.
 - Pendientes: 17 constelaciones.
 - `dotnet test` 909 tests; build Android 0 avisos.
+- Aprobados por el usuario (PR #48, fusionada con la #47).
+
+**10.8 — Textos, lote 5 (2026-10-08)**: el sur lejano (17): la Quilla, la Mosca, el Compás, el Triángulo Austral, el Ave del Paraíso, el Pavo, el Indio,
+el Octante, la Mesa, el Camaleón, el Pez Volador, el Pintor, el Dorado, el Retículo, el Reloj, la Hidra Macho y el Tucán. De 238 a 400 caracteres.
+- Fuentes: *Star Tales* de Ian Ridpath, una página por constelación.
+- Ninguna tiene estrellas en el catálogo (todas al sur de −50°) ni DATOS con sus estrellas: los textos nombran las notables (Canopo, Eta Carinae, Atria, Peacock)
+  con su cita, como permite la decisión 050. Las Nubes de Magallanes, sin distancia: Ridpath la da, pero no la NASA ni la ESA.
+- Sin repetir entre ellas: el Argo y su división están en la Popa; la Falsa Cruz, en la Vela; el trío de instrumentos de Lacaille, en la Escuadra.
+- Casi todas son modernas (los navegantes holandeses o Lacaille) y cuentan quién las inventó y por qué; varias dicen que no tienen leyenda porque Ridpath lo dice.
+
+**Paso 10 cerrado (2026-10-08)**: las 88 constelaciones tienen ficha en «¿qué es?», con sus datos, su dibujo del momento y su texto, en 5 lotes y 5 PR
+(#44, #45, #47, #48 y la de este lote), revisados uno a uno por el usuario. El test de pendientes pasa a ser una regla: `EveryConstellation_HasAText`, que falla
+nombrando la constelación si alguna se queda sin texto. Al contrastar con Ridpath se corrigieron cuatro textos de estrellas que seguían a Kaler en fechas
+o atribuciones (Naos, Phact, Cor Caroli e Izar).
+- `dotnet test` 909 tests; build Android 0 avisos.
+
+## Fase 5 — Hecho
+
+- **Fichas** de los 7 objetivos (al llegar a AQUÍ, con VER FICHA) y, en «¿qué es?», de las 155 estrellas y las 88 constelaciones (tocando su nombre, con una ⓘ).
+  En modo noche, en rojo.
+- **Datos del momento**, calculados en Core: fase e iluminación de la Luna (topocéntrica) y su próxima fase principal; distancia y tiempo de luz de los planetas;
+  lunas galileanas con su estado (delante, detrás, en sombra); inclinación de los anillos de Saturno; altura, velocidad y visibilidad de la ISS; años luz de las
+  estrellas desde la paralaje de Hipparcos, su color y su brillo; tamaño, visibilidad desde la latitud y estrellas de cada constelación.
+- **Dibujos calculados**, girados como se ven en el cielo: la Luna y los planetas con su fase, Júpiter con sus lunas, Saturno con sus anillos y cada constelación
+  con su figura y sus estrellas en ese momento.
+- **Textos**: 250 (7 objetivos, 155 estrellas y 88 constelaciones), cada uno con sus fuentes citadas y revisado uno a uno por el usuario.
+- Validado: JPL Horizons (iluminación, fases, distancias, lunas de Júpiter, anillos de Saturno, ángulos del borde iluminado, altura y velocidad de la ISS);
+  Hipparcos y SIMBAD (estrellas); Levin, Ridpath y el CDS (áreas y límites de las constelaciones); Stellarium Web (dibujos, comprobado por el usuario); el OPPO.
+- 909 tests en verde, también en el CI. Decisiones 036-050.
+- Fuera de la fase, a petición del usuario: la versión descargable 0.5.0.
 
 ## Mejoras fuera de fase
 
