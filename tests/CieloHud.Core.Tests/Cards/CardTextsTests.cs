@@ -134,11 +134,17 @@ public class CardTextsTests
             Assert.DoesNotMatch(new Regex(@"años luz|magnitud", RegexOptions.IgnoreCase), card.Body.Replace(NoBreakSpace, ' '));
     }
 
+    /// <summary>All 155 stars got their text in step 9 (decision 046): a star added to the catalog needs one too.</summary>
+    [Fact]
+    public void EveryStar_HasAText()
+    {
+        Assert.Empty(BrightStars.All.Where(s => CardTexts.Find(CardKey.Star(s)) is null).Select(s => s.Designation));
+    }
+
     /// <summary>Texts still to write; update when a batch is committed. Their cards show only the facts.</summary>
     [Fact]
     public void PendingTexts()
     {
-        Assert.Equal(20, BrightStars.All.Count(s => CardTexts.Find(CardKey.Star(s)) is null));
         Assert.Equal(88, ConstellationFigures.All.Count(c => CardTexts.Find(CardKey.Constellation(c.Symbol)) is null));
     }
 }

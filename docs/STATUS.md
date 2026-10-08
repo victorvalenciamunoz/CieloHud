@@ -1148,6 +1148,19 @@ De 250 a 344 caracteres.
 - Aprobados por el usuario sin cambios. Pendientes: 20 estrellas y 88 constelaciones.
 - `dotnet test` 794 tests; build Android 0 avisos. Sin prueba en el móvil, como los lotes 3 a 6.
 
+**Lote 8 (2026-10-08)**: las últimas 20: Andrómeda (Alpheratz, Mirach y Almach), Pegaso (Markab, Scheat, Algenib, Enif y Matar), el Triángulo (Beta),
+Aries (Hamal y Sheratan), la Ballena (Diphda y Menkar), Acuario (Sadalmelik y Sadalsuud), Capricornio (Deneb Algedi), el Fénix (Ankaa) y la Grulla
+(Alnair, Tiaki y Aldhanab). De 270 a 357 caracteres.
+- Fuentes: las páginas *Stars* de Jim Kaler, una por estrella. Kaler da Tiaki como estrella sin nombre propio: no se usa, la IAU se lo dio después.
+- Hamal: «el punto donde el Sol cruza el ecuador del cielo en marzo» en vez de «equinoccio de primavera», que en el hemisferio sur es de otoño.
+- Las esquinas del Gran Cuadrado de Pegaso, sin orientación («una de las esquinas»).
+- Aprobados por el usuario sin cambios.
+
+**Paso 9 cerrado (2026-10-08)**: las 155 estrellas tienen su texto, en 8 lotes y 8 PR (#32, #33 y #35-#40), todos revisados uno a uno
+por el usuario. El test de pendientes de estrellas pasa a ser una regla: `EveryStar_HasAText`, que falla nombrando la estrella si alguna del catálogo
+se queda sin texto. Quedan los 88 textos de las constelaciones (paso 10).
+- `dotnet test` 795 tests; build Android 0 avisos.
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.
