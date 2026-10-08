@@ -131,6 +131,34 @@ public static class CardFormatter
             degrees == 0 ? "0°" : $"{Math.Abs(degrees).ToString("F1", Culture)}° {(degrees > 0 ? "N" : "S")}";
     }
 
+    /// <summary>
+    /// What the drawing uses, to compare with Stellarium in an altazimuth mount: where it is centred, each star in degrees from the
+    /// center (right, up) and the direction from the brightest to the others (0° towards the zenith, 90° to the right).
+    /// </summary>
+    public static string ConstellationDrawing(ConstellationShape shape)
+    {
+        var sb = new StringBuilder();
+        var c = shape.Center;
+        sb.AppendLine("  Dibujo (0° hacia el cénit, 90° a la derecha; grados de cielo desde el centro):");
+        sb.AppendLine($"    Centro: acimut {c.AzimuthDegrees.ToString("F1", Culture)}° {SkyTableFormatter.Cardinal(c.CardinalPoint)}, " +
+            $"altura {c.AltitudeDegrees.ToString("F1", Culture)}°");
+        sb.AppendLine($"    Tamaño: {shape.Bounds.Width.ToString("F1", Culture)}° de ancho y {shape.Bounds.Height.ToString("F1", Culture)}° de alto; " +
+            $"{shape.Segments.Count} trazos ({shape.Segments.Count(s => !s.AboveHorizon)} bajo el horizonte), {shape.FaintVertices.Count} vértices sin estrella del catálogo");
+        foreach (var star in shape.Stars)
+            sb.AppendLine($"    {star.Star.Name,-14} {star.Star.Magnitude.ToString("F2", Culture),5}  derecha {star.At.Right.ToString("F1", Culture),6}  " +
+                $"arriba {star.At.Up.ToString("F1", Culture),6}{(star.Labelled ? "  rótulo" : "")}{(star.AboveHorizon ? "" : "  bajo el horizonte")}");
+        if (shape.Stars.Count > 1)
+        {
+            var first = shape.Stars[0];
+            foreach (var other in shape.Stars.Skip(1).Where(s => s.Labelled))
+            {
+                var direction = (Math.Atan2(other.At.Right - first.At.Right, other.At.Up - first.At.Up) * 180 / Math.PI + 360) % 360;
+                sb.AppendLine($"    De {first.Star.Name} a {other.Star.Name}: hacia {direction.ToString("F1", Culture)}°");
+            }
+        }
+        return sb.ToString();
+    }
+
     /// <summary>What the drawing uses: lit fraction, bright limb and north pole, in the HUD's axes.</summary>
     public static string Disc(BodyDisc disc)
     {

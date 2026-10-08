@@ -16,3 +16,8 @@ public sealed record SaturnPicture(SaturnShape Shape) : CardPicture;
 
 /// <summary>A star: a point of light in its color, which is all the eye sees.</summary>
 public sealed record StarPicture(StarColor Color) : CardPicture;
+
+/// <summary>
+/// A constellation as it looks now: its figure and its stars (decision 049), with the names of the brightest by designation, in Spanish.
+/// </summary>
+public sealed record ConstellationPicture(ConstellationShape Shape, IReadOnlyDictionary<string, string> Labels) : CardPicture;

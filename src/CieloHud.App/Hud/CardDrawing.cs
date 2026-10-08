@@ -39,6 +39,21 @@ public sealed class CardDrawing : IDrawable
     /// <summary>Room around the shapes.</summary>
     private const float Margin = 6;
 
+    /// <summary>
+    /// A constellation's drawing: as wide as the card and as tall as its shape asks, within these. No common scale between
+    /// constellations: their size is in the card's facts.
+    /// </summary>
+    private const float ChartMinHeight = 110;
+    private const float ChartMaxHeight = 170;
+
+    /// <summary>Room at the sides for half a name, above for a halo and below for a name.</summary>
+    private const float ChartSide = 30;
+    private const float ChartTop = 10;
+    private const float ChartBottom = 20;
+
+    /// <summary>The narrowest span of sky drawn, so a short or straight figure is not blown up into one line.</summary>
+    private const double ChartMinSpanDegrees = 4;
+
     public CardPicture? Picture { get; set; }
 
     public HudPalette Palette { get; set; } = HudPalette.Normal;
@@ -50,6 +65,7 @@ public sealed class CardDrawing : IDrawable
         StarPicture => 2 * (StarHalo + Margin),
         SaturnPicture saturn => 2 * (SaturnHalfHeight(saturn.Shape) + Margin),
         JupiterPicture jupiter => JupiterLayout(jupiter.Moons, (float)width).Height,
+        ConstellationPicture constellation => ConstellationLayout(constellation.Shape, (float)width).Height,
         _ => 0,
     };
 
@@ -71,6 +87,9 @@ public sealed class CardDrawing : IDrawable
                 break;
             case JupiterPicture jupiter:
                 DrawJupiter(canvas, r, jupiter.Moons);
+                break;
+            case ConstellationPicture constellation:
+                DrawConstellation(canvas, r, constellation);
                 break;
         }
         canvas.RestoreState();
@@ -325,6 +344,94 @@ public sealed class CardDrawing : IDrawable
 
     private static IEnumerable<GalileanMoon> Visible(JupiterMoonsFacts facts) =>
         facts.Moons.Where(m => m.State == GalileanMoonState.Visible);
+
+
+    private readonly record struct ChartLayout(float Scale, float Height);
+
+    /// <summary>Points per degree of sky: the figure fills the width, unless it would be taller than <see cref="ChartMaxHeight"/>.</summary>
+    private static ChartLayout ConstellationLayout(ConstellationShape shape, float width)
+    {
+        var spanRight = Math.Max(shape.Bounds.Width, ChartMinSpanDegrees);
+        var spanUp = Math.Max(shape.Bounds.Height, ChartMinSpanDegrees);
+        var room = Math.Max(width - 2 * ChartSide, 1);
+        var scale = (float)Math.Min(room / spanRight, (ChartMaxHeight - ChartTop - ChartBottom) / spanUp);
+        var height = (float)Math.Max(ChartMinHeight, spanUp * scale + ChartTop + ChartBottom);
+        return new ChartLayout(scale, height);
+    }
+
+    /// <summary>
+    /// The figure as it looks now (decision 049): its lines faint, as on the HUD; the vertices with no star of the catalog as small dots;
+    /// the stars as points of light in their color, sized by brightness as on the HUD; and the names of the three brightest. What has not
+    /// risen is drawn dimmer, with no horizon line.
+    /// </summary>
+    private void DrawConstellation(ICanvas canvas, RectF r, ConstellationPicture picture)
+    {
+        var shape = picture.Shape;
+        var layout = ConstellationLayout(shape, r.Width);
+        var middleRight = (shape.Bounds.MinRight + shape.Bounds.MaxRight) / 2;
+        var middleUp = (shape.Bounds.MinUp + shape.Bounds.MaxUp) / 2;
+        var center = new PointF(r.Center.X, r.Y + ChartTop + (r.Height - ChartTop - ChartBottom) / 2);
+        PointF At(ChartPoint p) => new(
+            center.X + (float)((p.Right - middleRight) * layout.Scale), center.Y - (float)((p.Up - middleUp) * layout.Scale));
+
+        canvas.StrokeSize = 1.5f;
+        canvas.StrokeLineCap = LineCap.Round;
+        foreach (var segment in shape.Segments)
+        {
+            canvas.StrokeColor = Palette.Guide.WithAlpha(segment.AboveHorizon ? 0.5f : 0.18f);
+            var from = At(segment.From);
+            var to = At(segment.To);
+            canvas.DrawLine(from, to);
+        }
+
+        foreach (var vertex in shape.FaintVertices)
+        {
+            canvas.FillColor = Palette.TextDim.WithAlpha(vertex.AboveHorizon ? 1 : 0.4f);
+            canvas.FillCircle(At(vertex.At), 1.3f);
+        }
+
+        // Faintest first, so a bright star's glow is never covered.
+        var dots = new List<RectF>();
+        foreach (var star in shape.Stars.Reverse())
+        {
+            var at = At(star.At);
+            var radius = StarDotRadius(star.Star.Magnitude);
+            var tint = Palette.TrueColors ? StarTrueColors[StarColors.Of(star.Star)] : Palette.Text;
+            if (star.AboveHorizon)
+                Glow(canvas, at, radius, radius * 2.6f, tint);
+            else
+            {
+                canvas.FillColor = tint.WithAlpha(0.35f);
+                canvas.FillCircle(at, radius);
+            }
+            dots.Add(new RectF(at.X - radius, at.Y - radius, 2 * radius, 2 * radius));
+        }
+
+        // The names, brightest first: under the dot, else over it, else left out; never over another name or another star.
+        var font = new Microsoft.Maui.Graphics.Font(FontRegular);
+        canvas.Font = font;
+        canvas.FontSize = LabelFontSize;
+        var placed = new List<RectF>();
+        foreach (var star in shape.Stars.Where(s => picture.Labels.ContainsKey(s.Star.Designation)))
+        {
+            var name = picture.Labels[star.Star.Designation];
+            var at = At(star.At);
+            var gap = StarDotRadius(star.Star.Magnitude) + 2;
+            // Measured with another font than the one drawn: a margin for collisions.
+            var width = canvas.GetStringSize(name, font, LabelFontSize).Width * 1.2f;
+            var left = Math.Clamp(at.X - width / 2, r.Left, r.Right - width);
+            RectF? Free(RectF box) =>
+                box.Top >= r.Top && box.Bottom <= r.Bottom && !placed.Concat(dots).Any(o => o.IntersectsWith(box)) ? box : null;
+            if ((Free(new RectF(left, at.Y + gap, width, LabelSize)) ?? Free(new RectF(left, at.Y - gap - LabelSize, width, LabelSize))) is not { } box)
+                continue;
+            placed.Add(box);
+            canvas.FontColor = Palette.TextMuted.WithAlpha(star.AboveHorizon ? 1 : 0.5f);
+            canvas.DrawString(name, box.X - LabelBox, box.Y, box.Width + 2 * LabelBox, LabelSize, HorizontalAlignment.Center, VerticalAlignment.Center);
+        }
+    }
+
+    /// <summary>As on the HUD: Sirius about 5, a star of magnitude 2 about 1.5.</summary>
+    private static float StarDotRadius(double magnitude) => (float)Math.Clamp(3.5 - magnitude, 1.5, 5);
 
     /// <summary>How far the rings or the globe reach up or down from the center, once turned.</summary>
     private static float SaturnHalfHeight(SaturnShape shape)
