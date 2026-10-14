@@ -94,6 +94,7 @@ public partial class HudPage : ContentPage
         CardPictureView.Drawable = _cardDrawing;
         BuildTargetBar();
         BuildBrightnessBar();
+        BuildKeypad();
         // In the constructor, not OnAppearing: a tap on an alert must reach the HUD also while diagnostics is on top.
         LaunchRequests.Listen(OnLaunchRequested);
         ApplyPalette();
@@ -161,6 +162,9 @@ public partial class HudPage : ContentPage
         StyleChip(LeaveNightButton, false);
         StyleChip(CloseCardButton, false);
         StyleChip(CloseStarsButton, false);
+        StyleChip(StarsModeButton, false);
+        foreach (var key in _keys)
+            StyleChip(key, false);
         StyleChip(CardMoreButton, false);
         StyleChip(ShowCardButton, _cardButtonLit ?? true);
         foreach (var (brightness, chip) in _brightnessChips)
@@ -684,31 +688,135 @@ public partial class HudPage : ContentPage
         CloseCard();
         NightPanel.IsVisible = false;
         ShowCardButton.IsVisible = false;
-        FillStarsList(DateTimeOffset.UtcNow);
+        // It always opens on the brightest: the short list is what most people need.
+        _starQuery = null;
+        FillStars(DateTimeOffset.UtcNow);
 #if ANDROID
         // Only when the rows do not fit, with the palette's color, as on the cards (decision 052).
         Platforms.Android.CardScrollBar.Apply(StarsScroll, _nightMode.Palette.TextMuted);
 #endif
         StarsPanel.IsVisible = true;
-        _ = StarsScroll.ScrollToAsync(0, 0, false);
     }
 
     private void OnCloseStarsClicked(object? sender, EventArgs e) => StarsPanel.IsVisible = false;
 
-    /// <summary>Once, when the list opens: rows that moved or left while the finger is on them would pick the wrong star.</summary>
-    private void FillStarsList(DateTimeOffset now)
+    /// <summary>BUSCAR ↔ LISTA: the search starts empty every time.</summary>
+    private void OnStarsModeClicked(object? sender, EventArgs e)
     {
+        _starQuery = _starQuery is null ? "" : null;
+        FillStars(DateTimeOffset.UtcNow);
+    }
+
+    /// <summary>What has been typed in the search; null while the panel shows the brightest.</summary>
+    private string? _starQuery;
+
+    /// <summary>Longer than any name in the catalog: more letters can only find nothing.</summary>
+    private const int MaxStarQueryLength = 20;
+
+    private readonly List<Button> _keys = [];
+
+    /// <summary>
+    /// QWERTY, the layout people already know (asked by the user): each key two half-columns wide, the second and third rows half a
+    /// key in, and BORRAR after M. Without Ñ: no name in the catalog has it, and the search ignores accents. BORRAR in words, not
+    /// "⌫": the HUD font may not have it.
+    /// </summary>
+    private void BuildKeypad()
+    {
+        string[] rows = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
+        for (var row = 0; row < rows.Length; row++)
+        {
+            var start = row == 0 ? 0 : 1;
+            for (var i = 0; i < rows[row].Length; i++)
+            {
+                var letter = rows[row][i].ToString();
+                var key = Key(letter);
+                key.Clicked += (_, _) => TypeStar(letter);
+                StarsKeypad.Add(key, start + 2 * i, row);
+                Grid.SetColumnSpan(key, 2);
+            }
+        }
+        var erase = Key("BORRAR");
+        erase.FontSize = 11;
+        erase.Clicked += (_, _) => EraseStarLetter();
+        StarsKeypad.Add(erase, 15, 2);
+        Grid.SetColumnSpan(erase, 5);
+    }
+
+    private Button Key(string text)
+    {
+        var key = new Button
+        {
+            Text = text,
+            FontFamily = "ChakraPetchBold",
+            FontSize = 15,
+            CornerRadius = 6,
+            Padding = new Thickness(0),
+            BorderWidth = 1,
+        };
+        _keys.Add(key);
+        return key;
+    }
+
+    private void TypeStar(string letter)
+    {
+        if (_starQuery is null || _starQuery.Length >= MaxStarQueryLength)
+            return;
+        _starQuery += letter;
+        FillStars(DateTimeOffset.UtcNow);
+    }
+
+    private void EraseStarLetter()
+    {
+        if (string.IsNullOrEmpty(_starQuery))
+            return;
+        _starQuery = _starQuery[..^1];
+        FillStars(DateTimeOffset.UtcNow);
+    }
+
+    /// <summary>
+    /// The brightest, once when the panel opens: rows that moved or left while the finger is on them would pick the wrong star.
+    /// Or the search, again on every key: then the rows change because the user typed.
+    /// </summary>
+    private void FillStars(DateTimeOffset now)
+    {
+        var searching = _starQuery is not null;
+        StarsTitle.Text = searching ? "BUSCAR ESTRELLA" : "LAS MÁS BRILLANTES AHORA";
+        StarsModeButton.Text = searching ? "LISTA" : "BUSCAR";
+        StarsQuery.IsVisible = searching;
+        StarsKeypad.IsVisible = searching;
+        if (searching)
+        {
+            var empty = _starQuery!.Length == 0;
+            StarsQuery.Text = empty ? "Escribe las primeras letras del nombre" : _starQuery + "_";
+            StarsQuery.FontFamily = empty ? "OpenSansRegular" : "ChakraPetchBold";
+            StarsQuery.FontSize = empty ? 13 : 18;
+            StarsQuery.SetDynamicResource(Label.TextColorProperty, empty ? "HudTextMuted" : "HudLocked");
+        }
+
         StarsList.Children.Clear();
+        StarsMore.IsVisible = false;
+        _ = StarsScroll.ScrollToAsync(0, 0, false);
         if (_observer is not { } observer)
         {
             ShowStarsNote(_locationFailed ? "Sin ubicación no se sabe qué estrellas hay sobre el horizonte." : "Buscando la ubicación…");
             return;
         }
 
+        var daylight = _starChoices.IsDaylight(observer, now) ? "Es de día: las estrellas no se ven." : null;
+        if (searching)
+        {
+            var result = _starChoices.Search(_starQuery!, observer, now);
+            ShowStarsNote(daylight ?? (_starQuery!.Length > 0 && result.Total == 0 ? "Ninguna estrella del catálogo se llama así." : null));
+            foreach (var choice in result.Shown)
+                StarsList.Children.Add(StarRow(choice));
+            StarsMore.Text = $"y {result.Total - result.Shown.Count} más: sigue escribiendo";
+            StarsMore.IsVisible = result.HasMore;
+            return;
+        }
+
         var brightest = _starChoices.Brightest(observer, now);
-        ShowStarsNote(_starChoices.IsDaylight(observer, now) ? "Es de día: las estrellas no se ven."
-            : brightest.Count == 0 ? $"Ninguna estrella pasa ahora de {StarChoices.MinAltitudeDegrees.ToString("0", Culture)}° de altura."
-            : null);
+        ShowStarsNote(daylight
+            ?? (brightest.Count == 0 ? $"Ninguna estrella pasa ahora de {StarChoices.MinAltitudeDegrees.ToString("0", Culture)}° de altura." : null));
         foreach (var choice in brightest)
             StarsList.Children.Add(StarRow(choice));
     }
@@ -728,10 +836,12 @@ public partial class HudPage : ContentPage
             Text = choice.Name,
             FontFamily = "OpenSansSemibold",
             FontSize = 15,
-            LineBreakMode = LineBreakMode.TailTruncation,
+            // A long name goes on to a second line instead of being cut ("Gamma 2 de la V…" when the right part was long).
+            LineBreakMode = LineBreakMode.WordWrap,
             VerticalOptions = LayoutOptions.Center,
         };
-        name.SetDynamicResource(Label.TextColorProperty, chosen ? "HudLocked" : "HudText");
+        // Below the horizon (only in a search), dimmed, as the HUD draws what has not risen.
+        name.SetDynamicResource(Label.TextColorProperty, chosen ? "HudLocked" : choice.AboveHorizon ? "HudText" : "HudTextMuted");
         var detail = new Label
         {
             Text = StarChoices.Detail(choice),

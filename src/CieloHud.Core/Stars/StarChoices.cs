@@ -59,14 +59,31 @@ public sealed class StarChoices
             .Take(MaxShown));
 
     /// <summary>
-    /// The stars whose names match <paramref name="query"/> (see <see cref="Matches"/>), above or below the horizon, in
-    /// alphabetical order; at most <see cref="MaxShown"/> of them, with the total. A blank query matches nothing.
+    /// The stars whose names match <paramref name="query"/> (see <see cref="Matches"/>), above or below the horizon; at most
+    /// <see cref="MaxShown"/> of them, with the total. First those whose name starts with what was typed (<see cref="StartsWith"/>),
+    /// then the rest, each group in alphabetical order: "ve" puts Vega before "Mu de la Vela". A blank query matches nothing.
     /// </summary>
     public StarSearchResult Search(string query, Observer observer, DateTimeOffset instant)
     {
         ArgumentNullException.ThrowIfNull(query);
-        var found = Alphabetical(_catalog.Where(s => Matches(s, query)).Select(s => Choice(s, observer, instant)));
+        var matching = _catalog.Where(s => Matches(s, query)).Select(s => Choice(s, observer, instant)).ToList();
+        var found = Alphabetical(matching.Where(c => StartsWith(c.Star, query)))
+            .Concat(Alphabetical(matching.Where(c => !StartsWith(c.Star, query))))
+            .ToList();
         return new StarSearchResult(found.Take(MaxShown).ToList(), found.Count);
+    }
+
+    /// <summary>
+    /// The first word of the query starts the star's name, in Spanish or IAU, ignoring accents and case: "ve" starts "Vega",
+    /// "sirius" starts Sirio's IAU name, but "ve" does not start "Mu de la Vela", which only contains it.
+    /// </summary>
+    public static bool StartsWith(Star star, string query)
+    {
+        ArgumentNullException.ThrowIfNull(star);
+        ArgumentNullException.ThrowIfNull(query);
+        var first = Words(query).FirstOrDefault();
+        return first is not null
+            && new[] { SpanishNames.Star(star), star.ProperName }.Any(n => n is not null && Words(n).FirstOrDefault() is { } w && w.StartsWith(first, StringComparison.Ordinal));
     }
 
     /// <summary>The Sun is higher than <see cref="MaxSunAltitudeDegrees"/>: the stars cannot be seen.</summary>

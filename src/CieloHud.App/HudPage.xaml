@@ -43,20 +43,35 @@
             <Border.StrokeShape>
                 <RoundRectangle CornerRadius="8" />
             </Border.StrokeShape>
-            <!-- CERRAR beside the title, always in view; the rows scroll if they do not fit (small screens, large fonts). -->
-            <Grid RowDefinitions="Auto,Auto,*" RowSpacing="4">
-                <Grid ColumnDefinitions="*,Auto">
-                    <Label Text="LAS MÁS BRILLANTES AHORA" FontFamily="ChakraPetchBold" FontSize="11" CharacterSpacing="1"
+            <!-- The buttons beside the title, always in view; the rows scroll if they do not fit (small screens, large fonts).
+                 BUSCAR swaps the brightest for a search with our own letter keypad, not the system keyboard, which is white at night
+                 and covers half the HUD (decision 054); LISTA brings the brightest back. -->
+            <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="4">
+                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                    <Label x:Name="StarsTitle" FontFamily="ChakraPetchBold" FontSize="11" CharacterSpacing="1"
                            VerticalOptions="Center" TextColor="{DynamicResource HudTextSoft}" />
-                    <Button Grid.Column="1" x:Name="CloseStarsButton" Text="CERRAR"
+                    <Button Grid.Column="1" x:Name="StarsModeButton"
+                            FontFamily="ChakraPetch" FontSize="11" BorderWidth="1" CornerRadius="6" Padding="10,4"
+                            Clicked="OnStarsModeClicked" />
+                    <Button Grid.Column="2" x:Name="CloseStarsButton" Text="CERRAR"
                             FontFamily="ChakraPetch" FontSize="11" BorderWidth="1" CornerRadius="6" Padding="10,4"
                             Clicked="OnCloseStarsClicked" />
                 </Grid>
-                <Label Grid.Row="1" x:Name="StarsNote" IsVisible="False" FontFamily="OpenSansRegular" FontSize="13"
+                <!-- What has been typed, with a cursor; a hint while empty. -->
+                <Label Grid.Row="1" x:Name="StarsQuery" IsVisible="False" FontFamily="ChakraPetchBold" FontSize="18" CharacterSpacing="1" />
+                <Label Grid.Row="2" x:Name="StarsNote" IsVisible="False" FontFamily="OpenSansRegular" FontSize="13"
                        TextColor="{DynamicResource HudTextMuted}" />
-                <ScrollView Grid.Row="2" x:Name="StarsScroll">
-                    <VerticalStackLayout x:Name="StarsList" />
+                <ScrollView Grid.Row="3" x:Name="StarsScroll">
+                    <VerticalStackLayout>
+                        <VerticalStackLayout x:Name="StarsList" />
+                        <Label x:Name="StarsMore" IsVisible="False" Margin="0,6,0,0" FontFamily="OpenSansRegular" FontSize="13"
+                               TextColor="{DynamicResource HudTextMuted}" />
+                    </VerticalStackLayout>
                 </ScrollView>
+                <!-- QWERTY and BORRAR, built in code. Twenty half-key columns, so the second and third rows can start half a key in,
+                     as on a phone keyboard. -->
+                <Grid Grid.Row="4" x:Name="StarsKeypad" IsVisible="False" Margin="0,6,0,0" RowSpacing="6" ColumnSpacing="4"
+                      ColumnDefinitions="*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*" RowDefinitions="44,44,44" />
             </Grid>
         </Border>
 

@@ -83,8 +83,44 @@ public class StarChoicesTests
         Assert.Equal(StarChoices.MaxShown, result.Shown.Count);
         Assert.True(result.HasMore);
         Assert.Equal(BrightStars.All.Count(s => StarChoices.Matches(s, "al")), result.Total);
-        var keys = result.Shown.Select(c => StarChoices.Fold(c.Name)).ToList();
-        Assert.Equal(keys.Order(StringComparer.Ordinal), keys);
+        AssertStartingFirstThenAlphabetical(result.Shown, "al");
+    }
+
+    /// <summary>Seen on the phone: with "ve", Vega came after two stars «de la Vela», which only contain the word.</summary>
+    [Fact]
+    public void Search_PutsTheNamesThatStartWithTheQueryFirst()
+    {
+        var result = _choices.Search("ve", Madrid, OctoberEvening);
+
+        Assert.Equal(["Vega", "Gamma 2 de la Vela", "Mu de la Vela"], result.Shown.Select(c => c.Name));
+        AssertStartingFirstThenAlphabetical(result.Shown, "ve");
+    }
+
+    [Theory]
+    [InlineData("ve", "alf Lyr", true)] // Vega
+    [InlineData("VEGA", "alf Lyr", true)]
+    [InlineData("sirius", "alf CMa", true)] // its IAU name
+    [InlineData("estr", "alf UMi", true)] // «Estrella Polar»
+    [InlineData("polar", "alf UMi", true)] // a later word of «Estrella Polar», but the start of «Polaris»
+    [InlineData("caroli", "alf02 CVn", false)] // a later word of «Cor Caroli»: it matches, in the second group
+    [InlineData("ve", "mu. Vel", false)] // «Mu de la Vela»
+    [InlineData("casi", "gam Cas", false)] // «Gamma de Casiopea»
+    [InlineData("", "alf Lyr", false)]
+    public void StartsWith_TheFirstWordOfTheName(string query, string designation, bool starts)
+    {
+        Assert.Equal(starts, StarChoices.StartsWith(Designated(designation), query));
+    }
+
+    private static void AssertStartingFirstThenAlphabetical(IReadOnlyList<StarChoice> shown, string query)
+    {
+        var starting = shown.TakeWhile(c => StarChoices.StartsWith(c.Star, query)).ToList();
+        var rest = shown.Skip(starting.Count).ToList();
+        Assert.DoesNotContain(rest, c => StarChoices.StartsWith(c.Star, query));
+        foreach (var group in new[] { starting, rest })
+        {
+            var keys = group.Select(c => StarChoices.Fold(c.Name)).ToList();
+            Assert.Equal(keys.Order(StringComparer.Ordinal), keys);
+        }
     }
 
     [Fact]

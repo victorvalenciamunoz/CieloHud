@@ -1550,6 +1550,24 @@ Pasos, en PR separadas:
   (el color de elegida y el del texto son casi iguales en rojo). El chip queda fuera de la pantalla al abrir la app; hay que desplazar la fila para verlo.
 - Aprobado por el usuario al verlo en el móvil. `dotnet test` 981 tests; build Android 0 avisos.
 
+### Paso 3 — BUSCAR con un teclado propio (2026-10-14)
+
+- En el panel de ESTRELLAS, **BUSCAR** junto a CERRAR. Pasa el panel a «BUSCAR ESTRELLA» (LISTA vuelve a las más brillantes; al abrir el chip, siempre la lista):
+  - lo escrito en grande, con un cursor («VE_»); vacío, «Escribe las primeras letras del nombre»;
+  - los resultados de `StarChoices.Search`, como mucho 10, y «y 18 más: sigue escribiendo» si hay más; si ninguno, «Ninguna estrella del catálogo se llama así»;
+    las que están bajo el horizonte, con el nombre apagado, como las dibuja el HUD; el aviso de día, como en la lista;
+  - **un teclado propio** en la paleta de la app (en rojo de noche): QWERTY en tres filas, la segunda y la tercera media tecla adentro, y BORRAR tras la M.
+    Sin el teclado del sistema, que es blanco y tapa medio HUD (decisión 054).
+- Ajustes al verlo en el móvil (decisión 054):
+  - El teclado era alfabético, 7 por 4; el usuario propuso **QWERTY**, el que ya conoce cualquiera. Ocupa una fila menos y deja más resultados a la vista.
+  - Con «ve», Vega salía la última, detrás de Gamma 2 de la Vela y Mu de la Vela, que solo contienen la palabra. Ahora **primero las que empiezan por lo
+    escrito** (en español o IAU: «polar» empieza «Polaris»), y después las demás; cada grupo por orden alfabético. «casi» sigue encontrando Gamma de Casiopea.
+    En Core, `StarChoices.StartsWith`, con sus tests.
+  - Los nombres largos se cortaban («Gamma 2 de la V…» junto a «en la Vela · bajo el horizonte»): ahora pasan a una segunda línea.
+- Validado en el OPPO (Android 16, Debug, de día), por adb con una captura antes de cada toque: ESTRELLAS → BUSCAR → V da Gamma 2 de la Vela, Mu de la Vela,
+  Vega y Vindemiatrix (antes del ajuste del orden); V, E da Vega, Gamma 2 de la Vela (en dos líneas) y Mu de la Vela, estas dos apagadas y «bajo el horizonte».
+- `dotnet test` 991 tests; build Android 0 avisos.
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.
