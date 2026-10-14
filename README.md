@@ -208,7 +208,8 @@ ISS        161.15° S   -37.26°  bajo el horizonte       8364 km
 - [x] **Fase 3** · HUD en MAUI para Android, validado en el cielo guiando hasta la Luna
 - [x] **Fase 4** · Avisos de la ISS, la Luna junto a un planeta, planetas juntos y Mercurio, con la app cerrada, validados contra Heavens-Above y JPL Horizons
 - [x] **Fase 5** · Fichas del objeto: qué estás viendo, explicado para no expertos, con datos del momento («esta luz salió de Júpiter hace 49 minutos») y un dibujo calculado, para la Luna, los planetas, la ISS, 155 estrellas y las 88 constelaciones, con 250 textos revisados uno a uno
-- [ ] **Fase 6** · Efemérides: la historia de cada objeto en su ficha (descubrimientos, misiones, lo que se vio en el cielo), con fecha y fuente, revisadas una a una (en curso)
+- [x] **Fase 6** · Efemérides: la historia de cada objeto en su ficha (descubrimientos, misiones, lo que se vio en el cielo), 30 fechas con su fuente, revisadas una a una
+- [ ] **Fase 7** · Guiar también a las estrellas: las más brillantes del momento y un buscador, para que la guía lleve a cualquiera de las 155 (en curso)
 
 El detalle está en [`docs/`](docs): [visión](docs/VISION.md), [plan](docs/PLAN.md), [estado](docs/STATUS.md) y [decisiones](docs/DECISIONS.md). Ahí se explica, por ejemplo, por qué la altura del Sol se calcula sin refracción, o cómo se esquivó un bucle infinito de la librería de efemérides al apuntar al cénit.
 

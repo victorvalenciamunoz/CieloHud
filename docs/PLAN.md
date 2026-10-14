@@ -1,6 +1,6 @@
 # Plan
 
-**Fase actual: 6** (planificada con el usuario el 2026-10-08; pasos en STATUS). La 5 se cerró el 2026-10-08.
+**Fase actual: 7** (planificada con el usuario el 2026-10-14; pasos en STATUS). La 6 se cerró el 2026-10-14.
 
 ---
 
@@ -108,24 +108,26 @@ dotnet run --project src/CieloHud.Console -- [--lat 40.4168] [--lon -3.7038] [--
 - Un descubrimiento, una misión o una persona, contado para el público general. Decisión 042.
 - Solo las ligadas a lo que la app enseña (la Luna, los planetas, la ISS, las estrellas y las constelaciones del catálogo), para que lleven al cielo.
   Una persona entra por lo que descubrió o estudió de algo que se puede ver, el día que lo hizo; no por su nacimiento ni por ser relevante en general.
-- Pocas y buenas: unas 40, como mucho 4 por objeto, la mayoría de los 7 objetivos.
+- Pocas y buenas: unas 40, como mucho 4 por objeto, la mayoría de los 7 objetivos. Quedaron 30 (24 de los 7 objetivos): casi nada anterior a las misiones
+  tiene el día en dos fuentes que coincidan (decisión 053).
 - Escritas y revisadas como los textos de las fichas: un Markdown por fecha, con su fuente, revisado uno a uno. Sin red y sin IA en la app. Criterios: decisión 051.
 - Dónde: en la ficha del objeto, una sección **HISTORIA** al final con todas sus fechas, siempre, de la más antigua a la más reciente (decisión 052, que
   corrige la idea de «tal día como hoy»: con la fecha exacta casi nunca coincidirían). No en EVENTOS, que es lo que se va a poder ver, ni como aviso.
 - Pasos: 1) Core: formato, reglas y tres entradas de ejemplo; 2) la sección en la app; 3-5) las entradas por lotes (Luna, Mercurio, Venus e ISS; Marte,
   Júpiter y Saturno; estrellas y constelaciones).
 
-## Idea: guiar también a las estrellas (apuntada el 2026-10-07, sin planificar ni fase asignada)
+## Fase 7 — Guiar también a las estrellas (idea apuntada el 2026-10-07, planificada el 2026-10-14)
 
-- Propuesta del usuario al probar las fichas de estrellas: que la guía lleve también a una estrella, como a un planeta. Caso claro: la Estrella Polar
-  para encontrar el norte, o «¿dónde está Vega?».
-- Cambia lo acordado: VISION dice «pocos objetos que buscar, pero más cosas que se puedan reconocer», y la decisión 044, que las estrellas no son
-  objetivos de la guía. Si se hace, va con una decisión nueva que lo corrija.
-- Lo técnico ya está: las 155 son `SkyTarget` (`StarTarget`), con su posición calculada; la flecha y AQUÍ sirven tal cual.
-- Lo que hay que diseñar es cómo se elige. Idea: un chip ESTRELLAS que abre una caja de texto con autocompletado sobre una lista.
-  - Con la caja vacía, las que están sobre el horizonte, ordenadas por brillo: se elige sin escribir y sin saber nombres.
-  - Al escribir, filtra las 155 por su nombre en español y el IAU («Sirio», «Sirius»), sin tildes ni mayúsculas, y por designación («gam Cas»).
-  - Las que están bajo el horizonte salen marcadas; elegidas, la guía hace lo de siempre con un objetivo bajo el horizonte (no guía).
-  - El filtrado y el orden, en Core con sus tests; la pantalla, con `Entry` y `CollectionView` (MAUI no trae autocompletado; sin paquetes).
-  - El teclado tapa medio HUD y deslumbra de noche: la lista tiene que bastar sin escribir, y en modo noche, todo en rojo.
-- Podría ir junto a las constelaciones (paso 10 de la Fase 5), que también podrían ser destino de la guía.
+- Propuesta del usuario al probar las fichas de estrellas: que la guía lleve también a una estrella, como a un planeta («¿dónde está Vega?»).
+  Corrige la decisión 044 (las estrellas no eran objetivos de la guía) y matiza VISION: decisión 054.
+- Lo técnico ya está: las 155 son `SkyTarget` (`StarTarget`), con su posición calculada; la flecha, AQUÍ y su ficha sirven tal cual. Lo nuevo es cómo se elige:
+  - Un chip **ESTRELLAS** detrás de ISS. Al elegir una, el chip lleva su nombre y la guía funciona como con un planeta.
+  - Al abrirlo, **las más brillantes que hay ahora sobre el horizonte, como mucho 10, por orden alfabético**, con su constelación, altura y dirección.
+    De día, un aviso: las estrellas no se ven.
+  - **BUSCAR**, con un **teclado de letras propio** en la paleta de la app (no el del sistema, blanco y que tapa el HUD): filtra las 155 sin tildes ni
+    mayúsculas, por el principio de cualquier palabra del nombre, y enseña como mucho 10.
+  - Las que están bajo el horizonte salen marcadas; elegidas, la guía hace lo de siempre (no guía).
+- Las constelaciones no son destino de la guía: son demasiado grandes para AQUÍ.
+- Pasos: 1) Core: la lista corta, el filtro y el aviso de día, con tests; los nombres en español de las estrellas pasan a Core. 2) La app: el chip y la
+  lista corta, en rojo de noche. 3) BUSCAR con el teclado propio. Validación en el móvil y en el cielo, con una estrella brillante y una débil (con
+  una de magnitud 2,5, AQUÍ puede dejar dudas entre vecinas parecidas). Lo que se vea al usarlo se ajusta en la misma fase.

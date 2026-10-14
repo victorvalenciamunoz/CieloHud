@@ -22,7 +22,8 @@ y, cuando lo encuentras, te cuenta qué estás viendo a nivel de no-experto, con
   El HUD puede pintar unas pocas referencias (estrellas muy brillantes, otros planetas, la Luna, horizonte) para que al
   bajar el móvil sepas dónde mirar, pero son ayudas para encontrar el objetivo, no un mapa del cielo.
   Pocos objetos que **buscar**, pero más cosas que se puedan **reconocer**: al apuntar, la app sabe en qué constelación
-  miras y nombra las estrellas hasta magnitud 3 (las que se ven desde ciudad).
+  miras y nombra las estrellas hasta magnitud 3 (las que se ven desde ciudad). Esas estrellas también se pueden buscar,
+  pero desde su propio chip, aparte de los objetivos (decisión 054).
 - No es una red social ni guarda historial en un servidor.
 - No es un chat ni depende de un servicio de IA. Lo que cuenta de cada objeto está escrito y revisado de antemano,
   y los datos del momento se calculan en el móvil y se pueden contrastar, como todo lo demás.
