@@ -79,6 +79,8 @@ public static class MauiProgram
 		// HUD
 		builder.Services.AddSingleton<TargetCatalog>();
 		builder.Services.AddSingleton<CardBuilder>();
+		builder.Services.AddSingleton(sp => new CieloHud.Core.Stars.StarChoices(
+			sp.GetRequiredService<CieloHud.Core.Stars.IStarService>(), sp.GetRequiredService<ISunService>()));
 		builder.Services.AddSingleton(Preferences.Default);
 		builder.Services.AddSingleton<NightMode>();
 		builder.Services.AddTransient<HudPage>();

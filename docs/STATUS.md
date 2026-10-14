@@ -1506,6 +1506,68 @@ Pasos, en PR separadas:
 - **7.3, BUSCAR**: el teclado de letras propio y los resultados.
 - Validación en el móvil y en el cielo, con una estrella brillante y una débil.
 
+### Paso 1 — Las estrellas para elegir, en Core (2026-10-14)
+
+- `Cards/SpanishNames` pasa de la app a Core, sin cambios, con sus primeros tests: el buscador tiene que encontrar las estrellas por el nombre que muestra la app.
+- Core `Stars/StarChoices` (decisión 054):
+  - `Brightest`: las 10 más brillantes a más de 10° de altura, por orden alfabético. Vacía si ninguna llega.
+  - `Search`: las que encajan con lo escrito, sobre o bajo el horizonte (`StarChoice.AboveHorizon`), por orden alfabético; como mucho 10, con el total
+    (`HasMore`: «sigue escribiendo»). Cada palabra escrita tiene que empezar una palabra del nombre en español o del IAU, sin tildes ni mayúsculas.
+  - `IsDaylight`: el Sol por encima de −6°.
+  - Cada `StarChoice` lleva el nombre en español, la constelación de su designación («la Lira») y su posición.
+- El orden alfabético va por el nombre sin tildes y en orden ordinal, no por la cultura del móvil: «Épsilon» va con la E en cualquier idioma.
+- **Cambio al verlo en la consola**: la designación ya no se busca. «al» encontraba 55 estrellas, todas las «alf …» (Vega entre ellas), y ahora encuentra 28,
+  todas con un nombre que empieza por «Al». El teclado propio no tendrá espacio para escribir «gam cas». Lo recoge la decisión 054.
+- Fijados en la decisión 054: 10° de altura para la lista corta (más bajas se apagan o las tapan los edificios) y −6° para el día, como en los pasos de la ISS.
+- Consola: `--stars` muestra la lista corta y `--stars <texto>`, la búsqueda, con designación, magnitud, altura y acimut. Desde Madrid el 15 oct a las 21:00 UT:
+  Alioth, Alkaid, Altair, Capella, Deneb, Dubhe, Fomalhaut, Menkalinan, Mirfak y Vega (Aldebarán, a 8,1°, se queda fuera); «casi» da Gamma de Casiopea;
+  «sirio» a mediodía da Sirio bajo el horizonte y el aviso de día.
+- Las posiciones son las de `AstronomyEngineStarService`, ya validadas en la Fase 3 (paso 8: la Estrella Polar a la altura de la latitud y las culminaciones);
+  lo nuevo es la elección y el orden, cubiertos por los tests.
+- `dotnet test` 978 tests (45 nuevos); build Android 0 avisos. La app aún no lo usa (paso 7.2).
+
+### Paso 2 — El chip ESTRELLAS y la lista corta en la app (2026-10-14)
+
+- Chip **ESTRELLAS** detrás de ISS. Abre un panel propio, en la paleta y en rojo de noche: «LAS MÁS BRILLANTES AHORA», con CERRAR junto al título, y como
+  mucho 10 filas: el nombre a la izquierda y, a la derecha, «en la Lira · 22° al NE» (`StarChoices.Detail`, en Core con su test). Toda la fila se puede tocar
+  (44 dp de alto como mínimo).
+- Al tocar una, la guía lleva a ella como a un planeta (la flecha, AQUÍ y VER FICHA son los de siempre), el chip pasa a llamarse como ella («VEGA») y la fila de
+  chips se desplaza hasta él. Con una estrella elegida, el chip vuelve a abrir la lista para cambiarla.
+- Avisos en el panel: «Es de día: las estrellas no se ven»; sin ubicación todavía, «Buscando la ubicación…»; si ninguna pasa de 10°, lo dice.
+- La lista se calcula al abrir el panel y no cambia mientras está abierto: una fila que se moviera bajo el dedo elegiría otra estrella (como en la decisión 048).
+- El panel, la ficha y el de NOCHE se excluyen: abrir uno cierra los otros. Atrás cierra la lista. `StarChoices` se registra en `MauiProgram`.
+- Corregido al probarlo: con el aviso de día, CERRAR quedaba cortado abajo. Ahora va junto al título, y las filas se desplazan si no caben (con la barra de
+  las fichas, decisión 052).
+- Validado en el OPPO (Android 16, Debug, de día), por adb con una captura antes de cada toque:
+
+  | Prueba | Resultado |
+  |---|---|
+  | ESTRELLAS | 10 por orden alfabético (Alioth, Arturo, Capella, Cástor, Dubhe, Espiga, Pólux, Proción, Régulo, Vega), con su constelación, altura y dirección, y «Es de día» |
+  | Tocar Vega | el chip pasa a VEGA, seleccionado; la guía: «Vega, en la Lira · acimut 57°, altura 22°», con VER FICHA |
+  | NOCHE y ESTRELLAS | el panel entero en rojo |
+
+- Pendiente de ver: el panel ocupa todo el alto del HUD aunque haya pocas estrellas (al anochecer). De noche, la estrella elegida apenas se distingue en la lista
+  (el color de elegida y el del texto son casi iguales en rojo). El chip queda fuera de la pantalla al abrir la app; hay que desplazar la fila para verlo.
+- Aprobado por el usuario al verlo en el móvil. `dotnet test` 981 tests; build Android 0 avisos.
+
+### Paso 3 — BUSCAR con un teclado propio (2026-10-14)
+
+- En el panel de ESTRELLAS, **BUSCAR** junto a CERRAR. Pasa el panel a «BUSCAR ESTRELLA» (LISTA vuelve a las más brillantes; al abrir el chip, siempre la lista):
+  - lo escrito en grande, con un cursor («VE_»); vacío, «Escribe las primeras letras del nombre»;
+  - los resultados de `StarChoices.Search`, como mucho 10, y «y 18 más: sigue escribiendo» si hay más; si ninguno, «Ninguna estrella del catálogo se llama así»;
+    las que están bajo el horizonte, con el nombre apagado, como las dibuja el HUD; el aviso de día, como en la lista;
+  - **un teclado propio** en la paleta de la app (en rojo de noche): QWERTY en tres filas, la segunda y la tercera media tecla adentro, y BORRAR tras la M.
+    Sin el teclado del sistema, que es blanco y tapa medio HUD (decisión 054).
+- Ajustes al verlo en el móvil (decisión 054):
+  - El teclado era alfabético, 7 por 4; el usuario propuso **QWERTY**, el que ya conoce cualquiera. Ocupa una fila menos y deja más resultados a la vista.
+  - Con «ve», Vega salía la última, detrás de Gamma 2 de la Vela y Mu de la Vela, que solo contienen la palabra. Ahora **primero las que empiezan por lo
+    escrito** (en español o IAU: «polar» empieza «Polaris»), y después las demás; cada grupo por orden alfabético. «casi» sigue encontrando Gamma de Casiopea.
+    En Core, `StarChoices.StartsWith`, con sus tests.
+  - Los nombres largos se cortaban («Gamma 2 de la V…» junto a «en la Vela · bajo el horizonte»): ahora pasan a una segunda línea.
+- Validado en el OPPO (Android 16, Debug, de día), por adb con una captura antes de cada toque: ESTRELLAS → BUSCAR → V da Gamma 2 de la Vela, Mu de la Vela,
+  Vega y Vindemiatrix (antes del ajuste del orden); V, E da Vega, Gamma 2 de la Vela (en dos líneas) y Mu de la Vela, estas dos apagadas y «bajo el horizonte».
+- `dotnet test` 991 tests; build Android 0 avisos.
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.

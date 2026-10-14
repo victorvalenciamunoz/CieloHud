@@ -36,6 +36,45 @@
             </VerticalStackLayout>
         </Border>
 
+        <!-- ESTRELLAS (decision 054): the brightest stars up now, at most ten, in alphabetical order; a tap guides to one. Our own panel
+             in the palette, red at night. Built when it opens, so a row does not change under the finger. -->
+        <Border Grid.Row="1" x:Name="StarsPanel" IsVisible="False" VerticalOptions="End" Margin="12,0,12,4" Padding="16,12"
+                StrokeThickness="1" BackgroundColor="{DynamicResource HudBackground}" Stroke="{DynamicResource HudTextDim}">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="8" />
+            </Border.StrokeShape>
+            <!-- The buttons beside the title, always in view; the rows scroll if they do not fit (small screens, large fonts).
+                 BUSCAR swaps the brightest for a search with our own letter keypad, not the system keyboard, which is white at night
+                 and covers half the HUD (decision 054); LISTA brings the brightest back. -->
+            <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="4">
+                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                    <Label x:Name="StarsTitle" FontFamily="ChakraPetchBold" FontSize="11" CharacterSpacing="1"
+                           VerticalOptions="Center" TextColor="{DynamicResource HudTextSoft}" />
+                    <Button Grid.Column="1" x:Name="StarsModeButton"
+                            FontFamily="ChakraPetch" FontSize="11" BorderWidth="1" CornerRadius="6" Padding="10,4"
+                            Clicked="OnStarsModeClicked" />
+                    <Button Grid.Column="2" x:Name="CloseStarsButton" Text="CERRAR"
+                            FontFamily="ChakraPetch" FontSize="11" BorderWidth="1" CornerRadius="6" Padding="10,4"
+                            Clicked="OnCloseStarsClicked" />
+                </Grid>
+                <!-- What has been typed, with a cursor; a hint while empty. -->
+                <Label Grid.Row="1" x:Name="StarsQuery" IsVisible="False" FontFamily="ChakraPetchBold" FontSize="18" CharacterSpacing="1" />
+                <Label Grid.Row="2" x:Name="StarsNote" IsVisible="False" FontFamily="OpenSansRegular" FontSize="13"
+                       TextColor="{DynamicResource HudTextMuted}" />
+                <ScrollView Grid.Row="3" x:Name="StarsScroll">
+                    <VerticalStackLayout>
+                        <VerticalStackLayout x:Name="StarsList" />
+                        <Label x:Name="StarsMore" IsVisible="False" Margin="0,6,0,0" FontFamily="OpenSansRegular" FontSize="13"
+                               TextColor="{DynamicResource HudTextMuted}" />
+                    </VerticalStackLayout>
+                </ScrollView>
+                <!-- QWERTY and BORRAR, built in code. Twenty half-key columns, so the second and third rows can start half a key in,
+                     as on a phone keyboard. -->
+                <Grid Grid.Row="4" x:Name="StarsKeypad" IsVisible="False" Margin="0,6,0,0" RowSpacing="6" ColumnSpacing="4"
+                      ColumnDefinitions="*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*" RowDefinitions="44,44,44" />
+            </Grid>
+        </Border>
+
         <!-- Object card (decision 038): opens by itself after a moment on AQUÍ, or with VER FICHA in identify mode.
              Our own panel in the palette, red at night. Closed with CERRAR, Back or another target. The footer stays in view;
              VER MÁS grows the card when its content does not fit, VER MENOS takes it back (decision 041). -->

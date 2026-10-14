@@ -7,6 +7,7 @@ using CieloHud.Core.Constellations;
 using CieloHud.Core.Passes;
 using CieloHud.Core.Satellites;
 using CieloHud.Core.SolarSystem;
+using CieloHud.Core.Stars;
 
 const int IssNoradNumber = 25544;
 
@@ -46,6 +47,8 @@ if (options.CardIss)
     return await PrintIssCardAsync();
 if (options.CardBody is { } cardBody)
     return PrintCard(cardBody);
+if (options.StarsQuery is { } starsQuery)
+    return PrintStarChoices(starsQuery);
 
 return options.PassesDays is { } days
     ? await PrintPassesAsync(days)
@@ -194,5 +197,16 @@ int PrintConstellationCard(string symbol)
         CardTexts.Find(CardKey.Constellation(symbol))));
     System.Console.WriteLine(CardFormatter.ConstellationDrawing(ConstellationShape.Of(symbol, options.Observer, options.Instant)));
     System.Console.Write(CardFormatter.History(CardHistory.For(CardKey.Constellation(symbol))));
+    return 0;
+}
+
+int PrintStarChoices(string query)
+{
+    var choices = new StarChoices(new AstronomyEngineStarService(), new AstronomyEngineSunService());
+    System.Console.WriteLine(SkyTableFormatter.Header(options.Observer, options.Instant));
+    var daylight = choices.IsDaylight(options.Observer, options.Instant);
+    System.Console.Write(query.Length == 0
+        ? StarChoicesFormatter.Brightest(choices.Brightest(options.Observer, options.Instant), daylight)
+        : StarChoicesFormatter.Search(query, choices.Search(query, options.Observer, options.Instant), daylight));
     return 0;
 }

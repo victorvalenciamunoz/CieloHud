@@ -29,12 +29,15 @@ public partial class HudPage : ContentPage
     private readonly AlertService _alerts;
     private readonly ObserverStore _observers;
     private readonly CardBuilder _cards;
+    private readonly StarChoices _starChoices;
     private readonly GuidanceCalculator _guidance = new();
     private readonly HudDrawable _drawable = new();
     private readonly CardDrawing _cardDrawing = new();
     private readonly Dictionary<SkyTarget, Button> _chips = new();
     private readonly Dictionary<float, Button> _brightnessChips = new();
     private Button _identifyChip = null!;
+    // After the 7 targets; it takes the name of the chosen star (decision 054).
+    private Button _starsChip = null!;
 
     /// <summary>Selected target; null means identify mode.</summary>
     private SkyTarget? _target;
@@ -73,9 +76,10 @@ public partial class HudPage : ContentPage
 
     public HudPage(IPointingSource pointing, ILocationSource location, TargetCatalog catalog,
         IConstellationLocator constellations, IConstellationFigureLocator figures, NightMode nightMode,
-        AlertService alerts, ObserverStore observers, CardBuilder cards)
+        AlertService alerts, ObserverStore observers, CardBuilder cards, StarChoices starChoices)
     {
         InitializeComponent();
+        _starChoices = starChoices;
         _pointing = pointing;
         _location = location;
         _catalog = catalog;
@@ -90,6 +94,7 @@ public partial class HudPage : ContentPage
         CardPictureView.Drawable = _cardDrawing;
         BuildTargetBar();
         BuildBrightnessBar();
+        BuildKeypad();
         // In the constructor, not OnAppearing: a tap on an alert must reach the HUD also while diagnostics is on top.
         LaunchRequests.Listen(OnLaunchRequested);
         ApplyPalette();
@@ -108,6 +113,10 @@ public partial class HudPage : ContentPage
             _chips[target] = chip;
             TargetBar.Children.Add(chip);
         }
+
+        _starsChip = CreateChip("ESTRELLAS");
+        _starsChip.Clicked += OnStarsChipClicked;
+        TargetBar.Children.Add(_starsChip);
         StyleChips();
     }
 
@@ -126,6 +135,8 @@ public partial class HudPage : ContentPage
         StyleChip(_identifyChip, _target is null);
         foreach (var (target, chip) in _chips)
             StyleChip(chip, target == _target);
+        _starsChip.Text = _target is StarTarget star ? star.Name.ToUpperInvariant() : "ESTRELLAS";
+        StyleChip(_starsChip, _target is StarTarget);
     }
 
     private void StyleChip(Button chip, bool selected)
@@ -150,6 +161,10 @@ public partial class HudPage : ContentPage
         StyleChip(AlertsButton, _alerts.IsOn);
         StyleChip(LeaveNightButton, false);
         StyleChip(CloseCardButton, false);
+        StyleChip(CloseStarsButton, false);
+        StyleChip(StarsModeButton, false);
+        foreach (var key in _keys)
+            StyleChip(key, false);
         StyleChip(CardMoreButton, false);
         StyleChip(ShowCardButton, _cardButtonLit ?? true);
         foreach (var (brightness, chip) in _brightnessChips)
@@ -184,9 +199,12 @@ public partial class HudPage : ContentPage
             return;
         }
         NightPanel.IsVisible = !NightPanel.IsVisible;
-        // Both live at the bottom: the brightness panel replaces an open card.
+        // They all live at the bottom: the brightness panel replaces an open card or the star list.
         if (NightPanel.IsVisible)
+        {
             CloseCard();
+            StarsPanel.IsVisible = false;
+        }
         ApplyPalette();
     }
 
@@ -285,6 +303,7 @@ public partial class HudPage : ContentPage
         _onTarget = false;
         _skyComputedAt = DateTimeOffset.MinValue;
         CloseCard();
+        StarsPanel.IsVisible = false;
         _cardOffer.Clear();
         _constellationOffer.Clear();
         StyleChips();
@@ -427,8 +446,8 @@ public partial class HudPage : ContentPage
                 : null;
             _offered = _cardOffer.Update(matched, now);
         }
-        // The brightness panel lives at the bottom too.
-        ShowCardButton.IsVisible = _target is not null && _offered is not null && !NightPanel.IsVisible;
+        // The brightness panel and the star list live at the bottom too.
+        ShowCardButton.IsVisible = _target is not null && _offered is not null && !NightPanel.IsVisible && !StarsPanel.IsVisible;
     }
 
     /// <summary>
@@ -472,7 +491,7 @@ public partial class HudPage : ContentPage
     /// <summary>In identify mode, a tap on a name the HUD shows opens its card (decision 048).</summary>
     private void OnCanvasTapped(object? sender, TappedEventArgs e)
     {
-        if (_target is not null || CardPanel.IsVisible || NightPanel.IsVisible || e.GetPosition(Canvas) is not { } at)
+        if (_target is not null || CardPanel.IsVisible || NightPanel.IsVisible || StarsPanel.IsVisible || e.GetPosition(Canvas) is not { } at)
             return;
         var point = new PointF((float)at.X, (float)at.Y);
         var subject = _drawable.NameZone is { } name && name.Contains(point) ? _nameOpens
@@ -557,6 +576,7 @@ public partial class HudPage : ContentPage
             _cardExpanded = false;
         _cardBuiltAt = now;
         NightPanel.IsVisible = false;
+        StarsPanel.IsVisible = false;
         ShowCardButton.IsVisible = false;
         FitCard();
 #if ANDROID
@@ -643,13 +663,217 @@ public partial class HudPage : ContentPage
         _cardConstellation = null;
     }
 
-    /// <summary>Back closes the card first, as it would a dialog.</summary>
+    /// <summary>Back closes the card or the star list first, as it would a dialog.</summary>
     protected override bool OnBackButtonPressed()
     {
+        if (StarsPanel.IsVisible)
+        {
+            StarsPanel.IsVisible = false;
+            return true;
+        }
         if (!CardPanel.IsVisible)
             return base.OnBackButtonPressed();
         CloseCard();
         return true;
+    }
+
+    /// <summary>ESTRELLAS opens or closes the list of the brightest stars up now (decision 054); with a star chosen, to change it.</summary>
+    private void OnStarsChipClicked(object? sender, EventArgs e)
+    {
+        if (StarsPanel.IsVisible)
+        {
+            StarsPanel.IsVisible = false;
+            return;
+        }
+        CloseCard();
+        NightPanel.IsVisible = false;
+        ShowCardButton.IsVisible = false;
+        // It always opens on the brightest: the short list is what most people need.
+        _starQuery = null;
+        FillStars(DateTimeOffset.UtcNow);
+#if ANDROID
+        // Only when the rows do not fit, with the palette's color, as on the cards (decision 052).
+        Platforms.Android.CardScrollBar.Apply(StarsScroll, _nightMode.Palette.TextMuted);
+#endif
+        StarsPanel.IsVisible = true;
+    }
+
+    private void OnCloseStarsClicked(object? sender, EventArgs e) => StarsPanel.IsVisible = false;
+
+    /// <summary>BUSCAR ↔ LISTA: the search starts empty every time.</summary>
+    private void OnStarsModeClicked(object? sender, EventArgs e)
+    {
+        _starQuery = _starQuery is null ? "" : null;
+        FillStars(DateTimeOffset.UtcNow);
+    }
+
+    /// <summary>What has been typed in the search; null while the panel shows the brightest.</summary>
+    private string? _starQuery;
+
+    /// <summary>Longer than any name in the catalog: more letters can only find nothing.</summary>
+    private const int MaxStarQueryLength = 20;
+
+    private readonly List<Button> _keys = [];
+
+    /// <summary>
+    /// QWERTY, the layout people already know (asked by the user): each key two half-columns wide, the second and third rows half a
+    /// key in, and BORRAR after M. Without Ñ: no name in the catalog has it, and the search ignores accents. BORRAR in words, not
+    /// "⌫": the HUD font may not have it.
+    /// </summary>
+    private void BuildKeypad()
+    {
+        string[] rows = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
+        for (var row = 0; row < rows.Length; row++)
+        {
+            var start = row == 0 ? 0 : 1;
+            for (var i = 0; i < rows[row].Length; i++)
+            {
+                var letter = rows[row][i].ToString();
+                var key = Key(letter);
+                key.Clicked += (_, _) => TypeStar(letter);
+                StarsKeypad.Add(key, start + 2 * i, row);
+                Grid.SetColumnSpan(key, 2);
+            }
+        }
+        var erase = Key("BORRAR");
+        erase.FontSize = 11;
+        erase.Clicked += (_, _) => EraseStarLetter();
+        StarsKeypad.Add(erase, 15, 2);
+        Grid.SetColumnSpan(erase, 5);
+    }
+
+    private Button Key(string text)
+    {
+        var key = new Button
+        {
+            Text = text,
+            FontFamily = "ChakraPetchBold",
+            FontSize = 15,
+            CornerRadius = 6,
+            Padding = new Thickness(0),
+            BorderWidth = 1,
+        };
+        _keys.Add(key);
+        return key;
+    }
+
+    private void TypeStar(string letter)
+    {
+        if (_starQuery is null || _starQuery.Length >= MaxStarQueryLength)
+            return;
+        _starQuery += letter;
+        FillStars(DateTimeOffset.UtcNow);
+    }
+
+    private void EraseStarLetter()
+    {
+        if (string.IsNullOrEmpty(_starQuery))
+            return;
+        _starQuery = _starQuery[..^1];
+        FillStars(DateTimeOffset.UtcNow);
+    }
+
+    /// <summary>
+    /// The brightest, once when the panel opens: rows that moved or left while the finger is on them would pick the wrong star.
+    /// Or the search, again on every key: then the rows change because the user typed.
+    /// </summary>
+    private void FillStars(DateTimeOffset now)
+    {
+        var searching = _starQuery is not null;
+        StarsTitle.Text = searching ? "BUSCAR ESTRELLA" : "LAS MÁS BRILLANTES AHORA";
+        StarsModeButton.Text = searching ? "LISTA" : "BUSCAR";
+        StarsQuery.IsVisible = searching;
+        StarsKeypad.IsVisible = searching;
+        if (searching)
+        {
+            var empty = _starQuery!.Length == 0;
+            StarsQuery.Text = empty ? "Escribe las primeras letras del nombre" : _starQuery + "_";
+            StarsQuery.FontFamily = empty ? "OpenSansRegular" : "ChakraPetchBold";
+            StarsQuery.FontSize = empty ? 13 : 18;
+            StarsQuery.SetDynamicResource(Label.TextColorProperty, empty ? "HudTextMuted" : "HudLocked");
+        }
+
+        StarsList.Children.Clear();
+        StarsMore.IsVisible = false;
+        _ = StarsScroll.ScrollToAsync(0, 0, false);
+        if (_observer is not { } observer)
+        {
+            ShowStarsNote(_locationFailed ? "Sin ubicación no se sabe qué estrellas hay sobre el horizonte." : "Buscando la ubicación…");
+            return;
+        }
+
+        var daylight = _starChoices.IsDaylight(observer, now) ? "Es de día: las estrellas no se ven." : null;
+        if (searching)
+        {
+            var result = _starChoices.Search(_starQuery!, observer, now);
+            ShowStarsNote(daylight ?? (_starQuery!.Length > 0 && result.Total == 0 ? "Ninguna estrella del catálogo se llama así." : null));
+            foreach (var choice in result.Shown)
+                StarsList.Children.Add(StarRow(choice));
+            StarsMore.Text = $"y {result.Total - result.Shown.Count} más: sigue escribiendo";
+            StarsMore.IsVisible = result.HasMore;
+            return;
+        }
+
+        var brightest = _starChoices.Brightest(observer, now);
+        ShowStarsNote(daylight
+            ?? (brightest.Count == 0 ? $"Ninguna estrella pasa ahora de {StarChoices.MinAltitudeDegrees.ToString("0", Culture)}° de altura." : null));
+        foreach (var choice in brightest)
+            StarsList.Children.Add(StarRow(choice));
+    }
+
+    private void ShowStarsNote(string? note)
+    {
+        StarsNote.Text = note;
+        StarsNote.IsVisible = note is not null;
+    }
+
+    /// <summary>"Vega          en la Lira · 47° al O": the whole row is the touch target, 44 dp high for a finger.</summary>
+    private Grid StarRow(StarChoice choice)
+    {
+        var chosen = _target is StarTarget { Star: var star } && star == choice.Star;
+        var name = new Label
+        {
+            Text = choice.Name,
+            FontFamily = "OpenSansSemibold",
+            FontSize = 15,
+            // A long name goes on to a second line instead of being cut ("Gamma 2 de la V…" when the right part was long).
+            LineBreakMode = LineBreakMode.WordWrap,
+            VerticalOptions = LayoutOptions.Center,
+        };
+        // Below the horizon (only in a search), dimmed, as the HUD draws what has not risen.
+        name.SetDynamicResource(Label.TextColorProperty, chosen ? "HudLocked" : choice.AboveHorizon ? "HudText" : "HudTextMuted");
+        var detail = new Label
+        {
+            Text = StarChoices.Detail(choice),
+            FontFamily = "OpenSansRegular",
+            FontSize = 12,
+            VerticalOptions = LayoutOptions.Center,
+            HorizontalTextAlignment = TextAlignment.End,
+        };
+        detail.SetDynamicResource(Label.TextColorProperty, "HudTextMuted");
+        Grid.SetColumn(detail, 1);
+
+        var row = new Grid
+        {
+            ColumnDefinitions = [new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Auto)],
+            ColumnSpacing = 10,
+            MinimumHeightRequest = 44,
+            // Without a background, a tap between the two labels may not reach the row.
+            BackgroundColor = Colors.Transparent,
+            Children = { name, detail },
+        };
+        var tap = new TapGestureRecognizer();
+        tap.Tapped += (_, _) => ChooseStar(choice.Star);
+        row.GestureRecognizers.Add(tap);
+        return row;
+    }
+
+    private void ChooseStar(Star star)
+    {
+        if (_catalog.All.OfType<StarTarget>().FirstOrDefault(t => t.Star == star) is not { } target)
+            return;
+        SelectTarget(target);
+        _ = TargetScroll.ScrollToAsync(_starsChip, ScrollToPosition.MakeVisible, false);
     }
 
     private void UpdateFigure(string? symbol, DateTimeOffset now)

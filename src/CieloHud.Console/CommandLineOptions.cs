@@ -12,11 +12,11 @@ namespace CieloHud.Console;
 /// </summary>
 public sealed record CommandLineOptions(
     Observer Observer, DateTimeOffset Instant, int? PassesDays, int? ConjunctionsDays = null, int? MercuryDays = null, CelestialBody? CardBody = null,
-    bool CardIss = false, Star? CardStar = null, string? CardConstellation = null)
+    bool CardIss = false, Star? CardStar = null, string? CardConstellation = null, string? StarsQuery = null)
 {
     public const string Usage = """
         Usage: CieloHud.Console [--lat <degrees>] [--lon <degrees>] [--alt <meters>] [--time <ISO-8601>]
-                                [--passes <days> | --conjunctions <days> | --mercury <days> | --card <object>]
+                                [--passes <days> | --conjunctions <days> | --mercury <days> | --card <object> | --stars [<text>]]
 
           --lat     Latitude, positive north.  Default 40.4168 (Madrid)
           --lon     Longitude, positive east.  Default -3.7038 (Madrid)
@@ -32,6 +32,8 @@ public sealed record CommandLineOptions(
                     moon, mercury, venus, mars, jupiter, saturn, iss (it needs its orbit, from the network or the cache),
                     or a star by its IAU name or Bayer designation ("Betelgeuse", "gam Cas"),
                     or a constellation by its IAU symbol ("Ori", "UMa").
+          --stars   Instead of the sky table, what the STARS chip offers at --time: without text, the brightest stars
+                    up now; with a text, the stars whose names match it ("vega", "casi", "gam cas").
           --help    Show this text
 
         Numbers use a decimal point regardless of system locale.
@@ -48,12 +50,18 @@ public sealed record CommandLineOptions(
         var cardIss = false;
         Star? cardStar = null;
         string? cardConstellation = null;
+        string? starsQuery = null;
 
         for (var i = 0; i < args.Length; i++)
         {
             var key = args[i];
             if (key is "--help" or "-h" or "/?")
                 throw new UsageException(null);
+            if (key == "--stars" && (i + 1 >= args.Length || args[i + 1].StartsWith("--", StringComparison.Ordinal)))
+            {
+                starsQuery = "";
+                continue;
+            }
             if (i + 1 >= args.Length)
                 throw new UsageException($"Missing value for {key}.");
             var value = args[++i];
@@ -72,15 +80,18 @@ public sealed record CommandLineOptions(
                 case "--card" when ConstellationExtents.All.FirstOrDefault(c => c.Symbol.Equals(value, StringComparison.OrdinalIgnoreCase)) is { } c:
                     cardConstellation = c.Symbol; break;
                 case "--card": cardBody = ParseBody(value); break;
+                case "--stars": starsQuery = value; break;
                 default: throw new UsageException($"Unknown option {key}.");
             }
         }
 
         try
         {
-            if (new[] { passesDays, conjunctionsDays, mercuryDays }.Count(d => d is not null) + (cardBody is null && !cardIss && cardStar is null && cardConstellation is null ? 0 : 1) > 1)
-                throw new UsageException("Use only one of --passes, --conjunctions, --mercury and --card.");
-            return new CommandLineOptions(new Observer(lat, lon, alt), instant, passesDays, conjunctionsDays, mercuryDays, cardBody, cardIss, cardStar, cardConstellation);
+            if (new[] { passesDays, conjunctionsDays, mercuryDays }.Count(d => d is not null) + (cardBody is null && !cardIss && cardStar is null && cardConstellation is null ? 0 : 1)
+                + (starsQuery is null ? 0 : 1) > 1)
+                throw new UsageException("Use only one of --passes, --conjunctions, --mercury, --card and --stars.");
+            return new CommandLineOptions(new Observer(lat, lon, alt), instant, passesDays, conjunctionsDays, mercuryDays, cardBody, cardIss, cardStar, cardConstellation,
+                starsQuery);
         }
         catch (ArgumentOutOfRangeException ex)
         {

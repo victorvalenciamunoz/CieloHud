@@ -1,6 +1,11 @@
-namespace CieloHud.App.Hud;
+using CieloHud.Core.Constellations;
+using CieloHud.Core.Stars;
 
-/// <summary>Spanish display names. Core keeps IAU/Latin names; translation is a UI concern.</summary>
+namespace CieloHud.Core.Cards;
+
+/// <summary>
+/// Spanish display names. The catalogs keep the IAU and Latin names; the app and the star choices (decision 054) show these.
+/// </summary>
 public static class SpanishNames
 {
     /// <summary>IAU proper names of the bright stars that have a usual Spanish form.</summary>
@@ -57,7 +62,7 @@ public static class SpanishNames
     /// has not named, the Bayer designation in words: "gam Cas" → "Gamma de Casiopea", "gam02 Vel" → "Gamma 2 de la Vela",
     /// "eps Cyg" → "Épsilon del Cisne".
     /// </summary>
-    public static string Star(Core.Stars.Star star)
+    public static string Star(Star star)
     {
         if (star.ProperName is { } proper)
             return Star(proper);
@@ -75,7 +80,7 @@ public static class SpanishNames
     }
 
     /// <summary>"la Ballena", "Orión"…; falls back to the Latin name for an unknown symbol.</summary>
-    public static string Constellation(Core.Constellations.Constellation c) => Constellations.GetValueOrDefault(c.Symbol, c.Name);
+    public static string Constellation(Constellation c) => Constellations.GetValueOrDefault(c.Symbol, c.Name);
 
     /// <summary>"la Osa Mayor" → "Osa Mayor", "los Perros de Caza" → "Perros de Caza"; names without article unchanged.</summary>
     public static string WithoutArticle(string name)
@@ -87,8 +92,8 @@ public static class SpanishNames
     }
 
     /// <summary>"en la Ballena", "en Orión".</summary>
-    public static string InConstellation(Core.Constellations.Constellation c) => "en " + Constellation(c);
+    public static string InConstellation(Constellation c) => "en " + Constellation(c);
 
     /// <summary>"hacia la Ballena", "hacia Orión".</summary>
-    public static string TowardsConstellation(Core.Constellations.Constellation c) => "hacia " + Constellation(c);
+    public static string TowardsConstellation(Constellation c) => "hacia " + Constellation(c);
 }
