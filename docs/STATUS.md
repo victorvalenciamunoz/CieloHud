@@ -1642,3 +1642,11 @@ Priorizadas por el usuario aunque la fase actual sea la 4.
 - README: «Instalar en tu móvil» dice qué trae la 0.5.1.
 - Publicada el 8 oct como `v0.5.1`, versión normal y *Latest* (desde `main` tras la PR #50): `CieloHud-0.5.1.apk`, firma verificada (`CN=CieloHud`),
   SHA-256 `0f6aa2cb30d09fb86c102123ccbe3048c6fed8df853d87f310b2cabe6eb88d82`. La release `v0.5.0` se retiró a la vez, a petición del usuario; queda su etiqueta.
+
+### Versión descargable 0.6.0, pre-release (2026-10-14)
+
+- A petición del usuario, con las fases 6 y 7 hechas: la HISTORIA en las fichas (30 fechas) y la guía a las estrellas (chip ESTRELLAS y BUSCAR).
+- **Versión** 0.6.0, `ApplicationVersion` 600. Se compila desde `main` con `scripts/publish-apk.ps1` y la misma clave: actualiza la 0.5.1 sin desinstalar.
+- ***Pre-release***, elegido por el usuario: la Fase 7 sigue abierta hasta probarla en el cielo (decisión 032). La 0.5.1 sigue como *Latest* hasta que se cierre;
+  entonces se publicará la versión normal.
+- README: el resumen y «Qué tiene ahora» con las estrellas y la HISTORIA al día, los ejemplos de `--stars` y qué trae la 0.6.0.

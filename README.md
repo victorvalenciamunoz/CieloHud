@@ -6,7 +6,7 @@
 
 <p align="center">
   <b>Una gincana mirando hacia arriba.</b><br/>
-  Levantas el móvil, un HUD te guía hasta la Luna, un planeta o la Estación Espacial, y lo miras con tus propios ojos.
+  Levantas el móvil, un HUD te guía hasta la Luna, un planeta, la Estación Espacial o una estrella, y lo miras con tus propios ojos.
 </p>
 
 <p align="center">
@@ -24,10 +24,10 @@
 
 CieloHud responde a dos preguntas, con el móvil en la mano y sin escribir nada:
 
-- **«¿Dónde está?»** Eliges Saturno y la app te dice *«izquierda 48° · sube 44°»* hasta que la retícula se pone verde: **AQUÍ**. Bajas el móvil y ahí está.
+- **«¿Dónde está?»** Eliges Saturno y la app te dice *«izquierda 48° · sube 44°»* hasta que la retícula se pone verde: **AQUÍ**. Bajas el móvil y ahí está. Con una estrella, igual: ESTRELLAS te propone las más brillantes del momento, o la buscas por su nombre.
 - **«¿Qué es eso?»** Apuntas a un punto brillante y te dice *«BETELGEUSE · estrella · en Orión»*. Si no hay nada conocido, al menos te dice hacia qué constelación miras y qué tienes cerca.
 
-Cuando lo encuentras, una **ficha** te cuenta qué estás viendo, con un dibujo calculado para ese momento: la Luna o Venus con su fase y girados como en el cielo, Júpiter con sus lunas en su sitio, Saturno con la inclinación de sus anillos.
+Cuando lo encuentras, una **ficha** te cuenta qué estás viendo, con un dibujo calculado para ese momento: la Luna o Venus con su fase y girados como en el cielo, Júpiter con sus lunas en su sitio, Saturno con la inclinación de sus anillos. Al final, su **historia**: el día que Galileo vio las lunas de Júpiter, el día que Tycho vio aparecer una estrella en Casiopea.
 
 Además calcula **cuándo pasa la ISS por encima de ti y si se va a ver**: iluminada por el Sol, con tu cielo ya oscuro y lo bastante alta.
 
@@ -54,15 +54,16 @@ Además calcula **cuándo pasa la ISS por encima de ti y si se va a ver**: ilumi
 - **Cero entrada de datos.** La ubicación y la hora salen del móvil; las órbitas y efemérides son públicas.
 - **Sin backend ni base de datos.** Todo se calcula en el dispositivo. Lo único que se descarga es la órbita de la ISS, una vez al día, y queda en caché.
 - **El cielo es el juez.** Cada cálculo se ha contrastado con una fuente independiente (abajo, los números).
-- **Pocos objetos que buscar, más cosas que reconocer.** No es un planetario: es una guía para encontrar lo que se ve desde una ciudad.
+- **Pocos objetos que buscar, más cosas que reconocer.** No es un planetario: es una guía para encontrar lo que se ve desde una ciudad. Las estrellas también se buscan, pero desde su propio chip, aparte de la Luna, los planetas y la ISS.
 
 ## Qué tiene ahora
 
 | | |
 |---|---|
 | 🎯 **Guía** | Luna, Mercurio, Venus, Marte, Júpiter, Saturno e ISS. Flecha en el borde cuando está fuera de pantalla, marcador cuando está a la vista, **AQUÍ** con histéresis (entra a 4°, sale a 6°) para que no parpadee con el ruido de la brújula. |
+| ⭐ **Estrellas** | Chip ESTRELLAS: las 10 más brillantes que hay ahora sobre los 10° de altura, por orden alfabético, con su constelación y hacia dónde mirar. **BUSCAR** encuentra cualquiera de las 155 por su nombre con un teclado propio, que no deslumbra de noche como el del sistema. La guía lleva a la estrella elegida como a un planeta. |
 | 🔭 **¿Qué es eso?** | Reconoce Luna, planetas, ISS y **155 estrellas** (todas las de magnitud < 3 visibles desde España, con su nombre IAU o su letra griega). Prefiere la más brillante cuando hay varias candidatas. Dice siempre en cuál de las **88 constelaciones** estás mirando. |
-| 🪐 **Fichas** | Con VER FICHA: en la guía, siempre a mano para el objetivo elegido (se resalta al llegar a **AQUÍ**); en «¿qué es?», para lo que reconoce. Un texto breve escrito y revisado, con sus fuentes, y **AHORA**: fase de la Luna y su próxima fase principal, distancia y cuánto tardó su luz en llegar, dónde están las lunas de Júpiter (o cuál está detrás o en su sombra), cuánto se inclinan los anillos de Saturno, y a qué altura y velocidad va la ISS y si ahora se puede ver. Encima, en la Luna y los planetas, un **dibujo calculado al momento**, girado como se ve en el cielo, con su color (en rojo de noche). Los 7 objetivos y, en «¿qué es?», las 155 estrellas: cuánto tardó su luz en llegar, su color y su brillo explicado; y las 88 constelaciones, tocando su nombre: su tamaño, si se ve entera desde tu latitud, sus estrellas más brillantes y su figura como está en ese momento, con sus estrellas de su color, y su texto: historia, cómo reconocerla y lo que contiene. Al final, **HISTORIA**: fechas de descubrimientos y misiones de ese objeto (de momento, la Luna, Júpiter y Ofiuco). |
+| 🪐 **Fichas** | Con VER FICHA: en la guía, siempre a mano para el objetivo elegido (se resalta al llegar a **AQUÍ**); en «¿qué es?», para lo que reconoce. Un texto breve escrito y revisado, con sus fuentes, y **AHORA**: fase de la Luna y su próxima fase principal, distancia y cuánto tardó su luz en llegar, dónde están las lunas de Júpiter (o cuál está detrás o en su sombra), cuánto se inclinan los anillos de Saturno, y a qué altura y velocidad va la ISS y si ahora se puede ver. Encima, en la Luna y los planetas, un **dibujo calculado al momento**, girado como se ve en el cielo, con su color (en rojo de noche). Los 7 objetivos y, en «¿qué es?», las 155 estrellas: cuánto tardó su luz en llegar, su color y su brillo explicado; y las 88 constelaciones, tocando su nombre: su tamaño, si se ve entera desde tu latitud, sus estrellas más brillantes y su figura como está en ese momento, con sus estrellas de su color, y su texto: historia, cómo reconocerla y lo que contiene. Al final, **HISTORIA**: 30 fechas de descubrimientos, misiones y primeras veces, cada una con sus fuentes (NASA, ESA, Ridpath, la AAS), en los 7 objetivos, Casiopea, la Ballena, Orión, Andrómeda, Algol y Vega. |
 | 🧭 **Referencias** | Línea del horizonte con escala de altura, brújula con puntos cardinales, estrellas por brillo y planetas, todo moviéndose con el móvil. La **figura de la constelación** que tienes en la retícula, dibujada tenue con su nombre. Aviso cuando la brújula necesita calibración («dibuja un 8»). |
 | 🔴 **Modo nocturno** | Botón NOCHE: todo pasa a rojo sobre negro puro para no perder la adaptación a la oscuridad, se ocultan las barras del sistema y la pantalla baja al 10 % mientras la app está abierta (sin tocar el ajuste del móvil). Con el modo activado, NOCHE abre un panel para elegir 3, 6, 10 o 20 %. Se recuerda entre sesiones. |
 | 🛰️ **Pasos de la ISS** | Inicio, máximo y fin de cada paso visible en los próximos días, indicando si la ISS «aparece» saliendo de la sombra de la Tierra o «se apaga» a media travesía. |
@@ -152,7 +153,8 @@ docs/                   Visión, plan por fases, estado y decisiones (en españo
 ## Instalar en tu móvil
 
 Descarga el APK de la [última versión](https://github.com/victorvalenciamunoz/CieloHud/releases) desde el propio móvil (Android 8.0 o posterior) y ábrelo.
-La 0.5.1 trae las fichas completas (Fase 5): la Luna, los planetas, la ISS, las 155 estrellas y las 88 constelaciones, cada una con su texto.
+La 0.6.0 (*pre-release*: la Fase 7 aún no se ha probado en el cielo) añade la **historia** de cada objeto en su ficha (Fase 6) y la **guía a las estrellas** (Fase 7).
+La 0.5.1, la última versión estable, trae las fichas completas (Fase 5): la Luna, los planetas, la ISS, las 155 estrellas y las 88 constelaciones, cada una con su texto.
 Android pedirá permiso para instalar apps de origen desconocido, y Play Protect puede avisar de que no la conoce: es normal en una app que no está en Google Play.
 
 Al abrirla pedirá la **ubicación** (para calcular tu cielo; no sale del móvil). Si activas **AVISOS**, también las **notificaciones** y, para que el aviso
@@ -175,8 +177,12 @@ dotnet run --project src/CieloHud.Console -- --lat 41.3874 --lon 2.1686 --time 2
 # Pasos visibles de la ISS en los próximos 14 días
 dotnet run --project src/CieloHud.Console -- --passes 14
 
-# Datos de la ficha de un objeto (moon, mercury, venus, mars, jupiter, saturn, iss o una estrella: Betelgeuse, "gam Cas")
+# Datos de la ficha de un objeto (moon, mercury, venus, mars, jupiter, saturn, iss, una estrella: Betelgeuse, "gam Cas", o una constelación: Ori)
 dotnet run --project src/CieloHud.Console -- --card jupiter
+
+# Las estrellas que ofrece el chip ESTRELLAS: las más brillantes ahora, o las que encajan con un nombre
+dotnet run --project src/CieloHud.Console -- --stars
+dotnet run --project src/CieloHud.Console -- --stars vega
 
 # App en el móvil conectado por USB
 dotnet build src/CieloHud.App -f net10.0-android -t:Install
