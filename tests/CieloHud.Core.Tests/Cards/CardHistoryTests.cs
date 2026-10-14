@@ -36,7 +36,8 @@ public class CardHistoryTests
     {
         Assert.Contains(CardHistory.For(CardKey.Body(CelestialBody.Moon)), e => e.Date == new DateOnly(1959, 10, 7));
         Assert.Contains(CardHistory.For(CardKey.Body(CelestialBody.Jupiter)), e => e.Date == new DateOnly(1610, 1, 7));
-        Assert.Contains(CardHistory.For(CardKey.Constellation("Oph")), e => e.Date == new DateOnly(1604, 10, 9));
+        Assert.Contains(CardHistory.For(CardKey.Constellation("Cas")), e => e.Date == new DateOnly(1572, 11, 11));
+        Assert.Contains(CardHistory.For(new CardKey(CardKind.Star, "bet Per")), e => e.Date == new DateOnly(1782, 11, 12));
     }
 
     [Fact]

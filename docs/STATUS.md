@@ -1380,7 +1380,7 @@ Pasos, en PR separadas:
 - **Tres entradas de ejemplo**, con el tono aprobado por el usuario y recortadas a 200 caracteres:
   - Luna, 7 oct 1959: Luna 3 fotografía por primera vez la cara oculta (NASA NSSDCA y NASA Science).
   - Júpiter, 7 ene 1610: Galileo ve tres «estrellas» junto a Júpiter (NASA, *415 Years Ago*).
-  - Ofiuco, 9 oct 1604: aparece la estrella de Kepler (NASA, *420 Years Ago*; Ridpath).
+  - Ofiuco, 9 oct 1604: aparece la estrella de Kepler (NASA, *420 Years Ago*; Ridpath). Retirada en el paso 6.5: ESA da el 8 oct (decisión 053).
 - Retocados los textos de **Júpiter** (sin «Galileo descubrió en 1610 sus cuatro lunas mayores…») y **Ofiuco** (sin la estrella de Kepler), que ahora
   cuenta su HISTORIA. Sus fuentes, sin las citas que ya no usan.
 - Consola: `--card` termina con la sección HISTORIA cuando el objeto tiene entradas (`--card jupiter`, `--card Oph`).
@@ -1453,6 +1453,31 @@ Pasos, en PR separadas:
 - Sin cambios en los textos de las fichas: ninguno contaba estos hechos.
 - Comprobado con la consola: `--card mars`, `jupiter` y `saturn` terminan con su HISTORIA en orden (Júpiter, con Galileo primero).
 - `dotnet test` 933 tests (las reglas recorren todas las entradas); build Android 0 avisos.
+
+### Paso 5 — Lote 3: estrellas y constelaciones (2026-10-14)
+
+- Lista y borradores propuestos al usuario con sus citas y aprobados antes de escribir los ficheros. 6 entradas nuevas:
+  - Constelaciones (`history/constellations/`): Casiopea, Tycho Brahe ve la supernova (11 nov 1572, juliano); la Ballena, Fabricius ve aparecer a Mira,
+    la primera variable (13 ago 1596, gregoriano; 3 ago en el juliano de Frisia); Orión, la primera foto de su nebulosa, de Henry y Mary Anna Draper
+    (30 sep 1880); Andrómeda, la placa de Hubble con la estrella variable que demostró que es otra galaxia (6 oct 1923 en UTC).
+  - Estrellas (`history/stars/`): Algol, Goodricke y Pigott la ven perder brillo (12 nov 1782); Vega, la primera foto de una estrella (17 jul 1850).
+- **Fuente nueva**, aprobada por el usuario: las columnas de historia de la AAS, leídas en web.archive.org (decisión 053). Cuatro de las seis la usan.
+- **Retirada la entrada de Ofiuco** (estrella de Kepler, paso 6.1): ESA da el 8 oct y la NASA el 9, y la regla de la 051 la deja fuera (decisión 053).
+  El hecho vuelve al texto de Ofiuco tal como estaba antes del paso 6.1. `TheFirstEntries_AreThere` comprueba ahora Casiopea y Algol.
+- Retocados los textos de **Casiopea** (sin la supernova de 1572; en su lugar, «Sus cinco estrellas más brillantes forman una W», para no perder cómo se
+  reconoce) y **la Ballena** (sin «Fue la primera estrella variable que se descubrió, en 1596»). Sus fuentes, sin las citas que ya no usan.
+- Descartadas: la supernova de 1054 (NASA, 4 jul; ESA, 5 jul), la de 1006 en el Lobo (Ridpath no la nombra y la AAS da «end of April»), las novas de Perseo
+  (1901), el Águila (1918) y el Cisne (1975) (sucesos, no primeras veces; la única primera vez, la Estrella Llameante de 1866, sin día en las fuentes),
+  las Leónidas de 1833 (son del radiante, no de Leo, y la noche cambia según el lugar), la medida de Betelgeuse de Michelson y Pease (el día solo lo da
+  un artículo de SPIE), el movimiento propio de Halley (1718, sin día), la Supernova 1987A (23 o 24 feb según la fuente) y la primera imagen de
+  Betelgeuse del Hubble (solo hay fecha de publicación).
+- Repasados los textos de estrellas y constelaciones con años: el resto no tiene día en las fuentes, no se ve a simple vista (compañeras, gas
+  interestelar, una fulguración ultravioleta) o no es una primera vez. Cáncer sigue con «en 1609, Galileo vio…»: es el año de Ridpath, y ni la NASA (M44)
+  ni Kaler lo contradicen (el *Sidereus Nuncius* es de 1610, pero es la fecha de publicación).
+- Las 32 citas se comprobaron con un script que busca cada una en el texto de las páginas descargadas. sci.esa.int da un error de certificado: la
+  historia de la astrometría de ESA se cita en su copia de web.archive.org.
+- Comprobado con la consola: `--card Cas`, `Cet`, `Ori`, `And`, `vega` y `algol` terminan con su HISTORIA; `--card Oph`, sin ella y con la estrella de Kepler en el texto.
+- `dotnet test` 933 tests; build Android 0 avisos.
 
 ## Mejoras fuera de fase
 
