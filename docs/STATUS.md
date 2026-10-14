@@ -1,6 +1,6 @@
 # Estado
 
-Fase actual: 6, efemérides: la historia de cada objeto (plan acordado el 2026-10-08; ver PLAN.md y la sección de la fase). Fases 1 y 2 completadas el 2026-10-02; fase 3 el 2026-10-05; fase 4 el 2026-10-06; fase 5 el 2026-10-08.
+Fase actual: 7, guiar también a las estrellas (plan acordado el 2026-10-14; ver PLAN.md y la sección de la fase). Fases 1 y 2 completadas el 2026-10-02; fase 3 el 2026-10-05; fase 4 el 2026-10-06; fase 5 el 2026-10-08; fase 6 el 2026-10-14.
 
 ## Hecho
 
@@ -1453,6 +1453,7 @@ Pasos, en PR separadas:
 - Sin cambios en los textos de las fichas: ninguno contaba estos hechos.
 - Comprobado con la consola: `--card mars`, `jupiter` y `saturn` terminan con su HISTORIA en orden (Júpiter, con Galileo primero).
 - `dotnet test` 933 tests (las reglas recorren todas las entradas); build Android 0 avisos.
+- Aprobado por el usuario (PR #55).
 
 ### Paso 5 — Lote 3: estrellas y constelaciones (2026-10-14)
 
@@ -1478,6 +1479,32 @@ Pasos, en PR separadas:
   historia de la astrometría de ESA se cita en su copia de web.archive.org.
 - Comprobado con la consola: `--card Cas`, `Cet`, `Ori`, `And`, `vega` y `algol` terminan con su HISTORIA; `--card Oph`, sin ella y con la estrella de Kepler en el texto.
 - `dotnet test` 933 tests; build Android 0 avisos.
+- Aprobado por el usuario (PR #56).
+
+## Fase 6 — Hecho
+
+- **HISTORIA** al final de las fichas: todas las fechas de su objeto, de la más antigua a la más reciente, con la fecha en seminegrita. También en rojo de noche,
+  y con una barra de desplazamiento que se ve siempre que la ficha no cabe.
+- **30 entradas**: 24 de los 7 objetivos (Luna 4, Mercurio 3, Venus 4, ISS 2, Marte 4, Júpiter 4, Saturno 3), 4 de constelaciones (Casiopea, la Ballena,
+  Orión y Andrómeda) y 2 de estrellas (Algol y Vega). Cada una con sus citas textuales, comprobadas con un script en las páginas descargadas y revisadas una
+  a una por el usuario. Quedaron menos de las «unas 40» previstas: casi nada anterior a las misiones tiene el día en dos fuentes que coincidan.
+- Las reglas de los textos, vigiladas por los tests: como mucho 200 caracteres y 4 entradas por objeto, nada que dependa del día en que se lee, el año en
+  alguna fuente y «juliano» antes de 1582.
+- Validado: NASA, NASA Science, NSSDCA, ESA, Ridpath y la AAS para las fechas (en UTC las misiones; gregorianas desde 1582); el OPPO para la sección.
+- 933 tests en verde, también en el CI. Decisiones 051-053.
+
+## Fase 7 — Guiar también a las estrellas
+
+Plan acordado con el usuario (2026-10-14). Primero se propuso una lista de todas las estrellas sobre el horizonte, por brillo, con una caja de texto. El
+usuario señaló que con más de 10 elementos se pierde y que por brillo no se encuentra una por su nombre. Contado con el catálogo: hay entre 57 y 73 a la vez
+sobre los 10° de altura, y 129 de las 155 tienen nombre propio. Se adoptó (decisión 054, corrige la 044) un chip **ESTRELLAS** que abre las más brillantes del
+momento, como mucho 10 y por orden alfabético, y un **BUSCAR** con un teclado de letras propio, en rojo de noche, que filtra las 155 y enseña como mucho 10.
+Se ajustará al verlo en el móvil.
+Pasos, en PR separadas:
+- **7.1, Core**: la lista corta, el filtro de búsqueda y el aviso de día, con tests. Los nombres en español de las estrellas pasan de la app a Core.
+- **7.2, la app**: el chip ESTRELLAS detrás de ISS, la lista corta en un panel propio (en rojo de noche) y el chip con el nombre de la estrella elegida.
+- **7.3, BUSCAR**: el teclado de letras propio y los resultados.
+- Validación en el móvil y en el cielo, con una estrella brillante y una débil.
 
 ## Mejoras fuera de fase
 
