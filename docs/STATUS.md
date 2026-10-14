@@ -1506,6 +1506,26 @@ Pasos, en PR separadas:
 - **7.3, BUSCAR**: el teclado de letras propio y los resultados.
 - Validación en el móvil y en el cielo, con una estrella brillante y una débil.
 
+### Paso 1 — Las estrellas para elegir, en Core (2026-10-14)
+
+- `Cards/SpanishNames` pasa de la app a Core, sin cambios, con sus primeros tests: el buscador tiene que encontrar las estrellas por el nombre que muestra la app.
+- Core `Stars/StarChoices` (decisión 054):
+  - `Brightest`: las 10 más brillantes a más de 10° de altura, por orden alfabético. Vacía si ninguna llega.
+  - `Search`: las que encajan con lo escrito, sobre o bajo el horizonte (`StarChoice.AboveHorizon`), por orden alfabético; como mucho 10, con el total
+    (`HasMore`: «sigue escribiendo»). Cada palabra escrita tiene que empezar una palabra del nombre en español o del IAU, sin tildes ni mayúsculas.
+  - `IsDaylight`: el Sol por encima de −6°.
+  - Cada `StarChoice` lleva el nombre en español, la constelación de su designación («la Lira») y su posición.
+- El orden alfabético va por el nombre sin tildes y en orden ordinal, no por la cultura del móvil: «Épsilon» va con la E en cualquier idioma.
+- **Cambio al verlo en la consola**: la designación ya no se busca. «al» encontraba 55 estrellas, todas las «alf …» (Vega entre ellas), y ahora encuentra 28,
+  todas con un nombre que empieza por «Al». El teclado propio no tendrá espacio para escribir «gam cas». Lo recoge la decisión 054.
+- Fijados en la decisión 054: 10° de altura para la lista corta (más bajas se apagan o las tapan los edificios) y −6° para el día, como en los pasos de la ISS.
+- Consola: `--stars` muestra la lista corta y `--stars <texto>`, la búsqueda, con designación, magnitud, altura y acimut. Desde Madrid el 15 oct a las 21:00 UT:
+  Alioth, Alkaid, Altair, Capella, Deneb, Dubhe, Fomalhaut, Menkalinan, Mirfak y Vega (Aldebarán, a 8,1°, se queda fuera); «casi» da Gamma de Casiopea;
+  «sirio» a mediodía da Sirio bajo el horizonte y el aviso de día.
+- Las posiciones son las de `AstronomyEngineStarService`, ya validadas en la Fase 3 (paso 8: la Estrella Polar a la altura de la latitud y las culminaciones);
+  lo nuevo es la elección y el orden, cubiertos por los tests.
+- `dotnet test` 978 tests (45 nuevos); build Android 0 avisos. La app aún no lo usa (paso 7.2).
+
 ## Mejoras fuera de fase
 
 Priorizadas por el usuario aunque la fase actual sea la 4.
