@@ -36,6 +36,30 @@
             </VerticalStackLayout>
         </Border>
 
+        <!-- ESTRELLAS (decision 054): the brightest stars up now, at most ten, in alphabetical order; a tap guides to one. Our own panel
+             in the palette, red at night. Built when it opens, so a row does not change under the finger. -->
+        <Border Grid.Row="1" x:Name="StarsPanel" IsVisible="False" VerticalOptions="End" Margin="12,0,12,4" Padding="16,12"
+                StrokeThickness="1" BackgroundColor="{DynamicResource HudBackground}" Stroke="{DynamicResource HudTextDim}">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="8" />
+            </Border.StrokeShape>
+            <!-- CERRAR beside the title, always in view; the rows scroll if they do not fit (small screens, large fonts). -->
+            <Grid RowDefinitions="Auto,Auto,*" RowSpacing="4">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Text="LAS MÁS BRILLANTES AHORA" FontFamily="ChakraPetchBold" FontSize="11" CharacterSpacing="1"
+                           VerticalOptions="Center" TextColor="{DynamicResource HudTextSoft}" />
+                    <Button Grid.Column="1" x:Name="CloseStarsButton" Text="CERRAR"
+                            FontFamily="ChakraPetch" FontSize="11" BorderWidth="1" CornerRadius="6" Padding="10,4"
+                            Clicked="OnCloseStarsClicked" />
+                </Grid>
+                <Label Grid.Row="1" x:Name="StarsNote" IsVisible="False" FontFamily="OpenSansRegular" FontSize="13"
+                       TextColor="{DynamicResource HudTextMuted}" />
+                <ScrollView Grid.Row="2" x:Name="StarsScroll">
+                    <VerticalStackLayout x:Name="StarsList" />
+                </ScrollView>
+            </Grid>
+        </Border>
+
         <!-- Object card (decision 038): opens by itself after a moment on AQUÍ, or with VER FICHA in identify mode.
              Our own panel in the palette, red at night. Closed with CERRAR, Back or another target. The footer stays in view;
              VER MÁS grows the card when its content does not fit, VER MENOS takes it back (decision 041). -->

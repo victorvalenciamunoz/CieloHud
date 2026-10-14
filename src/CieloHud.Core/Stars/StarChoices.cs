@@ -89,6 +89,16 @@ public sealed class StarChoices
         return wanted.All(w => words.Any(word => word.StartsWith(w, StringComparison.Ordinal)));
     }
 
+    /// <summary>What a row says after the name: "en la Lira · 47° al O", or "en el Can Mayor · bajo el horizonte".</summary>
+    public static string Detail(StarChoice choice)
+    {
+        ArgumentNullException.ThrowIfNull(choice);
+        var where = choice.AboveHorizon
+            ? $"{Alerts.AlertWords.Round(choice.Position.AltitudeDegrees).ToString(CultureInfo.InvariantCulture)}° al {Alerts.AlertWords.Cardinal(choice.Position.CardinalPoint)}"
+            : "bajo el horizonte";
+        return $"en {choice.Constellation} · {where}";
+    }
+
     /// <summary>The Spanish name of the constellation in the star's Bayer designation ("alf Lyr" → "la Lira").</summary>
     public static string ConstellationOf(Star star)
     {

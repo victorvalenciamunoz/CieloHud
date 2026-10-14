@@ -136,6 +136,18 @@ public class StarChoicesTests
     }
 
     [Theory]
+    [InlineData(47.4, 286.9, "en la Lira · 47° al O")]
+    [InlineData(10.5, 328.7, "en la Lira · 11° al NO")]
+    [InlineData(-16.8, 262.5, "en la Lira · bajo el horizonte")]
+    public void Detail_SaysWhereToLook(double altitude, double azimuth, string detail)
+    {
+        var vega = Designated("alf Lyr");
+        var choice = new StarChoice(vega, "Vega", "la Lira", new HorizontalPosition(azimuth, altitude));
+
+        Assert.Equal(detail, StarChoices.Detail(choice));
+    }
+
+    [Theory]
     [InlineData("Épsilon del Cisne", "epsilon del cisne")]
     [InlineData("Estrella Polar", "estrella polar")]
     [InlineData("Gamma 2 de la Vela", "gamma 2 de la vela")]
