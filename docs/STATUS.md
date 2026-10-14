@@ -751,8 +751,9 @@ Plan acordado: 11) buscador de temporadas en Core y validación; 12) aviso, text
 - Curiosidad de Heavens-Above: su lista «sólo los visibles» omite el 11 oct y el 15 oct de las 7:58, que en la vista «todos» marca como visibles.
   Los dos son de madrugada con el Sol a -5,6° / -6,0° al pasar la ISS de 10°, como el del 13 (-5,9°), que sí lista; parece un filtro propio de esa lista.
 - Los avisos que da Core para estos pasos son los de la tabla del paso 1 (13/10 07:44 «A las 7:54 pasa la ISS · 11 min · aparece por el SO, máximo 37° al SE», etc.).
-- **Pendiente en el cielo**, sin bloquear la fase: ver el 13 oct que el aviso de las 7:44 llega y que la ISS pasa por donde dice (si está nublado, el 16 oct a las 7:12, 67°).
-  Hacia el 10 oct, comprobar en Diagnóstico y con `dumpsys alarm` que está programado (la app del móvil es ahora una build de Debug con AVISOS activado).
+- **Visto en el cielo el 13 oct** (contado por el usuario el 14 oct): llegó el aviso de las 7:44 («A las 7:54 pasa la ISS · 11 min · aparece por el SO,
+  máximo 37° al SE»), con la app cerrada, en el OPPO con la build de Debug y AVISOS activado; la ISS apareció por el SO y pasó alta por el SE hacia las 8:00,
+  como decía, y el HUD llevó hasta ella. Ya no hace falta el paso de respaldo del 16 oct.
 
 ## Fase 4 — Hecho
 
@@ -998,8 +999,9 @@ Hallazgo al revisar: el catálogo `BrightStars` no guarda la paralaje; se añadi
 - **Probado en el OPPO** (7 oct, 14:17, la ISS recién salida por el NO a 1° de altura, de día): «A 430 km de altura y a 2210 km de ti»,
   «Va a 27 600 km/h, 7,7 km cada segundo», «La ilumina el Sol, pero hay demasiada luz en el cielo para verla». La consola, a las 14:17:30:
   430,23 km, 2274 km, 7,6572 km/s, cielo demasiado claro (la distancia baja unos 6 km por segundo mientras se acerca). Captura: `docs/images/ficha-iss.png`.
-- Pendiente en el móvil: «se puede ver a simple vista» con el paso del 13 oct (máximo a las 8:00, 36° al SE), y «en la sombra de la Tierra» del 14 oct
-  en adelante, cuando la ISS sale ya alta de la sombra (por ejemplo el 16 oct, que «aparece» a las 7:12 a 19° al SO): la frase debe cambiar sola en el refresco.
+- Probado con el paso del 13 oct (máximo a las 8:00, 36° al SE): la ficha abierta durante el paso decía «se puede ver a simple vista» (contado por el usuario).
+- Pendiente en el móvil: «en la sombra de la Tierra» del 14 oct en adelante, cuando la ISS sale ya alta de la sombra (por ejemplo el 16 oct, que «aparece»
+  a las 7:12 a 19° al SO): la frase debe cambiar sola en el refresco.
 - `dotnet test` 736 tests; build Android 0 avisos.
 
 ### Paso 8 — Estrellas: distancia, color y ficha en «¿qué es?» (2026-10-07)
@@ -1427,6 +1429,29 @@ Pasos, en PR separadas:
 - Retocado el texto de la **ISS**: sin «habitada sin interrupción desde noviembre de 2000», que ahora cuenta su HISTORIA (decisión 051).
 - Decisiones: la 051 fija la fecha gregoriana desde 1582 aunque el país siguiera con la juliana; la 052 registra la consulta del DLE.
 - Comprobado con la consola: `--card moon`, `mercury`, `venus` e `iss` terminan con su HISTORIA en orden; la ficha de la ISS empieza «…una casa en órbita.».
+- `dotnet test` 933 tests (las reglas recorren todas las entradas); build Android 0 avisos.
+- Aprobado por el usuario (PR #54).
+
+### Paso 4 — Lote 2: Marte, Júpiter y Saturno (2026-10-14)
+
+- Lista y borradores propuestos al usuario con sus citas y aprobados antes de escribir los ficheros. 10 entradas nuevas en `history/targets/`:
+  - Marte: Mariner 4, las primeras fotos de cerca de otro planeta (15 jul 1965), Mariner 9, la primera en órbita de otro planeta (14 nov 1971),
+    Viking 1 se posa y envía la primera foto desde el suelo (20 jul 1976), Mars Pathfinder con Sojourner, el primer vehículo con ruedas en otro planeta (4 jul 1997).
+  - Júpiter (4 con Galileo): Pioneer 10, la primera visita (4 dic 1973), el cometa Shoemaker-Levy 9 choca (16 jul 1994), la cápsula de Galileo y la nave
+    en órbita (7 dic 1995).
+  - Saturno: Pioneer 11, la primera visita (1 sep 1979), Cassini en órbita, con su final de 2017 en el mismo texto (1 jul 2004), Huygens se posa en Titán (14 ene 2005).
+- Descartadas: la Gran Mancha Roja (su primera observación es dudosa, Hooke en 1664 o Cassini en 1665, y ninguna fuente da un día; el texto de Júpiter sigue
+  diciendo que se observa desde hace más de 300 años), el descubrimiento de Titán (1655: no se ve a simple vista, como Fobos y Deimos), Galileo y los anillos
+  de Saturno (la NASA da solo el año), Voyager 1 y los volcanes de Ío (no es una primera llegada, y se descubrieron días después) y Juno (no es una primera vez).
+- Fechas en UTC, contrastadas con NASA NSSDCA, NASA, NASA Science y ESA: Mariner 4 y Pioneer 10 eran aún el día anterior en EE. UU., y Cassini, el 30 jun.
+  Dos se deducen y se dice en la fuente: el primer fragmento del Shoemaker-Levy 9 (la foto del Hubble de las 5:32 EDT del 16, hora y media después, lo pone el 16
+  en UTC fuera mañana o tarde) y Galileo (la cápsula entra a las 22:04 UT del 7; la órbita empieza a las 0:27 UT del 8, de ahí «horas después» sin dar su día).
+  Las fichas de NSSDCA de Galileo, Cassini y Huygens dan error: Galileo se cita con su cronología de NSSDCA y NASA Science; Cassini, con la copia de
+  web.archive.org de su ficha y de la de ESA; Huygens, con la copia de la página de ESA.
+- Las citas se comprobaron con un script que busca cada una, trozo a trozo, en el texto de las páginas descargadas. La de Pioneer 10 conserva una errata
+  de la fuente («Nov. 6 and 31 Dec. 31»), señalada.
+- Sin cambios en los textos de las fichas: ninguno contaba estos hechos.
+- Comprobado con la consola: `--card mars`, `jupiter` y `saturn` terminan con su HISTORIA en orden (Júpiter, con Galileo primero).
 - `dotnet test` 933 tests (las reglas recorren todas las entradas); build Android 0 avisos.
 
 ## Mejoras fuera de fase
