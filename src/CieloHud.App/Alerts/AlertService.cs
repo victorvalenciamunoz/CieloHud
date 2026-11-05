@@ -1,0 +1,416 @@
+using System.Text.Json;
+using CieloHud.App.Services;
+using CieloHud.Core.Alerts;
+using CieloHud.Core.Apparitions;
+using CieloHud.Core.Conjunctions;
+using CieloHud.Core.Events;
+using CieloHud.Core.Passes;
+using CieloHud.Core.Satellites;
+
+namespace CieloHud.App.Alerts;
+
+/// <summary>
+/// Alerts of ISS passes, conjunctions and the best days of Mercury. Off until the user turns them on (AVISOS button), remembered in <c>Preferences</c>.
+/// <see cref="RescheduleAsync"/> plans the next days with Core (<see cref="PassAlertPlanner"/>, <see cref="ConjunctionAlertPlanner"/>,
+/// <see cref="MercuryAlertPlanner"/>) from the last known location and, for the ISS, the cached TLE; it stores every kind in one list ordered by time and arms one alarm
+/// at the first; <see cref="OnAlarmAsync"/> posts what is due and plans again.
+/// The alarm and the notification are the platform's (<see cref="IAlertPlatform"/>).
+/// </summary>
+public sealed class AlertService
+{
+    private const int IssNoradNumber = 25544;
+    private const string OnKey = "alerts_on";
+    private const string PendingKey = "alerts_pending";
+    private const string NotifiedKey = "alerts_notified";
+    private const string NotifiedConjunctionsKey = "alerts_notified_conjunctions";
+    private const string NotifiedMercuryKey = "alerts_notified_mercury";
+    private const string HistoryKey = "alerts_history";
+    private const int HistoryLength = 6;
+    private const string ProblemKey = "alerts_problem";
+    private const string LastWakeKey = "alerts_last_wake";
+    private const string NextRefreshKey = "alerts_next_refresh";
+
+    /// <summary>The alarm may wake the app with no network; do not wait long for a fresh TLE, the cache will do.</summary>
+    private static readonly TimeSpan TleTimeout = TimeSpan.FromSeconds(15);
+
+    private readonly IAlertPlatform _platform;
+    private readonly IPreferences _preferences;
+    private readonly ObserverStore _observers;
+    private readonly ITleProvider _tleProvider;
+    private readonly IVisiblePassFinder _finder;
+    private readonly IConjunctionFinder _conjunctionFinder;
+    private readonly IMercuryApparitionFinder _mercuryFinder;
+    private readonly PassAlertPlanner _planner = new();
+    private readonly ConjunctionAlertPlanner _conjunctionPlanner = new();
+    private readonly MercuryAlertPlanner _mercuryPlanner = new();
+    private readonly SemaphoreSlim _gate = new(1, 1);
+
+    public AlertService(IAlertPlatform platform, IPreferences preferences, ObserverStore observers, ITleProvider tleProvider,
+        IVisiblePassFinder finder, IConjunctionFinder conjunctionFinder, IMercuryApparitionFinder mercuryFinder)
+    {
+        _platform = platform;
+        _preferences = preferences;
+        _observers = observers;
+        _tleProvider = tleProvider;
+        _finder = finder;
+        _conjunctionFinder = conjunctionFinder;
+        _mercuryFinder = mercuryFinder;
+    }
+
+    public IAlertPlatform Platform => _platform;
+
+    public bool IsOn => _preferences.Get(OnKey, false);
+
+    /// <summary>How many days ahead each planning looks.</summary>
+    public int PlanningDays => (int)_planner.Settings.Horizon.TotalDays;
+
+    /// <summary>Planned alerts of every kind, in order. Empty when off or nothing to see in the next days.</summary>
+    public IReadOnlyList<ScheduledAlert> Pending => Read(PendingKey, AlertJsonContext.Default.ListScheduledAlert);
+
+    /// <summary>The last plannings, oldest first, with why they ran: shows that the background ones happen (reboot, daily…).</summary>
+    public IReadOnlyList<PlanningRecord> History => Read(HistoryKey, AlertJsonContext.Default.ListPlanningRecord);
+
+    /// <summary>When the alerts will be planned again with the app closed (UTC), if the alerts are on.</summary>
+    public DateTimeOffset? NextRefresh =>
+        _preferences.Get(NextRefreshKey, (string?)null) is { } s ? Parse(s) : null;
+
+    /// <summary>Why the last planning could not run, in words; null when it went fine.</summary>
+    public string? Problem => _preferences.Get(ProblemKey, (string?)null);
+
+    /// <summary>
+    /// Turns the alerts on when the user taps AVISOS. Needs the notification permission; without it they stay off.
+    /// Call on the main thread.
+    /// </summary>
+    public async Task<bool> TurnOnAsync()
+    {
+        if (!await _platform.RequestNotificationsAsync())
+            return false;
+        _preferences.Set(OnKey, true);
+        await RescheduleAsync("al activar");
+        return true;
+    }
+
+    public void TurnOff()
+    {
+        _preferences.Set(OnKey, false);
+        _platform.ArmAlert(null);
+        ArmRefresh(null);
+        _preferences.Remove(PendingKey);
+    }
+
+    /// <summary>Plans the alerts again and arms the alarm at the first one. Safe to call often and from any thread.</summary>
+    /// <param name="reason">Why, in words, for the history in diagnostics ("al abrir la app", "tras reiniciar"…).</param>
+    public async Task RescheduleAsync(string reason)
+    {
+        await _gate.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            await RescheduleCoreAsync(reason).ConfigureAwait(false);
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
+    /// <summary>
+    /// The alarm went off. Before the first alert is due (ColorOS delivers alarms late, so they are armed early; see
+    /// <see cref="AlarmSteps"/>), it only re-arms toward it. When due, it posts what is due, remembers it and plans again.
+    /// </summary>
+    public async Task OnAlarmAsync()
+    {
+        await _gate.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            var now = DateTimeOffset.UtcNow;
+            var pending = Pending;
+            if (IsOn && pending.Count > 0)
+            {
+                var target = pending[0].NotifyAt;
+                RecordWake(now, target);
+                if (!AlarmSteps.IsDue(now, target))
+                {
+                    _platform.ArmAlert(AlarmSteps.NextWakeUp(now, target));
+                    return;
+                }
+
+                var notified = Read(NotifiedKey, AlertJsonContext.Default.ListDateTimeOffset);
+                var notifiedConjunctions = Read(NotifiedConjunctionsKey, AlertJsonContext.Default.ListNotifiedConjunction);
+                var notifiedMercury = Read(NotifiedMercuryKey, AlertJsonContext.Default.ListNotifiedMercury);
+                foreach (var alert in pending.Where(a => AlarmSteps.IsDue(now, a.NotifyAt) && a.WorthUntil > now))
+                {
+                    _platform.Show(alert);
+                    if (alert.Kind == AlertKind.Pass)
+                        notified.Add(alert.VisibleStart);
+                    else if (alert.Kind == AlertKind.Mercury && alert.Mercury is { } season)
+                        notifiedMercury.Add(season);
+                    else
+                        notifiedConjunctions.AddRange(alert.Conjunctions ?? []);
+                }
+                // Only recent ones matter: the planner never looks at passes that have already started, a conjunction
+                // is only the same one within a day of its best moment, and a season of Mercury within a month of its best day.
+                notified.RemoveAll(n => n < now - TimeSpan.FromDays(1));
+                notifiedConjunctions.RemoveAll(n => n.Best < now - TimeSpan.FromDays(2));
+                notifiedMercury.RemoveAll(n => n.Best < now - _mercuryPlanner.Settings.SameMercurySeasonTolerance);
+                Write(NotifiedKey, notified, AlertJsonContext.Default.ListDateTimeOffset);
+                Write(NotifiedConjunctionsKey, notifiedConjunctions, AlertJsonContext.Default.ListNotifiedConjunction);
+                Write(NotifiedMercuryKey, notifiedMercury, AlertJsonContext.Default.ListNotifiedMercury);
+            }
+            await RescheduleCoreAsync("tras un aviso").ConfigureAwait(false);
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
+    /// <summary>The last time the alarm went off and what it was aiming at (UTC), to see how late the system delivers it.</summary>
+    public (DateTimeOffset Fired, DateTimeOffset Target)? LastWake =>
+        _preferences.Get(LastWakeKey, (string?)null)?.Split('|') is [var fired, var target]
+            ? (Parse(fired), Parse(target))
+            : null;
+
+    /// <summary>Posts the next planned pass alert (or an example) in <paramref name="delay"/>, through real alarms, marked as a test.</summary>
+    public void ArmTest(TimeSpan delay)
+    {
+        var now = DateTimeOffset.UtcNow;
+        ArmTest(now, delay, Pending.FirstOrDefault(a => a.Kind == AlertKind.Pass) ?? ExamplePass(now));
+    }
+
+    /// <summary>
+    /// Posts the next real conjunction of the Moon, or of two planets, in <paramref name="delay"/>, with the text its alert will
+    /// have, through real alarms, marked as a test. Looks up to two months ahead, so there is usually one to try; otherwise an
+    /// example. Slow: call off the main thread.
+    /// </summary>
+    public void ArmConjunctionTest(TimeSpan delay, bool planets)
+    {
+        var now = DateTimeOffset.UtcNow;
+        ArmTest(now, delay, NextConjunction(now, planets) ?? ExampleConjunction(now, planets));
+    }
+
+    /// <summary>
+    /// Posts the next real season of Mercury in <paramref name="delay"/>, with the text its alert will have, through real alarms,
+    /// marked as a test. Seasons at dusk can be six months apart, so it looks up to <see cref="MercuryTestDays"/> days ahead;
+    /// otherwise an example. Slow: call off the main thread.
+    /// </summary>
+    public void ArmMercuryTest(TimeSpan delay)
+    {
+        var now = DateTimeOffset.UtcNow;
+        ArmTest(now, delay, NextMercury(now) ?? ExampleMercury(now));
+    }
+
+    private const int MercuryTestDays = 200;
+
+    private void ArmTest(DateTimeOffset now, TimeSpan delay, ScheduledAlert sample)
+    {
+        var at = now + delay;
+        // Real visible times keep the alert alive until they end; an example lives a quarter of an hour after posting.
+        var visibleEnd = sample.VisibleEnd > at ? sample.VisibleEnd : at + TimeSpan.FromMinutes(15);
+        var test = sample with { NotifyAt = at, VisibleEnd = visibleEnd, Title = "[PRUEBA] " + sample.Title };
+        _platform.ArmTest(AlarmSteps.NextWakeUp(now, at), test);
+    }
+
+    private static ScheduledAlert ExamplePass(DateTimeOffset now) =>
+        new(now, now + TimeSpan.FromMinutes(10), now + TimeSpan.FromMinutes(15), false,
+            "La ISS pasa en 10 min", "A las 21:43 pasa la ISS · 5 min · aparece por el NO, máximo 67° al SE");
+
+    private static ScheduledAlert ExampleConjunction(DateTimeOffset now, bool planets) => planets
+        ? new(now, now + TimeSpan.FromMinutes(30), now + TimeSpan.FromHours(3), false, "Marte junto a Júpiter",
+            "Esta noche, Marte junto a Júpiter (1°), lo más cerca en estas semanas · mejor hacia las 22:00 al SE · juntos del 9 al 23 nov",
+            AlertKind.Conjunction, Guide: "Júpiter")
+        : new(now, now + TimeSpan.FromMinutes(30), now + TimeSpan.FromHours(3), false, "La Luna junto a Júpiter",
+            "Esta noche, la Luna junto a Júpiter (3°) · mejor hacia las 22:00 al SE", AlertKind.Conjunction, Guide: "Luna");
+
+    private static ScheduledAlert ExampleMercury(DateTimeOffset now) =>
+        new(now, now + TimeSpan.FromMinutes(30), now + TimeSpan.FromMinutes(45), false, "Mercurio al anochecer",
+            "Hoy al anochecer, Mercurio a 11°, lo más alto en estas semanas · mejor hacia las 19:05 al SO · se ve del 31 ene al 7 feb",
+            AlertKind.Mercury, Guide: MercuryAlertText.GuideName);
+
+    // The next season of Mercury from here, with the text its real alert will have.
+    private ScheduledAlert? NextMercury(DateTimeOffset now)
+    {
+        if (_observers.Last is not { } observer)
+            return null;
+        var seasons = _mercuryFinder.Find(observer, now, now + TimeSpan.FromDays(MercuryTestDays), TimeZoneInfo.Local);
+        return _mercuryPlanner.Plan(seasons, now, TimeZoneInfo.Local).FirstOrDefault() is { } alert
+            ? ScheduledAlert.From(alert, TimeZoneInfo.Local)
+            : null;
+    }
+
+    // The first conjunction of that kind from here, with the text its real alert will have.
+    private ScheduledAlert? NextConjunction(DateTimeOffset now, bool planets)
+    {
+        if (_observers.Last is not { } observer)
+            return null;
+        var to = now + TimeSpan.FromDays(60);
+        var conjunctions = planets
+            ? _conjunctionFinder.FindPlanetPairs(observer, now, to, TimeZoneInfo.Local)
+            : _conjunctionFinder.FindWithMoon(observer, now, to, TimeZoneInfo.Local);
+        return _conjunctionPlanner.Plan(conjunctions, now, TimeZoneInfo.Local).FirstOrDefault() is { } alert
+            ? ScheduledAlert.From(alert, TimeZoneInfo.Local)
+            : null;
+    }
+
+    /// <summary>How many days ahead the list of upcoming events shows conjunctions and Mercury. ISS passes, only as far as the alerts look.</summary>
+    public const int EventDays = 30;
+
+    /// <summary>
+    /// The upcoming events, computed now from the last location (decision 030): conjunctions and Mercury for <see cref="EventDays"/> days and
+    /// visible ISS passes for the alert horizon, each with when its alert would go off. Works with the alerts off too. Slow: call off the main thread.
+    /// </summary>
+    public async Task<UpcomingEventList> UpcomingAsync()
+    {
+        if (_observers.Last is not { } observer)
+            return new UpcomingEventList([], "sin ubicación: abre el HUD con el GPS activo");
+
+        var now = DateTimeOffset.UtcNow;
+        var timeZone = TimeZoneInfo.Local;
+        var conjunctions = _conjunctionFinder.FindWithMoon(observer, now, now + TimeSpan.FromDays(EventDays), timeZone)
+            .Concat(_conjunctionFinder.FindPlanetPairs(observer, now, now + TimeSpan.FromDays(EventDays), timeZone))
+            .ToList();
+
+        IReadOnlyList<VisiblePass> passes = [];
+        DateTimeOffset? epoch = null;
+        string? problem = null;
+        try
+        {
+            using var timeout = new CancellationTokenSource(TleTimeout);
+            var tle = await _tleProvider.GetTleAsync(IssNoradNumber, timeout.Token).ConfigureAwait(false);
+            passes = _finder.Find(tle, observer, now, now + _planner.Settings.Horizon);
+            epoch = tle.Epoch;
+        }
+        catch (Exception ex) when (ex is TleUnavailableException or OperationCanceledException or IOException)
+        {
+            problem = "sin órbita de la ISS (sin red): solo la Luna y los planetas";
+        }
+
+        var mercury = _mercuryFinder.Find(observer, now, now + TimeSpan.FromDays(EventDays), timeZone);
+        var events = UpcomingEvents.Build(passes, epoch, conjunctions, now, timeZone,
+            Read(NotifiedKey, AlertJsonContext.Default.ListDateTimeOffset),
+            Read(NotifiedConjunctionsKey, AlertJsonContext.Default.ListNotifiedConjunction),
+            _planner.Settings,
+            mercury,
+            Read(NotifiedMercuryKey, AlertJsonContext.Default.ListNotifiedMercury));
+        return new UpcomingEventList(events, problem);
+    }
+
+    /// <summary>Brings the background planning forward to <paramref name="delay"/> from now, to try it with the app closed.</summary>
+    public void ArmRefreshTest(TimeSpan delay) => ArmRefresh(DateTimeOffset.UtcNow + delay);
+
+    /// <summary>The test alarm went off: the same steps as a real alert, without touching the planned ones.</summary>
+    public void OnTestAlarm(ScheduledAlert test)
+    {
+        var now = DateTimeOffset.UtcNow;
+        RecordWake(now, test.NotifyAt);
+        if (AlarmSteps.IsDue(now, test.NotifyAt))
+            _platform.Show(test);
+        else
+            _platform.ArmTest(AlarmSteps.NextWakeUp(now, test.NotifyAt), test);
+    }
+
+    private void RecordWake(DateTimeOffset fired, DateTimeOffset target) =>
+        _preferences.Set(LastWakeKey, $"{Format(fired)}|{Format(target)}");
+
+    private static string Format(DateTimeOffset instant) => instant.ToString("O", System.Globalization.CultureInfo.InvariantCulture);
+
+    private static DateTimeOffset Parse(string instant) => DateTimeOffset.Parse(instant, System.Globalization.CultureInfo.InvariantCulture);
+
+    private async Task RescheduleCoreAsync(string reason)
+    {
+        if (!IsOn)
+        {
+            _platform.ArmAlert(null);
+            ArmRefresh(null);
+            return;
+        }
+
+        var now = DateTimeOffset.UtcNow;
+        var history = Read(HistoryKey, AlertJsonContext.Default.ListPlanningRecord);
+        history.Add(new PlanningRecord(now, reason));
+        Write(HistoryKey, history.TakeLast(HistoryLength).ToList(), AlertJsonContext.Default.ListPlanningRecord);
+
+        if (_observers.Last is not { } observer)
+        {
+            Fail(now, "sin ubicación: abre el HUD con el GPS activo");
+            return;
+        }
+
+        var timeZone = TimeZoneInfo.Local;
+        var horizon = _planner.Settings.Horizon;
+
+        // Conjunctions (the Moon with planets, two planets) and Mercury need nothing but the ephemeris: they are planned even with no network.
+        var conjunctions = _conjunctionFinder.FindWithMoon(observer, now, now + horizon, timeZone)
+            .Concat(_conjunctionFinder.FindPlanetPairs(observer, now, now + horizon, timeZone));
+        var notifiedConjunctions = Read(NotifiedConjunctionsKey, AlertJsonContext.Default.ListNotifiedConjunction);
+        var alerts = _conjunctionPlanner.Plan(conjunctions, now, timeZone, notifiedConjunctions)
+            .Select(a => ScheduledAlert.From(a, timeZone))
+            .ToList();
+        // Mercury too: its best day, when it falls within the horizon.
+        var mercury = _mercuryFinder.Find(observer, now, now + horizon, timeZone);
+        alerts.AddRange(_mercuryPlanner.Plan(mercury, now, timeZone, Read(NotifiedMercuryKey, AlertJsonContext.Default.ListNotifiedMercury))
+            .Select(a => ScheduledAlert.From(a, timeZone)));
+
+        string? problem = null;
+        try
+        {
+            using var timeout = new CancellationTokenSource(TleTimeout);
+            var tle = await _tleProvider.GetTleAsync(IssNoradNumber, timeout.Token).ConfigureAwait(false);
+            var passes = _finder.Find(tle, observer, now, now + horizon);
+            var notified = Read(NotifiedKey, AlertJsonContext.Default.ListDateTimeOffset);
+            alerts.AddRange(_planner.Plan(passes, tle.Epoch, now, timeZone, notified).Select(a => ScheduledAlert.From(a, timeZone)));
+        }
+        catch (Exception ex) when (ex is TleUnavailableException or OperationCanceledException or IOException)
+        {
+            problem = "sin órbita de la ISS (sin red): solo avisos de la Luna y los planetas";
+        }
+
+        alerts = alerts.OrderBy(a => a.NotifyAt).ThenBy(a => a.WorthUntil).ToList();
+        Write(PendingKey, alerts, AlertJsonContext.Default.ListScheduledAlert);
+        if (problem is null)
+            _preferences.Remove(ProblemKey);
+        else
+            _preferences.Set(ProblemKey, problem);
+        // Early enough that the system delivering it late still lands on the alert; an alert already due goes off now.
+        _platform.ArmAlert(alerts.Count > 0 ? AlarmSteps.NextWakeUp(now, alerts[0].NotifyAt) : null);
+        // Without the TLE, try again sooner.
+        ArmRefresh(now + (problem is null ? _planner.Settings.RefreshInterval : _planner.Settings.RetryInterval));
+    }
+
+    private void Fail(DateTimeOffset now, string problem)
+    {
+        _preferences.Set(ProblemKey, problem);
+        _preferences.Remove(PendingKey);
+        _platform.ArmAlert(null);
+        ArmRefresh(now + _planner.Settings.RetryInterval);
+    }
+
+    /// <summary>The daily planning with the app closed. Inexact: a few minutes, or the hour ColorOS may add, do not matter here.</summary>
+    private void ArmRefresh(DateTimeOffset? at)
+    {
+        _platform.ArmRefresh(at);
+        if (at is { } time)
+            _preferences.Set(NextRefreshKey, Format(time));
+        else
+            _preferences.Remove(NextRefreshKey);
+    }
+
+    private List<T> Read<T>(string key, System.Text.Json.Serialization.Metadata.JsonTypeInfo<List<T>> type)
+    {
+        if (_preferences.Get(key, (string?)null) is not { } json)
+            return [];
+        try
+        {
+            return JsonSerializer.Deserialize(json, type) ?? [];
+        }
+        catch (JsonException)
+        {
+            return [];
+        }
+    }
+
+    private void Write<T>(string key, List<T> value, System.Text.Json.Serialization.Metadata.JsonTypeInfo<List<T>> type) =>
+        _preferences.Set(key, JsonSerializer.Serialize(value, type));
+}
+
+/// <summary>The upcoming events, and why some may be missing (no location, no ISS orbit).</summary>
+public sealed record UpcomingEventList(IReadOnlyList<SkyEvent> Events, string? Problem);

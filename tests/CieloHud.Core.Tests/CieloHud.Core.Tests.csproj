@@ -1,0 +1,51 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+    <Using Include="CieloHud.Core.Sky" />
+    <Using Include="CieloHud.Core.SolarSystem" />
+    <Using Include="CieloHud.Core.Satellites" />
+    <Using Include="CieloHud.Core.Passes" />
+    <Using Include="CieloHud.Core.Guidance" />
+    <Using Include="CieloHud.Core.Stars" />
+    <Using Include="CieloHud.Core.Alerts" />
+    <Using Include="CieloHud.Core.Apparitions" />
+    <Using Include="CieloHud.Core.Conjunctions" />
+    <Using Include="CieloHud.Core.Events" />
+    <Using Include="CieloHud.Core.Cards" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\CieloHud.Core\CieloHud.Core.csproj" />
+  </ItemGroup>
+
+  <!--
+    Tests built on the author's real places (passes checked against Heavens-Above from home) are kept out of this
+    public repo, in a sibling folder (or CIELOHUD_PRIVATE_DIR). When it exists they compile into this assembly; without
+    it, only the public tests run.
+  -->
+  <PropertyGroup>
+    <CieloHudPrivateDir Condition="'$(CIELOHUD_PRIVATE_DIR)' != ''">$(CIELOHUD_PRIVATE_DIR)</CieloHudPrivateDir>
+    <CieloHudPrivateDir Condition="'$(CieloHudPrivateDir)' == ''">$(MSBuildProjectDirectory)\..\..\..\CieloHud-privado</CieloHudPrivateDir>
+    <CieloHudPrivateTests>$([System.IO.Path]::GetFullPath('$(CieloHudPrivateDir)\tests'))</CieloHudPrivateTests>
+  </PropertyGroup>
+
+  <ItemGroup Condition="Exists('$(CieloHudPrivateTests)')">
+    <Compile Include="$(CieloHudPrivateTests)\**\*.cs" LinkBase="Private" />
+    <None Include="$(CieloHudPrivateTests)\Fixtures\**\*" LinkBase="Fixtures" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

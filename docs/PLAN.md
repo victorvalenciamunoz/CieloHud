@@ -1,0 +1,133 @@
+# Plan
+
+**Fase actual: 7** (planificada con el usuario el 2026-10-14; pasos en STATUS). La 6 se cerró el 2026-10-14.
+
+---
+
+## Fase 1 — Consola: ¿dónde está cada cosa ahora?
+
+Objetivo: dada una ubicación y un instante, obtener acimut y altura de la Luna, los planetas y la ISS,
+y comprobar que coinciden con Stellarium / Heavens-Above.
+
+### Estructura
+
+```
+CieloHud.slnx
+src/
+  CieloHud.Core/
+  CieloHud.Console/
+tests/
+  CieloHud.Core.Tests/
+docs/
+```
+
+### Core
+
+- `Observer` (latitud, longitud, altitud en metros).
+- `HorizontalPosition` (acimut, altura) y quizá distancia.
+- `CelestialBody` (Moon, Mercury, Venus, Mars, Jupiter, Saturn) — enum o similar.
+- Un servicio para cuerpos del sistema solar: `(body, observer, instant) -> HorizontalPosition`.
+  - Candidata: Astronomy Engine (Don Cross), que tiene versión C#. Verificar paquete en NuGet antes de usarlo.
+- Un servicio para satélites: `(tle, observer, instant) -> HorizontalPosition`, usando SGP4.
+  - Valorar librerías SGP4 para .NET existentes (comparar mantenimiento y licencia). Documentar la elección en DECISIONS.md.
+- Un proveedor de TLE:
+  - Fuente: CelesTrak (ISS = NORAD 25544). Verificar la URL actual de su API GP.
+  - Cache en fichero local; refrescar si tiene más de 24 h.
+  - Debe poder usarse un TLE fijo para tests.
+
+### Consola
+
+```
+dotnet run --project src/CieloHud.Console -- [--lat 40.4168] [--lon -3.7038] [--time 2026-10-02T21:00:00Z]
+```
+
+- Por defecto: Madrid y la hora actual.
+- Salida: tabla con objeto, acimut (con punto cardinal: N, NE, E…), altura y "visible/bajo el horizonte".
+
+### Tests
+
+- Con instante y observador fijos, posiciones de la Luna y Júpiter dentro de tolerancia frente a valores de referencia.
+- ISS con un TLE fijo guardado en el repo de tests.
+- Conversión acimut → punto cardinal.
+
+### Validación (el juez)
+
+- Comparar la salida con Stellarium (o su versión web) para el mismo lugar y hora.
+- Tolerancias objetivo: planetas y Luna < 0,5°; ISS < 1° con TLE reciente.
+- Apuntar en STATUS.md los resultados de la comparación.
+
+### Hecho cuando
+
+- `dotnet test` en verde.
+- La tabla de la consola coincide con Stellarium dentro de tolerancia en al menos 3 instantes distintos.
+
+---
+
+## Fase 2 — Próximos pasos visibles de la ISS
+
+- Calcular pasos en los próximos N días: inicio, punto más alto, fin (hora, acimut, altura).
+- "Visible" = ISS iluminada por el Sol Y observador en oscuridad (Sol por debajo de ~-6°) Y altura máxima > 10°.
+- Validar contra Heavens-Above.
+
+## Fase 3 — HUD en MAUI (Android)
+
+- Orientación del dispositivo -> hacia qué acimut/altura apunta el móvil.
+- Flecha/retícula que guía al objeto elegido. Probar primero con la Luna.
+- Tolerar el ruido del magnetómetro: guiar a una zona, no a un píxel.
+- Futuro: opción para elegir entre referencias dibujadas (actual) o la cámara de fondo (CommunityToolkit.Maui.Camera, permiso de cámara).
+- Referencias en el HUD para orientarse al bajar el móvil: las 15-20 estrellas más brillantes (catálogo fijo pequeño en el repo),
+  los demás cuerpos de `CelestialBody` y marcas de horizonte con puntos cardinales. Pocas cosas, todas visibles desde ciudad.
+  Nada de líneas de constelaciones ni catálogos grandes. Las estrellas se calculan con la misma conversión ecuatorial → horizontal
+  que los planetas (AstronomyEngine `Horizon`).
+- Modo "¿qué es eso?": apuntas y la app dice qué objeto del catálogo (Luna, planetas, ISS, estrellas brillantes) está más cerca
+  de donde apuntas, si está a menos de ~5°. Es la misma geometría de guiado al revés; no necesita cámara. Hacerlo después de
+  validar la precisión en el cielo y junto con el catálogo de estrellas. Es la antesala de la Fase 5.
+
+## Fase 4 — Avisos
+
+- Notificaciones locales antes de pasos visibles de la ISS y eventos destacados.
+
+## Fase 5 — Fichas del objeto
+
+- Al llegar a AQUÍ, o al reconocer algo en "¿qué es?", una ficha breve: qué es, contado para no expertos, y datos del momento.
+- Datos del momento calculados en local y contrastables con Horizons o Stellarium:
+  - Luna: fase y fracción iluminada (Astronomy Engine MoonPhase, Illumination).
+  - Júpiter: lunas galileanas a cada lado (JupiterMoons).
+  - Saturno: inclinación de los anillos (Illumination, ring_tilt).
+  - Planetas: distancia y tiempo que tarda su luz en llegar.
+  - Estrellas: años que tarda su luz en llegar, desde la paralaje de Hipparcos (no la de SIMBAD, que para muchas de estas es Gaia, saturada;
+    decisión 044), su color y su brillo explicado.
+  - ISS: altura y velocidad.
+- Un dibujo de cada objetivo calculado en el momento, no una foto (añadido el 2026-10-07 a petición del usuario): la Luna y los planetas
+  con su fase, Júpiter con sus lunas en su sitio y Saturno con la inclinación de sus anillos de ese día. Contrastable con Stellarium y en rojo de noche.
+- Textos: uno por objeto (7 objetivos, 155 estrellas, 88 constelaciones), en el repo como datos. Se pueden redactar con ayuda
+  de IA durante el desarrollo, pero se revisan uno a uno antes de subirlos. La app no usa IA ni red para esto. Decisión 020.
+
+## Fase 6 — Efemérides: la historia de cada objeto (idea apuntada el 2026-10-07, planificada el 2026-10-08)
+
+- Un descubrimiento, una misión o una persona, contado para el público general. Decisión 042.
+- Solo las ligadas a lo que la app enseña (la Luna, los planetas, la ISS, las estrellas y las constelaciones del catálogo), para que lleven al cielo.
+  Una persona entra por lo que descubrió o estudió de algo que se puede ver, el día que lo hizo; no por su nacimiento ni por ser relevante en general.
+- Pocas y buenas: unas 40, como mucho 4 por objeto, la mayoría de los 7 objetivos. Quedaron 30 (24 de los 7 objetivos): casi nada anterior a las misiones
+  tiene el día en dos fuentes que coincidan (decisión 053).
+- Escritas y revisadas como los textos de las fichas: un Markdown por fecha, con su fuente, revisado uno a uno. Sin red y sin IA en la app. Criterios: decisión 051.
+- Dónde: en la ficha del objeto, una sección **HISTORIA** al final con todas sus fechas, siempre, de la más antigua a la más reciente (decisión 052, que
+  corrige la idea de «tal día como hoy»: con la fecha exacta casi nunca coincidirían). No en EVENTOS, que es lo que se va a poder ver, ni como aviso.
+- Pasos: 1) Core: formato, reglas y tres entradas de ejemplo; 2) la sección en la app; 3-5) las entradas por lotes (Luna, Mercurio, Venus e ISS; Marte,
+  Júpiter y Saturno; estrellas y constelaciones).
+
+## Fase 7 — Guiar también a las estrellas (idea apuntada el 2026-10-07, planificada el 2026-10-14)
+
+- Propuesta del usuario al probar las fichas de estrellas: que la guía lleve también a una estrella, como a un planeta («¿dónde está Vega?»).
+  Corrige la decisión 044 (las estrellas no eran objetivos de la guía) y matiza VISION: decisión 054.
+- Lo técnico ya está: las 155 son `SkyTarget` (`StarTarget`), con su posición calculada; la flecha, AQUÍ y su ficha sirven tal cual. Lo nuevo es cómo se elige:
+  - Un chip **ESTRELLAS** detrás de ISS. Al elegir una, el chip lleva su nombre y la guía funciona como con un planeta.
+  - Al abrirlo, **las más brillantes que hay ahora sobre el horizonte, como mucho 10, por orden alfabético**, con su constelación, altura y dirección.
+    De día, un aviso: las estrellas no se ven.
+  - **BUSCAR**, con un **teclado de letras propio** en la paleta de la app (no el del sistema, blanco y que tapa el HUD): filtra las 155 sin tildes ni
+    mayúsculas, por el principio de cualquier palabra del nombre, y enseña como mucho 10.
+  - Las que están bajo el horizonte salen marcadas; elegidas, la guía hace lo de siempre (no guía).
+- Las constelaciones no son destino de la guía: son demasiado grandes para AQUÍ.
+- Pasos: 1) Core: la lista corta, el filtro y el aviso de día, con tests; los nombres en español de las estrellas pasan a Core. 2) La app: el chip y la
+  lista corta, en rojo de noche. 3) BUSCAR con el teclado propio. Validación en el móvil y en el cielo, con una estrella brillante y una débil (con
+  una de magnitud 2,5, AQUÍ puede dejar dudas entre vecinas parecidas). Lo que se vea al usarlo se ajusta en la misma fase.
