@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- CieloHud foreground: the HUD reticle locked on a star. Everything stays within the adaptive-icon safe zone
+     (radius ~150 around the center), so circular and squircle masks never clip it. -->
+<svg width="456" height="456" viewBox="0 0 456 456" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none" stroke="#7CFFB2" stroke-linecap="round">
+        <!-- Lock ring -->
+        <circle cx="228" cy="228" r="98" stroke-width="13" />
+        <!-- Four ticks, center left open -->
+        <line x1="228" y1="84" x2="228" y2="112" stroke-width="13" />
+        <line x1="228" y1="344" x2="228" y2="372" stroke-width="13" />
+        <line x1="84" y1="228" x2="112" y2="228" stroke-width="13" />
+        <line x1="344" y1="228" x2="372" y2="228" stroke-width="13" />
+    </g>
+    <!-- The star it found -->
+    <path d="M228,170 Q235,221 286,228 Q235,235 228,286 Q221,235 170,228 Q221,221 228,170 Z" fill="#E8EEF4" />
+    <!-- A small companion in amber, the HUD's target color -->
+    <circle cx="274" cy="182" r="8" fill="#FFC42E" />
+</svg>

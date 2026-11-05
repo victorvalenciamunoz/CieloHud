@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="CieloHud.App.HudPage"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{DynamicResource HudBackground}">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Target chips -->
+        <ScrollView Grid.Row="0" x:Name="TargetScroll" Orientation="Horizontal" HorizontalScrollBarVisibility="Never" Margin="0,44,0,0">
+            <HorizontalStackLayout x:Name="TargetBar" Padding="12,8" Spacing="8" />
+        </ScrollView>
+
+        <!-- In identify mode a tap on a name opens its card (decision 048). -->
+        <GraphicsView Grid.Row="1" x:Name="Canvas">
+            <GraphicsView.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnCanvasTapped" />
+            </GraphicsView.GestureRecognizers>
+        </GraphicsView>
+
+        <!-- Night options, opened by NOCHE when night mode is on: brightness and leaving it. Our own panel in the palette,
+             not a system dialog, which would be white. Buttons are styled in code, like the chips. -->
+        <Border Grid.Row="1" x:Name="NightPanel" IsVisible="False" VerticalOptions="End" Margin="16,0,16,4" Padding="14,12"
+                StrokeThickness="1" BackgroundColor="{DynamicResource HudBackground}" Stroke="{DynamicResource HudTextDim}">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="8" />
+            </Border.StrokeShape>
+            <VerticalStackLayout Spacing="10">
+                <Label Text="BRILLO EN MODO NOCHE" FontFamily="ChakraPetchBold" FontSize="12" CharacterSpacing="1"
+                       TextColor="{DynamicResource HudTextSoft}" />
+                <HorizontalStackLayout x:Name="BrightnessBar" Spacing="8" />
+                <Button x:Name="LeaveNightButton" Text="SALIR DEL MODO NOCHE" HorizontalOptions="Start"
+                        FontFamily="ChakraPetch" FontSize="11" BorderWidth="1" CornerRadius="6" Padding="10,4"
+                        Clicked="OnLeaveNightClicked" />
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- ESTRELLAS (decision 054): the brightest stars up now, at most ten, in alphabetical order; a tap guides to one. Our own panel
+             in the palette, red at night. Built when it opens, so a row does not change under the finger. -->
+        <Border Grid.Row="1" x:Name="StarsPanel" IsVisible="False" VerticalOptions="End" Margin="12,0,12,4" Padding="16,12"
+                StrokeThickness="1" BackgroundColor="{DynamicResource HudBackground}" Stroke="{DynamicResource HudTextDim}">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="8" />
+            </Border.StrokeShape>
+            <!-- The buttons beside the title, always in view; the rows scroll if they do not fit (small screens, large fonts).
+                 BUSCAR swaps the brightest for a search with our own letter keypad, not the system keyboard, which is white at night
+                 and covers half the HUD (decision 054); LISTA brings the brightest back. -->
+            <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="4">
+                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                    <Label x:Name="StarsTitle" FontFamily="ChakraPetchBold" FontSize="11" CharacterSpacing="1"
+                           VerticalOptions="Center" TextColor="{DynamicResource HudTextSoft}" />
+                    <Button Grid.Column="1" x:Name="StarsModeButton"
+                            FontFamily="ChakraPetch" FontSize="11" BorderWidth="1" CornerRadius="6" Padding="10,4"
+                            Clicked="OnStarsModeClicked" />
+                    <Button Grid.Column="2" x:Name="CloseStarsButton" Text="CERRAR"
+                            FontFamily="ChakraPetch" FontSize="11" BorderWidth="1" CornerRadius="6" Padding="10,4"
+                            Clicked="OnCloseStarsClicked" />
+                </Grid>
+                <!-- What has been typed, with a cursor; a hint while empty. -->
+                <Label Grid.Row="1" x:Name="StarsQuery" IsVisible="False" FontFamily="ChakraPetchBold" FontSize="18" CharacterSpacing="1" />
+                <Label Grid.Row="2" x:Name="StarsNote" IsVisible="False" FontFamily="OpenSansRegular" FontSize="13"
+                       TextColor="{DynamicResource HudTextMuted}" />
+                <ScrollView Grid.Row="3" x:Name="StarsScroll">
+                    <VerticalStackLayout>
+                        <VerticalStackLayout x:Name="StarsList" />
+                        <Label x:Name="StarsMore" IsVisible="False" Margin="0,6,0,0" FontFamily="OpenSansRegular" FontSize="13"
+                               TextColor="{DynamicResource HudTextMuted}" />
+                    </VerticalStackLayout>
+                </ScrollView>
+                <!-- QWERTY and BORRAR, built in code. Twenty half-key columns, so the second and third rows can start half a key in,
+                     as on a phone keyboard. -->
+                <Grid Grid.Row="4" x:Name="StarsKeypad" IsVisible="False" Margin="0,6,0,0" RowSpacing="6" ColumnSpacing="4"
+                      ColumnDefinitions="*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*" RowDefinitions="44,44,44" />
+            </Grid>
+        </Border>
+
+        <!-- Object card (decision 038): opens by itself after a moment on AQUÍ, or with VER FICHA in identify mode.
+             Our own panel in the palette, red at night. Closed with CERRAR, Back or another target. The footer stays in view;
+             VER MÁS grows the card when its content does not fit, VER MENOS takes it back (decision 041). -->
+        <Border Grid.Row="1" x:Name="CardPanel" IsVisible="False" VerticalOptions="End" Margin="12,0,12,4" Padding="16,14"
+                StrokeThickness="1" BackgroundColor="{DynamicResource HudBackground}" Stroke="{DynamicResource HudTextDim}">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="8" />
+            </Border.StrokeShape>
+            <Grid RowDefinitions="Auto,Auto" RowSpacing="10">
+                <!-- Height set in code to fit the content (a ScrollView alone takes all the height it is allowed). -->
+                <ScrollView x:Name="CardScroll">
+                    <!-- Right padding: the gutter of the scroll bar, which is always shown while the content does not fit (decision 052). -->
+                    <VerticalStackLayout x:Name="CardContent" Spacing="8" Padding="0,0,10,0">
+                        <Label x:Name="CardTitle" FontFamily="ChakraPetchBold" FontSize="20" CharacterSpacing="1"
+                               TextColor="{DynamicResource HudLocked}" />
+                        <Label x:Name="CardSubtitle" FontFamily="OpenSansRegular" FontSize="12" Margin="0,-6,0,0"
+                               TextColor="{DynamicResource HudTextMuted}" />
+                        <!-- Drawing worked out for this moment (decision 041); its height is set in code for each object. -->
+                        <GraphicsView x:Name="CardPictureView" IsVisible="False" />
+                        <Label x:Name="CardBody" FontFamily="OpenSansRegular" FontSize="14" LineHeight="1.15"
+                               TextColor="{DynamicResource HudText}" />
+                        <Label x:Name="CardNowHeader" Text="AHORA" FontFamily="ChakraPetchBold" FontSize="11" CharacterSpacing="1"
+                               Margin="0,4,0,0" TextColor="{DynamicResource HudTextSoft}" />
+                        <VerticalStackLayout x:Name="CardNow" Spacing="3" />
+                        <!-- The object's dated events, always, oldest first (decision 052); hidden when it has none. -->
+                        <Label x:Name="CardHistoryHeader" Text="HISTORIA" FontFamily="ChakraPetchBold" FontSize="11" CharacterSpacing="1"
+                               Margin="0,4,0,0" TextColor="{DynamicResource HudTextSoft}" />
+                        <VerticalStackLayout x:Name="CardHistoryList" Spacing="6" />
+                    </VerticalStackLayout>
+                </ScrollView>
+                <Grid Grid.Row="1" x:Name="CardFooter" ColumnDefinitions="Auto,*,Auto">
+                    <Button x:Name="CardMoreButton" Text="VER MÁS" IsVisible="False"
+                            FontFamily="ChakraPetch" FontSize="11" BorderWidth="1" CornerRadius="6" Padding="10,4"
+                            Clicked="OnCardMoreClicked" />
+                    <Button Grid.Column="2" x:Name="CloseCardButton" Text="CERRAR"
+                            FontFamily="ChakraPetch" FontSize="11" BorderWidth="1" CornerRadius="6" Padding="10,4"
+                            Clicked="OnCloseCardClicked" />
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- The card of the chosen target in guide mode, filled on AQUÍ. In identify mode the names on the HUD open the cards instead
+             (decision 048). Styled in code, like the chips. -->
+        <Button Grid.Row="1" x:Name="ShowCardButton" Text="VER FICHA" IsVisible="False"
+                VerticalOptions="End" HorizontalOptions="Center" Margin="0,0,0,8"
+                FontFamily="ChakraPetchBold" FontSize="12" BorderWidth="1" CornerRadius="14" Padding="14,6"
+                Clicked="OnShowCardClicked" />
+
+        <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="8" Padding="16,8,16,20">
+            <!-- What is coming up. The coordinates that were here are in diagnostics. -->
+            <Button Text="EVENTOS" HorizontalOptions="Start"
+                    FontFamily="ChakraPetch" FontSize="11"
+                    TextColor="{DynamicResource HudTextSoft}"
+                    BackgroundColor="Transparent"
+                    BorderColor="{DynamicResource HudTextDim}" BorderWidth="1"
+                    CornerRadius="6" Padding="10,4"
+                    Clicked="OnEventsClicked" />
+            <!-- Colors set from the palette in code: filled when on. -->
+            <Button Grid.Column="1" x:Name="AlertsButton" Text="AVISOS"
+                    FontFamily="ChakraPetch" FontSize="11"
+                    BorderWidth="1" CornerRadius="6" Padding="10,4"
+                    Clicked="OnAlertsClicked" />
+            <Button Grid.Column="2" x:Name="NightButton" Text="NOCHE"
+                    FontFamily="ChakraPetch" FontSize="11"
+                    BorderWidth="1" CornerRadius="6" Padding="10,4"
+                    Clicked="OnNightClicked" />
+            <Button Grid.Column="3" Text="ACERCA DE"
+                    FontFamily="ChakraPetch" FontSize="11"
+                    TextColor="{DynamicResource HudTextSoft}"
+                    BackgroundColor="Transparent"
+                    BorderColor="{DynamicResource HudTextDim}" BorderWidth="1"
+                    CornerRadius="6" Padding="10,4"
+                    Clicked="OnAboutClicked" />
+        </Grid>
+    </Grid>
+
+</ContentPage>

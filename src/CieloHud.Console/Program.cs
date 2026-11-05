@@ -1,0 +1,212 @@
+using CieloHud.Console;
+using CieloHud.Core.Alerts;
+using CieloHud.Core.Apparitions;
+using CieloHud.Core.Cards;
+using CieloHud.Core.Conjunctions;
+using CieloHud.Core.Constellations;
+using CieloHud.Core.Passes;
+using CieloHud.Core.Satellites;
+using CieloHud.Core.SolarSystem;
+using CieloHud.Core.Stars;
+
+const int IssNoradNumber = 25544;
+
+CommandLineOptions options;
+try
+{
+    options = CommandLineOptions.Parse(args);
+}
+catch (UsageException ex) when (ex.Message.Length == 0)
+{
+    System.Console.WriteLine(CommandLineOptions.Usage);
+    return 0;
+}
+catch (UsageException ex)
+{
+    System.Console.Error.WriteLine($"Error: {ex.Message}\n");
+    System.Console.Error.WriteLine(CommandLineOptions.Usage);
+    return 1;
+}
+
+System.Console.OutputEncoding = System.Text.Encoding.UTF8;
+
+var cacheDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CieloHud");
+using var http = new HttpClient();
+http.DefaultRequestHeaders.UserAgent.ParseAdd("CieloHud/0.1");
+var tleProvider = new CelesTrakTleProvider(http, cacheDirectory);
+
+if (options.ConjunctionsDays is { } conjunctionDays)
+    return PrintConjunctions(conjunctionDays);
+if (options.MercuryDays is { } mercuryDays)
+    return PrintMercury(mercuryDays);
+if (options.CardStar is { } cardStar)
+    return PrintStarCard(cardStar);
+if (options.CardConstellation is { } cardConstellation)
+    return PrintConstellationCard(cardConstellation);
+if (options.CardIss)
+    return await PrintIssCardAsync();
+if (options.CardBody is { } cardBody)
+    return PrintCard(cardBody);
+if (options.StarsQuery is { } starsQuery)
+    return PrintStarChoices(starsQuery);
+
+return options.PassesDays is { } days
+    ? await PrintPassesAsync(days)
+    : await PrintSkyTableAsync();
+
+async Task<int> PrintSkyTableAsync()
+{
+    System.Console.WriteLine(SkyTableFormatter.Header(options.Observer, options.Instant));
+
+    var rows = new List<SkyRow>();
+    var solarSystem = new AstronomyEngineSolarSystemService();
+    foreach (var body in Enum.GetValues<CelestialBody>())
+        rows.Add(new SkyRow(SkyTableFormatter.Name(body), solarSystem.Locate(body, options.Observer, options.Instant)));
+
+    string? tleInfo = null;
+    try
+    {
+        var tle = await tleProvider.GetTleAsync(IssNoradNumber);
+        rows.Add(new SkyRow("ISS", new Sgp4SatelliteService().Locate(tle, options.Observer, options.Instant)));
+        tleInfo = SkyTableFormatter.TleInfo(tle, options.Instant);
+    }
+    catch (TleUnavailableException)
+    {
+        rows.Add(new SkyRow("ISS", null, "sin TLE (sin red)"));
+    }
+
+    System.Console.WriteLine(SkyTableFormatter.Table(rows));
+    if (tleInfo is not null)
+        System.Console.WriteLine(tleInfo);
+    return 0;
+}
+
+async Task<int> PrintPassesAsync(int days)
+{
+    Tle tle;
+    try
+    {
+        tle = await tleProvider.GetTleAsync(IssNoradNumber);
+    }
+    catch (TleUnavailableException ex)
+    {
+        System.Console.Error.WriteLine($"Error: no se pudo obtener el TLE de la ISS ({ex.InnerException?.Message}).");
+        return 2;
+    }
+
+    var from = options.Instant;
+    var to = from.AddDays(days);
+    var criteria = VisibilityCriteria.Default;
+    var finder = new VisiblePassFinder(
+        new Sgp4SatellitePassPredictor(),
+        new Sgp4SatelliteService(),
+        new AstronomyEngineSunService(),
+        new Sgp4SatelliteIlluminationService(),
+        criteria);
+
+    var passes = finder.Find(tle, options.Observer, from, to);
+
+    System.Console.WriteLine(PassTableFormatter.Header(options.Observer, from, to, criteria));
+    System.Console.WriteLine(PassTableFormatter.Table(passes));
+    System.Console.WriteLine(SkyTableFormatter.TleInfo(tle, from));
+    return 0;
+}
+
+int PrintConjunctions(int days)
+{
+    var from = options.Instant;
+    var to = from.AddDays(days);
+    var finder = new ConjunctionFinder(new AstronomyEngineSolarSystemService(), new AstronomyEngineSunService());
+
+    var conjunctions = finder.FindWithMoon(options.Observer, from, to, TimeZoneInfo.Local);
+
+    System.Console.WriteLine(ConjunctionTableFormatter.Header(options.Observer, from, to, finder.Criteria));
+    System.Console.WriteLine(ConjunctionTableFormatter.Table(conjunctions));
+    var planetPairs = finder.FindPlanetPairs(options.Observer, from, to, TimeZoneInfo.Local);
+    System.Console.WriteLine(ConjunctionTableFormatter.PlanetPairs(planetPairs));
+
+    var alerts = new ConjunctionAlertPlanner().Plan(conjunctions.Concat(planetPairs), from, TimeZoneInfo.Local);
+    System.Console.WriteLine(ConjunctionTableFormatter.Alerts(alerts, TimeZoneInfo.Local));
+    return 0;
+}
+
+int PrintMercury(int days)
+{
+    var from = options.Instant;
+    var to = from.AddDays(days);
+    var finder = new MercuryApparitionFinder(
+        new AstronomyEngineSolarSystemService(), new AstronomyEngineSunService(), new AstronomyEngineMagnitudeService());
+
+    System.Console.WriteLine(MercuryTableFormatter.Header(options.Observer, from, to, finder.Criteria));
+    var apparitions = finder.Find(options.Observer, from, to, TimeZoneInfo.Local);
+    System.Console.WriteLine(MercuryTableFormatter.Apparitions(apparitions));
+    System.Console.WriteLine(MercuryTableFormatter.Windows(finder.FindWindows(options.Observer, from, to, TimeZoneInfo.Local)));
+    var alerts = new MercuryAlertPlanner().Plan(apparitions, from, TimeZoneInfo.Local);
+    System.Console.WriteLine(MercuryTableFormatter.Alerts(alerts, TimeZoneInfo.Local));
+    return 0;
+}
+
+int PrintCard(CelestialBody body)
+{
+    var facts = new AstronomyEngineSolarSystemFactsService();
+    System.Console.WriteLine(SkyTableFormatter.Header(options.Observer, options.Instant));
+    System.Console.WriteLine(body == CelestialBody.Moon
+        ? CardFormatter.Moon(facts.Moon(options.Observer, options.Instant), CardTexts.Find(CardKey.Body(body)), options.Instant, TimeZoneInfo.Local)
+        : CardFormatter.Planet(SkyTableFormatter.Name(body), facts.Planet(body, options.Observer, options.Instant), CardTexts.Find(CardKey.Body(body))));
+    if (body == CelestialBody.Jupiter)
+        System.Console.WriteLine(CardFormatter.JupiterMoons(facts.JupiterMoons(options.Observer, options.Instant)));
+    if (body == CelestialBody.Saturn)
+        System.Console.WriteLine(CardFormatter.SaturnRings(facts.SaturnRings(options.Instant), options.Instant));
+    System.Console.WriteLine(CardFormatter.Disc(facts.Disc(body, options.Observer, options.Instant)));
+    System.Console.Write(CardFormatter.History(CardHistory.For(CardKey.Body(body))));
+    return 0;
+}
+
+async Task<int> PrintIssCardAsync()
+{
+    Tle tle;
+    try
+    {
+        tle = await tleProvider.GetTleAsync(IssNoradNumber);
+    }
+    catch (TleUnavailableException ex)
+    {
+        System.Console.Error.WriteLine($"Error: no se pudo obtener el TLE de la ISS ({ex.InnerException?.Message}).");
+        return 2;
+    }
+
+    var facts = new Sgp4SatelliteFactsService(new Sgp4SatelliteService(), new Sgp4SatelliteIlluminationService(), new AstronomyEngineSunService());
+    System.Console.WriteLine(SkyTableFormatter.Header(options.Observer, options.Instant));
+    System.Console.WriteLine(CardFormatter.Iss(facts.Satellite(tle, options.Observer, options.Instant), CardTexts.Find(CardKey.Iss)));
+    System.Console.WriteLine(SkyTableFormatter.TleInfo(tle, options.Instant));
+    System.Console.Write(CardFormatter.History(CardHistory.For(CardKey.Iss)));
+    return 0;
+}
+
+int PrintStarCard(CieloHud.Core.Stars.Star star)
+{
+    System.Console.WriteLine(CardFormatter.Star(star, CardTexts.Find(CardKey.Star(star))));
+    System.Console.Write(CardFormatter.History(CardHistory.For(CardKey.Star(star))));
+    return 0;
+}
+
+int PrintConstellationCard(string symbol)
+{
+    System.Console.WriteLine(SkyTableFormatter.Header(options.Observer, options.Instant));
+    System.Console.WriteLine(CardFormatter.Constellation(ConstellationFacts.Of(symbol, options.Observer), ConstellationExtents.Get(symbol)!,
+        CardTexts.Find(CardKey.Constellation(symbol))));
+    System.Console.WriteLine(CardFormatter.ConstellationDrawing(ConstellationShape.Of(symbol, options.Observer, options.Instant)));
+    System.Console.Write(CardFormatter.History(CardHistory.For(CardKey.Constellation(symbol))));
+    return 0;
+}
+
+int PrintStarChoices(string query)
+{
+    var choices = new StarChoices(new AstronomyEngineStarService(), new AstronomyEngineSunService());
+    System.Console.WriteLine(SkyTableFormatter.Header(options.Observer, options.Instant));
+    var daylight = choices.IsDaylight(options.Observer, options.Instant);
+    System.Console.Write(query.Length == 0
+        ? StarChoicesFormatter.Brightest(choices.Brightest(options.Observer, options.Instant), daylight)
+        : StarChoicesFormatter.Search(query, choices.Search(query, options.Observer, options.Instant), daylight));
+    return 0;
+}
