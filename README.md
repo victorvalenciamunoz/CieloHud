@@ -1,12 +1,16 @@
 <p align="center">
-  <img src="docs/images/icono.png" width="112" alt="Icono de CieloHud: retícula verde fijada sobre una estrella" />
+  <img src="docs/images/icono.png" width="112" alt="CieloHud icon: a green reticle locked on a star" />
 </p>
 
 <h1 align="center">CieloHud</h1>
 
 <p align="center">
-  <b>Una gincana mirando hacia arriba.</b><br/>
-  Levantas el móvil, un HUD te guía hasta la Luna, un planeta, la Estación Espacial o una estrella, y lo miras con tus propios ojos.
+  <b>A scavenger hunt, looking up.</b><br/>
+  Raise your phone and a HUD guides you to the Moon, a planet, the Space Station or a star, so you can see it with your own eyes.
+</p>
+
+<p align="center">
+  <b>English</b> · <a href="README.es.md">Español</a>
 </p>
 
 <p align="center">
@@ -14,182 +18,186 @@
   <img alt=".NET MAUI Android" src="https://img.shields.io/badge/MAUI-Android-3DDC84?logo=android&logoColor=white" />
   <a href="https://github.com/victorvalenciamunoz/CieloHud/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/victorvalenciamunoz/CieloHud/actions/workflows/ci.yml/badge.svg" /></a>
   <img alt="Tests" src="https://img.shields.io/badge/tests-988-7CFFB2" />
-  <img alt="Sin backend" src="https://img.shields.io/badge/backend-ninguno-0B1218" />
-  <a href="LICENSE"><img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-4DD2FF" /></a>
+  <img alt="No backend" src="https://img.shields.io/badge/backend-none-0B1218" />
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-4DD2FF" /></a>
 </p>
+
+> **Language note.** The app, the texts of its cards and the project documentation in [`docs/`](docs/) are in Spanish.
+> This README is the English entry point; [`README.es.md`](README.es.md) is the Spanish one. The app's labels are quoted
+> as they appear on screen (AQUÍ, NOCHE, AVISOS…), with a translation the first time.
 
 ---
 
-## Qué es
+## What it is
 
-CieloHud responde a dos preguntas, con el móvil en la mano y sin escribir nada:
+CieloHud answers two questions, phone in hand and without typing anything:
 
-- **«¿Dónde está?»** Eliges Saturno y la app te dice *«izquierda 48° · sube 44°»* hasta que la retícula se pone verde: **AQUÍ**. Bajas el móvil y ahí está. Con una estrella, igual: ESTRELLAS te propone las más brillantes del momento, o la buscas por su nombre.
-- **«¿Qué es eso?»** Apuntas a un punto brillante y te dice *«BETELGEUSE · estrella · en Orión»*. Si no hay nada conocido, al menos te dice hacia qué constelación miras y qué tienes cerca.
+- **"Where is it?"** Pick Saturn and the app says *"izquierda 48° · sube 44°"* (left 48°, up 44°) until the reticle turns green: **AQUÍ** (here). Lower the phone and there it is. A star works the same way: ESTRELLAS (stars) suggests the brightest ones right now, or you search for one by name.
+- **"What's that?"** Point at a bright dot and it tells you *"BETELGEUSE · estrella · en Orión"* (a star in Orion). If there is nothing known there, it at least tells you which constellation you are looking at and what is nearby.
 
-Cuando lo encuentras, una **ficha** te cuenta qué estás viendo, con un dibujo calculado para ese momento: la Luna o Venus con su fase y girados como en el cielo, Júpiter con sus lunas en su sitio, Saturno con la inclinación de sus anillos. Al final, su **historia**: el día que Galileo vio las lunas de Júpiter, el día que Tycho vio aparecer una estrella en Casiopea.
+Once you find it, a **card** tells you what you are looking at, with a drawing computed for that moment: the Moon or Venus with their phase and turned as they appear in the sky, Jupiter with its moons in place, Saturn with the tilt of its rings. At the end comes its **history**: the day Galileo saw Jupiter's moons, the day Tycho saw a new star appear in Cassiopeia.
 
-Además calcula **cuándo pasa la ISS por encima de ti y si se va a ver**: iluminada por el Sol, con tu cielo ya oscuro y lo bastante alta.
-
-<p align="center">
-  <img src="docs/images/hud-guia.png" width="260" alt="Modo guía: flecha hacia Júpiter, 'izquierda 48° · sube 44°', Júpiter en Leo" />
-  &nbsp;
-  <img src="docs/images/hud-que-es.png" width="260" alt="Modo ¿qué es?: 'Hacia Tauro', cerca Elnath a 6°" />
-  &nbsp;
-  <img src="docs/images/hud-constelacion.png" width="260" alt="Figura del Dragón sobre el cielo del norte: 'Hacia el Dragón'" />
-</p>
-<p align="center"><sub>Modo guía hacia Júpiter · modo «¿qué es?» · figura de la constelación bajo la retícula. Horizonte, brújula, estrellas y figuras se mueven con el móvil.</sub></p>
+It also works out **when the ISS passes overhead and whether you will see it**: lit by the Sun, with your sky already dark and high enough.
 
 <p align="center">
-  <img src="docs/images/ficha-venus.png" width="260" alt="Ficha de Venus: creciente fina iluminada arriba a la derecha, a 47 millones de km" />
+  <img src="docs/images/hud-guia.png" width="260" alt="Guide mode: arrow towards Jupiter, 'left 48° · up 44°', Jupiter in Leo" />
   &nbsp;
-  <img src="docs/images/ficha-marte-dibujo.png" width="260" alt="Ficha de Marte: disco anaranjado iluminado al 90 %, su luz salió hace 13 minutos" />
+  <img src="docs/images/hud-que-es.png" width="260" alt="'What's that?' mode: 'Towards Taurus', Elnath 6° away" />
   &nbsp;
-  <img src="docs/images/ficha-jupiter.png" width="260" alt="Ficha de Júpiter: vista de prismáticos con Europa e Ío a la izquierda y Ganímedes y Calisto a la derecha" />
+  <img src="docs/images/hud-constelacion.png" width="260" alt="The figure of Draco over the northern sky: 'Towards Draco'" />
 </p>
-<p align="center"><sub>Fichas del 7 oct 2026 a mediodía: Venus, una creciente del 9 % · Marte, casi lleno · Júpiter y sus lunas, como con prismáticos. Contrastadas con Stellarium a la misma hora.</sub></p>
+<p align="center"><sub>Guide mode towards Jupiter · "what's that?" mode · the constellation's figure under the reticle. Horizon, compass, stars and figures move with the phone.</sub></p>
 
-### Principios
+<p align="center">
+  <img src="docs/images/ficha-venus.png" width="260" alt="Venus card: a thin crescent lit at the top right, 47 million km away" />
+  &nbsp;
+  <img src="docs/images/ficha-marte-dibujo.png" width="260" alt="Mars card: an orange disc 90 % lit, its light left 13 minutes ago" />
+  &nbsp;
+  <img src="docs/images/ficha-jupiter.png" width="260" alt="Jupiter card: binocular view with Europa and Io on the left and Ganymede and Callisto on the right" />
+</p>
+<p align="center"><sub>Cards on 7 Oct 2026 at noon: Venus, a 9 % crescent · Mars, almost full · Jupiter and its moons, as seen through binoculars. Checked against Stellarium at the same time.</sub></p>
 
-- **Cero entrada de datos.** La ubicación y la hora salen del móvil; las órbitas y efemérides son públicas.
-- **Sin backend ni base de datos.** Todo se calcula en el dispositivo. Lo único que se descarga es la órbita de la ISS, una vez al día, y queda en caché.
-- **El cielo es el juez.** Cada cálculo se ha contrastado con una fuente independiente (abajo, los números).
-- **Pocos objetos que buscar, más cosas que reconocer.** No es un planetario: es una guía para encontrar lo que se ve desde una ciudad. Las estrellas también se buscan, pero desde su propio chip, aparte de la Luna, los planetas y la ISS.
+### Principles
 
-## Qué tiene ahora
+- **Zero data entry.** Location and time come from the phone; orbits and ephemerides are public.
+- **No backend, no database.** Everything is computed on the device. The only download is the ISS orbit, once a day, cached.
+- **The sky is the judge.** Every calculation has been checked against an independent source (the numbers are below).
+- **Few things to find, more to recognise.** It is not a planetarium: it is a guide to what you can see from a city. Stars can be searched for too, but from their own chip, apart from the Moon, the planets and the ISS.
+
+## What it does today
 
 | | |
 |---|---|
-| 🎯 **Guía** | Luna, Mercurio, Venus, Marte, Júpiter, Saturno e ISS. Flecha en el borde cuando está fuera de pantalla, marcador cuando está a la vista, **AQUÍ** con histéresis (entra a 4°, sale a 6°) para que no parpadee con el ruido de la brújula. |
-| ⭐ **Estrellas** | Chip ESTRELLAS: las 10 más brillantes que hay ahora sobre los 10° de altura, por orden alfabético, con su constelación y hacia dónde mirar. **BUSCAR** encuentra cualquiera de las 155 por su nombre con un teclado propio, que no deslumbra de noche como el del sistema. La guía lleva a la estrella elegida como a un planeta. |
-| 🔭 **¿Qué es eso?** | Reconoce Luna, planetas, ISS y **155 estrellas** (todas las de magnitud < 3 visibles desde España, con su nombre IAU o su letra griega). Prefiere la más brillante cuando hay varias candidatas. Dice siempre en cuál de las **88 constelaciones** estás mirando. |
-| 🪐 **Fichas** | Con VER FICHA: en la guía, siempre a mano para el objetivo elegido (se resalta al llegar a **AQUÍ**); en «¿qué es?», para lo que reconoce. Un texto breve escrito y revisado, con sus fuentes, y **AHORA**: fase de la Luna y su próxima fase principal, distancia y cuánto tardó su luz en llegar, dónde están las lunas de Júpiter (o cuál está detrás o en su sombra), cuánto se inclinan los anillos de Saturno, y a qué altura y velocidad va la ISS y si ahora se puede ver. Encima, en la Luna y los planetas, un **dibujo calculado al momento**, girado como se ve en el cielo, con su color (en rojo de noche). Los 7 objetivos y, en «¿qué es?», las 155 estrellas: cuánto tardó su luz en llegar, su color y su brillo explicado; y las 88 constelaciones, tocando su nombre: su tamaño, si se ve entera desde tu latitud, sus estrellas más brillantes y su figura como está en ese momento, con sus estrellas de su color, y su texto: historia, cómo reconocerla y lo que contiene. Al final, **HISTORIA**: 30 fechas de descubrimientos, misiones y primeras veces, cada una con sus fuentes (NASA, ESA, Ridpath, la AAS), en los 7 objetivos, Casiopea, la Ballena, Orión, Andrómeda, Algol y Vega. |
-| 🧭 **Referencias** | Línea del horizonte con escala de altura, brújula con puntos cardinales, estrellas por brillo y planetas, todo moviéndose con el móvil. La **figura de la constelación** que tienes en la retícula, dibujada tenue con su nombre. Aviso cuando la brújula necesita calibración («dibuja un 8»). |
-| 🔴 **Modo nocturno** | Botón NOCHE: todo pasa a rojo sobre negro puro para no perder la adaptación a la oscuridad, se ocultan las barras del sistema y la pantalla baja al 10 % mientras la app está abierta (sin tocar el ajuste del móvil). Con el modo activado, NOCHE abre un panel para elegir 3, 6, 10 o 20 %. Se recuerda entre sesiones. |
-| 🛰️ **Pasos de la ISS** | Inicio, máximo y fin de cada paso visible en los próximos días, indicando si la ISS «aparece» saliendo de la sombra de la Tierra o «se apaga» a media travesía. |
-| 🔔 **Avisos** | Botón AVISOS: notificación 10 minutos antes de cada paso visible de la ISS, cuando la Luna pasa junto a un planeta, cuando dos planetas se ven juntos y en los mejores días para ver Mercurio. Funcionan con la app cerrada y tras reiniciar el móvil; de madrugada avisan la víspera a las 22:00. Al tocar el aviso, el HUD te lleva al objetivo. |
-| 📅 **Eventos** | Lo que se ve en los próximos 30 días (la ISS, en 3), con la hora a la que avisará. Toca uno y el HUD te lleva. |
-| 💻 **Consola** | Tabla de posiciones para cualquier lugar e instante, tabla de pasos de la ISS al estilo Heavens-Above, y listados de conjunciones y de los días buenos para ver Mercurio con sus avisos. |
+| 🎯 **Guide** | Moon, Mercury, Venus, Mars, Jupiter, Saturn and the ISS. An arrow on the edge when the target is off screen, a marker when it is in view, and **AQUÍ** with hysteresis (in at 4°, out at 6°) so it does not flicker with compass noise. |
+| ⭐ **Stars** | ESTRELLAS chip: the 10 brightest stars above 10° right now, in alphabetical order, with their constellation and which way to look. **BUSCAR** (search) finds any of the 155 by name with an in-app keypad that does not dazzle at night like the system one. The guide takes you to the chosen star as it does to a planet. |
+| 🔭 **What's that?** | Recognises the Moon, the planets, the ISS and **155 stars** (every star brighter than magnitude 3 visible from Spain, with its IAU name or Greek letter). It prefers the brightest when several are candidates, and always says which of the **88 constellations** you are looking at. |
+| 🪐 **Cards** | With VER FICHA (see card): in the guide, always at hand for the chosen target (highlighted on reaching **AQUÍ**); in "what's that?", for whatever it recognises. A short text, written and reviewed, with its sources, and **AHORA** (now): the Moon's phase and its next main phase, distance and how long its light took to reach you, where Jupiter's moons are (or which one is behind or in its shadow), the tilt of Saturn's rings, and the ISS's height, speed and whether it can be seen right now. On top, for the Moon and the planets, a **drawing computed on the spot**, turned as it looks in the sky, in its own colour (red at night). The 7 targets and, in "what's that?", the 155 stars: how long their light took, their colour and their brightness explained; and the 88 constellations, by tapping their name: their size, whether they can be seen whole from your latitude, their brightest stars and their figure as it is right now, each star in its colour, plus their text: history, how to recognise them and what they contain. At the end, **HISTORIA** (history): 30 dates of discoveries, missions and firsts, each with its sources (NASA, ESA, Ridpath, the AAS), for the 7 targets, Cassiopeia, Cetus, Orion, Andromeda, Algol and Vega. |
+| 🧭 **References** | A horizon line with an altitude scale, a compass with the cardinal points, stars by brightness and the planets, all moving with the phone. The **figure of the constellation** under the reticle, drawn faintly with its name. A warning when the compass needs calibrating ("draw an 8"). |
+| 🔴 **Night mode** | NOCHE (night) button: everything turns red on pure black so you keep your dark adaptation, the system bars are hidden and the screen drops to 10 % brightness while the app is open (without touching the phone's setting). With night mode on, NOCHE opens a panel to choose 3, 6, 10 or 20 %. It is remembered between sessions. |
+| 🛰️ **ISS passes** | Start, peak and end of every visible pass over the next days, saying whether the ISS "appears" coming out of the Earth's shadow or "fades out" halfway across. |
+| 🔔 **Alerts** | AVISOS (alerts) button: a notification 10 minutes before every visible ISS pass, when the Moon passes by a planet, when two planets are seen together and on the best days to see Mercury. They work with the app closed and after rebooting the phone; for early-morning events they warn the evening before at 22:00. Tapping the notification takes the HUD to the target. |
+| 📅 **Events** | What can be seen over the next 30 days (the ISS, over 3), with the time it will alert you. Tap one and the HUD takes you there. |
+| 💻 **Console** | A table of positions for any place and time, a Heavens-Above-style table of ISS passes, and lists of conjunctions and of the good days to see Mercury, with their alerts. |
 
-## El juez: cuánto acierta
+## The judge: how accurate it is
 
-Nada de esto vale si el objeto no está donde la app dice. Cada parte se ha validado contra una referencia externa:
+None of this is worth anything if the object is not where the app says. Every part has been checked against an external reference:
 
-| Qué | Contra qué | Resultado |
+| What | Against | Result |
 |---|---|---|
-| Luna, planetas, Sol | [JPL Horizons](https://ssd.jpl.nasa.gov/horizons/) (NASA) | < 0,01° en acimut y altura |
-| Luna, 3 instantes | [Stellarium Web](https://stellarium-web.org) | 0,003°–0,028° |
-| Posición de la ISS (SGP4) | JPL Horizons | < 0,01°; distancia 567,41 km vs 567,35 km |
-| 7 pasos de la ISS en un día | JPL Horizons | los 7, salidas y puestas a ±60 s |
-| Pasos **visibles** de la ISS, 10 días | [Heavens-Above](https://www.heavens-above.com) | 10 de 10, máximo a ≤ 6 s y ≤ 1° |
-| Pasos visibles de la ISS, 11-15 oct 2026 (los que avisa la app) | Heavens-Above | 5 de 5, inicio, máximo y fin a ≤ 2 s |
-| La Luna junto a un planeta, planetas juntos | JPL Horizons | 8 conjunciones, separación ≤ 0,0044° |
-| Mejores días para ver Mercurio | JPL Horizons | ventanas iguales al minuto día a día, posición ≤ 0,0015° |
-| Constelación de planetas y Luna | JPL Horizons | 5 de 5 (sí: Saturno está en la Ballena, no en Piscis) |
-| Fase de la Luna, distancias y tiempo de luz | JPL Horizons | iluminada ≤ 0,003 puntos; fases principales a < 40 s; distancias ≤ 0,01 % |
-| Lunas de Júpiter | JPL Horizons | posición ≤ 0,02 radios de Júpiter; ocultaciones, tránsitos y eclipses al minuto |
-| Inclinación de los anillos de Saturno | JPL Horizons | ≤ 0,02° en 11 fechas de 2025 a 2032 |
-| Altura y velocidad de la ISS | JPL Horizons | altura ≤ 0,06 km, velocidad ≤ 0,1 m/s |
-| Distancia de las estrellas | Hipparcos (ESA) en VizieR, NASA | paralajes iguales al catálogo; Sirio 8,6 y Vega 25 años luz, como la NASA |
-| Dibujos: lado iluminado y giro | JPL Horizons, Stellarium Web | borde iluminado ≤ 0,17°, polo ≤ 0,01°; la Luna, Venus, Marte y Júpiter, iguales que en Stellarium; Orión, la Osa Mayor, la Hidra y la Serpiente, giradas igual que en Stellarium |
-| Brújula del móvil | Punto de referencia en tierra con acimut conocido | 2,6° de error tras calibrar |
+| Moon, planets, Sun | [JPL Horizons](https://ssd.jpl.nasa.gov/horizons/) (NASA) | < 0.01° in azimuth and altitude |
+| Moon, 3 instants | [Stellarium Web](https://stellarium-web.org) | 0.003°–0.028° |
+| ISS position (SGP4) | JPL Horizons | < 0.01°; distance 567.41 km vs 567.35 km |
+| 7 ISS passes in one day | JPL Horizons | all 7, rise and set within ±60 s |
+| **Visible** ISS passes, 10 days | [Heavens-Above](https://www.heavens-above.com) | 10 out of 10, peak within ≤ 6 s and ≤ 1° |
+| Visible ISS passes, 11–15 Oct 2026 (the ones the app alerts about) | Heavens-Above | 5 out of 5, start, peak and end within ≤ 2 s |
+| The Moon by a planet, planets together | JPL Horizons | 8 conjunctions, separation ≤ 0.0044° |
+| Best days to see Mercury | JPL Horizons | the same windows to the minute, day by day; position ≤ 0.0015° |
+| Constellation of the planets and the Moon | JPL Horizons | 5 out of 5 (yes: Saturn is in Cetus, not in Pisces) |
+| Moon phase, distances and light time | JPL Horizons | illuminated fraction ≤ 0.003 points; main phases within < 40 s; distances ≤ 0.01 % |
+| Jupiter's moons | JPL Horizons | position ≤ 0.02 Jupiter radii; occultations, transits and eclipses to the minute |
+| Tilt of Saturn's rings | JPL Horizons | ≤ 0.02° on 11 dates from 2025 to 2032 |
+| ISS height and speed | JPL Horizons | height ≤ 0.06 km, speed ≤ 0.1 m/s |
+| Distance to the stars | Hipparcos (ESA) in VizieR, NASA | parallaxes equal to the catalogue; Sirius 8.6 and Vega 25 light years, as NASA gives them |
+| Drawings: lit side and rotation | JPL Horizons, Stellarium Web | lit limb ≤ 0.17°, pole ≤ 0.01°; the Moon, Venus, Mars and Jupiter look as in Stellarium; Orion, Ursa Major, Hydra and Serpens are turned as in Stellarium |
+| Phone compass | A landmark with a known azimuth | 2.6° error after calibrating |
 
-El objetivo era 0,5° para planetas y 1° para la ISS; el cálculo va dos órdenes de magnitud por debajo. El límite real es el **magnetómetro del móvil** (unos 3–5°), y por eso la app guía a una zona, no a un píxel.
+The target was 0.5° for planets and 1° for the ISS; the calculation is two orders of magnitude better. The real limit is the **phone's magnetometer** (about 3–5°), which is why the app guides you to an area, not to a pixel.
 
-## Cómo funciona
+## How it works
 
 ```mermaid
 flowchart LR
-    subgraph Datos["Datos públicos"]
-        AE["Efemérides<br/>(Astronomy Engine)"]
-        TLE["Órbita de la ISS<br/>(CelesTrak, caché 24 h)"]
-        CAT["155 estrellas<br/>(SIMBAD, Hipparcos y nombres IAU)"]
+    subgraph Data["Public data"]
+        AE["Ephemerides<br/>(Astronomy Engine)"]
+        TLE["ISS orbit<br/>(CelesTrak, 24 h cache)"]
+        CAT["155 stars<br/>(SIMBAD, Hipparcos and IAU names)"]
     end
-    subgraph Movil["Móvil"]
-        GPS["GPS + hora"]
-        ROT["Vector de rotación<br/>(acelerómetro + giroscopio + magnetómetro)"]
+    subgraph Phone["Phone"]
+        GPS["GPS + time"]
+        ROT["Rotation vector<br/>(accelerometer + gyroscope + magnetometer)"]
     end
     AE --> POS
     TLE -- SGP4 --> POS
-    CAT -- precesión --> POS
-    GPS --> POS["¿Dónde está?<br/>acimut + altura"]
-    ROT -- cuaternión → eje −Z --> PTR["¿Hacia dónde apunto?<br/>acimut + altura"]
-    POS --> G["Guía<br/>giro, inclinación, AQUÍ"]
+    CAT -- precession --> POS
+    GPS --> POS["Where is it?<br/>azimuth + altitude"]
+    ROT -- quaternion → −Z axis --> PTR["Where am I pointing?<br/>azimuth + altitude"]
+    POS --> G["Guide<br/>turn, tilt, AQUÍ"]
     PTR --> G
-    POS --> ID["¿Qué es eso?<br/>más cercano + constelación"]
+    POS --> ID["What's that?<br/>nearest + constellation"]
     PTR --> ID
     G --> HUD(["HUD"])
     ID --> HUD
 ```
 
-Todo objeto, sea una estrella, un planeta o la ISS, acaba en el mismo sitio: **acimut** (0° norte, 90° este) y **altura** (0° horizonte, 90° cénit) desde tu posición y en este instante. Lo que cambia es de dónde sale:
+Every object, be it a star, a planet or the ISS, ends up in the same place: **azimuth** (0° north, 90° east) and **altitude** (0° horizon, 90° zenith), from where you are and at this instant. What changes is where it comes from:
 
-- **Estrellas**: coordenadas fijas del catálogo (J2000) → precesión y nutación hasta hoy → rotación de la Tierra y tu latitud → refracción.
-- **Luna y planetas**: efemérides que dan su posición de hoy vista desde tu punto de la Tierra → el mismo paso final.
-- **ISS**: su órbita cambia cada día, así que se descarga la «foto» orbital (TLE) y se propaga con SGP4.
+- **Stars**: fixed catalogue coordinates (J2000) → precession and nutation up to today → the Earth's rotation and your latitude → refraction.
+- **Moon and planets**: ephemerides that give today's position as seen from your spot on Earth → the same final step.
+- **ISS**: its orbit changes every day, so the orbital "snapshot" (TLE) is downloaded and propagated with SGP4.
 
-El móvil hace la pregunta inversa: el sensor de rotación da un cuaternión, que se convierte en la dirección hacia la que mira la cámara trasera, en el mismo sistema de acimut y altura. Todo se dibuja con una proyección gnomónica, la misma que forma la imagen en una cámara, así que el horizonte y las líneas de las constelaciones salen rectas incluso mirando cerca del cénit.
+The phone asks the reverse question: the rotation sensor gives a quaternion, which is turned into the direction the rear camera is facing, in the same azimuth-and-altitude system. Everything is drawn with a gnomonic projection, the same one that forms the image in a camera, so the horizon and the constellation lines stay straight even when looking near the zenith.
 
-## Estructura
+## Structure
 
 ```
 src/
-  CieloHud.Core/        Librería de cálculo, sin UI ni dependencias de plataforma (la usan la consola y la app)
-    Sky/                  Observador, posición horizontal, acimut, puntos cardinales
-    SolarSystem/          Luna, planetas, Sol (Astronomy Engine)
-    Satellites/           TLE, SGP4, sombra de la Tierra, proveedor CelesTrak con caché
-    Passes/               Pasos de la ISS y cuáles son visibles
-    Stars/                Catálogo de estrellas brillantes
-    Constellations/       ¿En qué constelación cae esta dirección?
-    Guidance/             Orientación del móvil, guía, proyección en pantalla, identificación
-    Cards/                Fichas: datos del momento (fase de la Luna, distancia, tiempo de luz), geometría de sus dibujos y textos revisados
-  CieloHud.Console/     Consola para validar cálculos (solo formatea lo que devuelve Core)
-  CieloHud.App/         App .NET MAUI para Android: HUD, sensores, GPS
+  CieloHud.Core/        Calculation library, no UI and no platform dependencies (used by the console and the app)
+    Sky/                  Observer, horizontal position, azimuth, cardinal points
+    SolarSystem/          Moon, planets, Sun (Astronomy Engine)
+    Satellites/           TLE, SGP4, Earth's shadow, CelesTrak provider with cache
+    Passes/               ISS passes and which ones are visible
+    Stars/                Bright-star catalogue
+    Constellations/       Which constellation does this direction fall in?
+    Guidance/             Phone orientation, guidance, screen projection, identification
+    Cards/                Cards: data of the moment (Moon phase, distance, light time), geometry of their drawings and reviewed texts
+  CieloHud.Console/     Console to validate calculations (it only formats what Core returns)
+  CieloHud.App/         .NET MAUI app for Android: HUD, sensors, GPS
 tests/
-  CieloHud.Core.Tests/  988 tests xUnit, con referencias de JPL Horizons, Stellarium y Heavens-Above
-docs/                   Visión, plan por fases, estado y decisiones (en español)
+  CieloHud.Core.Tests/  988 xUnit tests, with references from JPL Horizons, Stellarium and Heavens-Above
+docs/                   Vision, phased plan, status and decisions (in Spanish)
 ```
 
-## Instalar en tu móvil
+## Install it on your phone
 
-Descarga el APK de la [última versión](https://github.com/victorvalenciamunoz/CieloHud/releases) desde el propio móvil (Android 8.0 o posterior) y ábrelo.
-La 0.6.0 (*pre-release*: la Fase 7 aún no se ha probado en el cielo) añade la **historia** de cada objeto en su ficha (Fase 6) y la **guía a las estrellas** (Fase 7).
-La 0.5.1, la última versión estable, trae las fichas completas (Fase 5): la Luna, los planetas, la ISS, las 155 estrellas y las 88 constelaciones, cada una con su texto.
-Android pedirá permiso para instalar apps de origen desconocido, y Play Protect puede avisar de que no la conoce: es normal en una app que no está en Google Play.
+Download the APK of the [latest release](https://github.com/victorvalenciamunoz/CieloHud/releases) from the phone itself (Android 8.0 or later) and open it.
+0.6.0 (*pre-release*: phase 7 has not been tried under the sky yet) adds the **history** of each object to its card (phase 6) and the **guide to the stars** (phase 7).
+0.5.1, the latest stable release, brings the complete cards (phase 5): the Moon, the planets, the ISS, the 155 stars and the 88 constellations, each with its text.
+Android will ask for permission to install apps from unknown sources, and Play Protect may warn that it does not know the app: that is normal for an app that is not on Google Play.
 
-Al abrirla pedirá la **ubicación** (para calcular tu cielo; no sale del móvil). Si activas **AVISOS**, también las **notificaciones** y, para que el aviso
-llegue a su hora, «Alarmas y recordatorios». En móviles que cierran las apps para ahorrar batería (OPPO, Xiaomi, Huawei…) conviene permitirle la actividad en segundo plano.
+When you open it, it asks for your **location** (to compute your sky; it never leaves the phone). If you turn on **AVISOS**, it also asks for **notifications** and, so that alerts arrive on time,
+"Alarms and reminders". On phones that kill apps to save battery (OPPO, Xiaomi, Huawei…) it is worth allowing it to run in the background.
 
-## Probarlo desde el código
+## Try it from the code
 
-**Requisitos:** SDK de .NET 10 (el `global.json` fija `10.0.401`). Para la app, además, el workload de MAUI para Android (`dotnet workload install maui-android`) y un móvil Android 8.0+ con depuración USB.
+**Requirements:** .NET 10 SDK (`global.json` pins `10.0.401`). For the app, also the MAUI workload for Android (`dotnet workload install maui-android`) and an Android 8.0+ phone with USB debugging.
 
 ```bash
 # Tests
 dotnet test tests/CieloHud.Core.Tests
 
-# ¿Dónde está cada cosa ahora? (Madrid por defecto)
+# Where is everything right now? (Madrid by default)
 dotnet run --project src/CieloHud.Console
 
-# En otro lugar e instante
+# At another place and time
 dotnet run --project src/CieloHud.Console -- --lat 41.3874 --lon 2.1686 --time 2026-10-03T04:00:00Z
 
-# Pasos visibles de la ISS en los próximos 14 días
+# Visible ISS passes over the next 14 days
 dotnet run --project src/CieloHud.Console -- --passes 14
 
-# Datos de la ficha de un objeto (moon, mercury, venus, mars, jupiter, saturn, iss, una estrella: Betelgeuse, "gam Cas", o una constelación: Ori)
+# Card data for an object (moon, mercury, venus, mars, jupiter, saturn, iss, a star: Betelgeuse, "gam Cas", or a constellation: Ori)
 dotnet run --project src/CieloHud.Console -- --card jupiter
 
-# Las estrellas que ofrece el chip ESTRELLAS: las más brillantes ahora, o las que encajan con un nombre
+# The stars the ESTRELLAS chip offers: the brightest right now, or those matching a name
 dotnet run --project src/CieloHud.Console -- --stars
 dotnet run --project src/CieloHud.Console -- --stars vega
 
-# App en el móvil conectado por USB
+# The app on a phone connected over USB
 dotnet build src/CieloHud.App -f net10.0-android -t:Install
 ```
 
 <details>
-<summary>Salida de ejemplo de la consola</summary>
+<summary>Sample console output (the console speaks Spanish)</summary>
 
 ```
 Observador: lat 40.4168  lon -3.7038  alt 650 m
@@ -207,34 +215,34 @@ ISS        161.15° S   -37.26°  bajo el horizonte       8364 km
 ```
 </details>
 
-## Hoja de ruta
+## Roadmap
 
-- [x] **Fase 1** · Consola: dónde está cada cosa ahora, validado contra Horizons y Stellarium
-- [x] **Fase 2** · Próximos pasos visibles de la ISS, validado contra Heavens-Above
-- [x] **Fase 3** · HUD en MAUI para Android, validado en el cielo guiando hasta la Luna
-- [x] **Fase 4** · Avisos de la ISS, la Luna junto a un planeta, planetas juntos y Mercurio, con la app cerrada, validados contra Heavens-Above y JPL Horizons
-- [x] **Fase 5** · Fichas del objeto: qué estás viendo, explicado para no expertos, con datos del momento («esta luz salió de Júpiter hace 49 minutos») y un dibujo calculado, para la Luna, los planetas, la ISS, 155 estrellas y las 88 constelaciones, con 250 textos revisados uno a uno
-- [x] **Fase 6** · Efemérides: la historia de cada objeto en su ficha (descubrimientos, misiones, lo que se vio en el cielo), 30 fechas con su fuente, revisadas una a una
-- [ ] **Fase 7** · Guiar también a las estrellas: las más brillantes del momento y un buscador, para que la guía lleve a cualquiera de las 155 (en curso)
+- [x] **Phase 1** · Console: where everything is right now, checked against Horizons and Stellarium
+- [x] **Phase 2** · Upcoming visible ISS passes, checked against Heavens-Above
+- [x] **Phase 3** · HUD in MAUI for Android, tested under the sky by guiding to the Moon
+- [x] **Phase 4** · Alerts for the ISS, the Moon by a planet, planets together and Mercury, with the app closed, checked against Heavens-Above and JPL Horizons
+- [x] **Phase 5** · Object cards: what you are looking at, explained for non-experts, with data of the moment ("this light left Jupiter 49 minutes ago") and a computed drawing, for the Moon, the planets, the ISS, 155 stars and the 88 constellations, with 250 texts reviewed one by one
+- [x] **Phase 6** · Ephemerides: the history of each object on its card (discoveries, missions, what was seen in the sky), 30 dates with their source, reviewed one by one
+- [ ] **Phase 7** · Guide to the stars too: the brightest of the moment and a search, so the guide can take you to any of the 155 (in progress)
 
-El detalle está en [`docs/`](docs): [visión](docs/VISION.md), [plan](docs/PLAN.md), [estado](docs/STATUS.md) y [decisiones](docs/DECISIONS.md). Ahí se explica, por ejemplo, por qué la altura del Sol se calcula sin refracción, o cómo se esquivó un bucle infinito de la librería de efemérides al apuntar al cénit.
+The details are in [`docs/`](docs) (in Spanish): [vision](docs/VISION.md), [plan](docs/PLAN.md), [status](docs/STATUS.md) and [decisions](docs/DECISIONS.md). They explain, for example, why the Sun's altitude is computed without refraction, or how an infinite loop in the ephemeris library was avoided when pointing at the zenith.
 
-## Créditos
+## Credits
 
-CieloHud es hermano de [GincanaHud](https://github.com/victorvalenciamunoz/gincanaHud), del que hereda la estética del HUD.
+CieloHud is a sibling of [GincanaHud](https://github.com/victorvalenciamunoz/gincanaHud), from which it inherits the HUD look.
 
-Se apoya en:
-- [Astronomy Engine](https://github.com/cosinekitty/astronomy) (Don Cross, MIT): efemérides, precesión y límites de constelaciones.
-- [SGP.NET](https://github.com/parzivail/SGP.NET) (MIT): propagación orbital SGP4.
-- [CelesTrak](https://celestrak.org): elementos orbitales de la ISS.
-- [SIMBAD](https://simbad.cds.unistra.fr), CDS, Estrasburgo: coordenadas y magnitudes de las estrellas. *This research has made use of the SIMBAD database, operated at CDS, Strasbourg, France.*
-- [Hipparcos](https://www.cosmos.esa.int/web/hipparcos), ESA, nueva reducción de van Leeuwen (2007) en [VizieR](https://vizier.cds.unistra.fr) (I/311): paralajes de las estrellas.
-- [IAU Catalog of Star Names](https://www.iau.org/public/themes/naming_stars/) (WGSN): nombres propios de las estrellas.
-- [d3-celestial](https://github.com/ofrohn/d3-celestial) (Olaf Frohn, BSD): figuras de las constelaciones.
-- Fuentes [Chakra Petch](https://github.com/m4rc1e/Chakra-Petch) y [Open Sans](https://github.com/googlefonts/opensans) (SIL OFL 1.1).
+It relies on:
+- [Astronomy Engine](https://github.com/cosinekitty/astronomy) (Don Cross, MIT): ephemerides, precession and constellation boundaries.
+- [SGP.NET](https://github.com/parzivail/SGP.NET) (MIT): SGP4 orbital propagation.
+- [CelesTrak](https://celestrak.org): orbital elements of the ISS.
+- [SIMBAD](https://simbad.cds.unistra.fr), CDS, Strasbourg: star coordinates and magnitudes. *This research has made use of the SIMBAD database, operated at CDS, Strasbourg, France.*
+- [Hipparcos](https://www.cosmos.esa.int/web/hipparcos), ESA, new reduction by van Leeuwen (2007) in [VizieR](https://vizier.cds.unistra.fr) (I/311): star parallaxes.
+- [IAU Catalog of Star Names](https://www.iau.org/public/themes/naming_stars/) (WGSN): proper names of the stars.
+- [d3-celestial](https://github.com/ofrohn/d3-celestial) (Olaf Frohn, BSD): constellation figures.
+- [Chakra Petch](https://github.com/m4rc1e/Chakra-Petch) and [Open Sans](https://github.com/googlefonts/opensans) fonts (SIL OFL 1.1).
 
-Las referencias de validación son [JPL Horizons](https://ssd.jpl.nasa.gov/horizons/), [Stellarium](https://stellarium.org) y [Heavens-Above](https://www.heavens-above.com). Las licencias de terceros están en [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md).
+The validation references are [JPL Horizons](https://ssd.jpl.nasa.gov/horizons/), [Stellarium](https://stellarium.org) and [Heavens-Above](https://www.heavens-above.com). Third-party licences are in [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md).
 
-## Licencia
+## License
 
-El código de CieloHud se publica bajo la [licencia MIT](LICENSE): puedes usarlo, modificarlo y redistribuirlo libremente, manteniendo el aviso de copyright. Los componentes, datos y fuentes de terceros conservan sus propias licencias, recogidas en [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md).
+CieloHud's code is released under the [MIT license](LICENSE): you may use, modify and redistribute it freely, keeping the copyright notice. Third-party components, data and fonts keep their own licences, listed in [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md).
